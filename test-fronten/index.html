@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Library - Your Learning Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold" href="#home">
+                <i class="fas fa-book-open text-primary me-2"></i>School Library
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#books">Books</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#events">Events</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                </ul>
+                <button class="btn btn-primary ms-3">Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">Welcome to Your Learning Hub</h1>
+                    <p class="lead mb-4">Discover thousands of books, resources, and programs designed to inspire your learning journey.</p>
+                    <div class="input-group mb-4" style="max-width: 400px;">
+                        <input type="text" class="form-control" placeholder="Search books, authors...">
+                        <button class="btn btn-primary" type="button"><i class="fas fa-search"></i></button>
+                    </div>
+                    <button class="btn btn-primary btn-lg me-2">Explore Now</button>
+                    <button class="btn btn-outline-primary btn-lg">Learn More</button>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <div class="hero-image">
+                        <i class="fas fa-book-reader" style="font-size: 200px; color: #0D47A1; opacity: 0.1;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="statistics-section py-5 bg-light">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card p-4">
+                        <h3 class="text-primary fw-bold">50K+</h3>
+                        <p class="text-muted">Books Available</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card p-4">
+                        <h3 class="text-primary fw-bold">2K+</h3>
+                        <p class="text-muted">Active Members</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card p-4">
+                        <h3 class="text-primary fw-bold">100+</h3>
+                        <p class="text-muted">Events Yearly</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="stat-card p-4">
+                        <h3 class="text-primary fw-bold">24/7</h3>
+                        <p class="text-muted">Digital Access</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Books Section -->
+    <section id="books" class="featured-books py-5">
+        <div class="container">
+            <h2 class="text-center fw-bold mb-5">Featured Books</h2>
+            <div class="row g-4">
+                <div class="col-md-4 mb-4">
+                    <div class="book-card">
+                        <div class="book-image bg-gradient-1 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-book" style="font-size: 80px; color: white;"></i>
+                        </div>
+                        <div class="p-3">
+                            <h5 class="fw-bold">The Adventure Begins</h5>
+                            <p class="text-muted small">By Sarah Johnson</p>
+                            <div class="mb-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star-half-alt text-warning"></i>
+                            </div>
+                            <button class="btn btn-primary w-100 btn-sm">Borrow Now</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="book-card">
+                        <div class="book-image bg-gradient-2 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-book" style="font-size: 80px; color: white;"></i>
+                        </div>
+                        <div class="p-3">
+                            <h5 class="fw-bold">Science Wonders</h5>
+                            <p class="text-muted small">By Dr. Michael Chen</p>
+                            <div class="mb-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                            </div>
+                            <button class="btn btn-primary w-100 btn-sm">Borrow Now</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="book-card">
+                        <div class="book-image bg-gradient-3 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-book" style="font-size: 80px; color: white;"></i>
+                        </div>
+                        <div class="p-3">
+                            <h5 class="fw-bold">History Chronicles</h5>
+                            <p class="text-muted small">By Emma Williams</p>
+                            <div class="mb-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star-half-alt text-warning"></i>
+                            </div>
+                            <button class="btn btn-primary w-100 btn-sm">Borrow Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center fw-bold mb-5">Our Services</h2>
+            <div class="row g-4">
+                <div class="col-md-3 mb-4">
+                    <div class="service-card text-center p-4">
+                        <i class="fas fa-book-open text-primary mb-3" style="font-size: 40px;"></i>
+                        <h5 class="fw-bold">Vast Collection</h5>
+                        <p class="text-muted">Access to 50,000+ books across all genres and subjects</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="service-card text-center p-4">
+                        <i class="fas fa-users text-primary mb-3" style="font-size: 40px;"></i>
+                        <h5 class="fw-bold">Study Groups</h5>
+                        <p class="text-muted">Collaborative learning spaces for group projects</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="service-card text-center p-4">
+                        <i class="fas fa-laptop text-primary mb-3" style="font-size: 40px;"></i>
+                        <h5 class="fw-bold">Digital Resources</h5>
+                        <p class="text-muted">E-books, journals, and online databases available 24/7</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="service-card text-center p-4">
+                        <i class="fas fa-star text-primary mb-3" style="font-size: 40px;"></i>
+                        <h5 class="fw-bold">Reading Programs</h5>
+                        <p class="text-muted">Engaging programs to promote reading habits</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Events Section -->
+    <section id="events" class="events-section py-5">
+        <div class="container">
+            <h2 class="text-center fw-bold mb-5">Upcoming Events</h2>
+            <div class="row g-4">
+                <div class="col-md-6 mb-4">
+                    <div class="event-card p-4">
+                        <div class="row">
+                            <div class="col-auto">
+                                <div class="event-date bg-primary text-white p-3 rounded text-center">
+                                    <div class="fw-bold" style="font-size: 24px;">15</div>
+                                    <div class="small">Nov</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h5 class="fw-bold">Book Club Meeting</h5>
+                                <p class="text-muted mb-2"><i class="fas fa-clock me-2"></i>2:00 PM - 3:30 PM</p>
+                                <p class="text-muted"><i class="fas fa-map-marker-alt me-2"></i>Library Hall</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="event-card p-4">
+                        <div class="row">
+                            <div class="col-auto">
+                                <div class="event-date bg-primary text-white p-3 rounded text-center">
+                                    <div class="fw-bold" style="font-size: 24px;">22</div>
+                                    <div class="small">Nov</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h5 class="fw-bold">Author Meet & Greet</h5>
+                                <p class="text-muted mb-2"><i class="fas fa-clock me-2"></i>3:00 PM - 5:00 PM</p>
+                                <p class="text-muted"><i class="fas fa-map-marker-alt me-2"></i>Main Auditorium</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="event-card p-4">
+                        <div class="row">
+                            <div class="col-auto">
+                                <div class="event-date bg-primary text-white p-3 rounded text-center">
+                                    <div class="fw-bold" style="font-size: 24px;">29</div>
+                                    <div class="small">Nov</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h5 class="fw-bold">Reading Challenge Launch</h5>
+                                <p class="text-muted mb-2"><i class="fas fa-clock me-2"></i>1:00 PM - 2:00 PM</p>
+                                <p class="text-muted"><i class="fas fa-map-marker-alt me-2"></i>Library Hall</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="event-card p-4">
+                        <div class="row">
+                            <div class="col-auto">
+                                <div class="event-date bg-primary text-white p-3 rounded text-center">
+                                    <div class="fw-bold" style="font-size: 24px;">05</div>
+                                    <div class="small">Dec</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h5 class="fw-bold">Library Orientation</h5>
+                                <p class="text-muted mb-2"><i class="fas fa-clock me-2"></i>10:00 AM - 11:00 AM</p>
+                                <p class="text-muted"><i class="fas fa-map-marker-alt me-2"></i>Meeting Room</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials-section py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center fw-bold mb-5">What Students Say</h2>
+            <div class="row g-4">
+                <div class="col-md-4 mb-4">
+                    <div class="testimonial-card p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="mb-4">"The library has been instrumental in my academic success. The staff is incredibly helpful and the collection is amazing!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0">Alex Johnson</h6>
+                                <small class="text-muted">Grade 10</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="testimonial-card p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <p class="mb-4">"I love the reading programs and book club meetings. It's a great way to connect with other book lovers!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0">Maria Garcia</h6>
+                                <small class="text-muted">Grade 11</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="testimonial-card p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star-half-alt text-warning"></i>
+                        </div>
+                        <p class="mb-4">"The digital resources are fantastic. I can access journals and e-books anytime, anywhere. Highly recommended!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0">James Chen</h6>
+                                <small class="text-muted">Grade 9</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter-section py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 text-center">
+                    <h2 class="fw-bold mb-3">Stay Updated</h2>
+                    <p class="text-muted mb-4">Subscribe to our newsletter for book recommendations, events, and library updates.</p>
+                    <form class="d-flex gap-2">
+                        <input type="email" class="form-control" placeholder="Enter your email" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Library Info Section -->
+    <section id="contact" class="library-info py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center fw-bold mb-5">Library Information</h2>
+            <div class="row g-4">
+                <div class="col-md-3 text-center">
+                    <div class="info-card p-4">
+                        <i class="fas fa-map-marker-alt text-primary mb-3" style="font-size: 32px;"></i>
+                        <h5 class="fw-bold">Location</h5>
+                        <p class="text-muted">123 Education Street<br>School Campus, City 12345</p>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="info-card p-4">
+                        <i class="fas fa-phone text-primary mb-3" style="font-size: 32px;"></i>
+                        <h5 class="fw-bold">Phone</h5>
+                        <p class="text-muted">(555) 123-4567<br>Mon-Fri: 8AM-6PM</p>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="info-card p-4">
+                        <i class="fas fa-envelope text-primary mb-3" style="font-size: 32px;"></i>
+                        <h5 class="fw-bold">Email</h5>
+                        <p class="text-muted">info@schoollibrary.edu<br>support@schoollibrary.edu</p>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="info-card p-4">
+                        <i class="fas fa-clock text-primary mb-3" style="font-size: 32px;"></i>
+                        <h5 class="fw-bold">Hours</h5>
+                        <p class="text-muted">Mon-Fri: 8AM-6PM<br>Sat: 10AM-4PM</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Announcements Section -->
+    <section class="announcements-section py-5">
+        <div class="container">
+            <h2 class="text-center fw-bold mb-5">Latest Announcements</h2>
+            <div class="row g-4">
+                <div class="col-md-6 mb-4">
+                    <div class="announcement-card p-4">
+                        <span class="badge bg-primary mb-3">New</span>
+                        <h5 class="fw-bold">New Digital Database Available</h5>
+                        <p class="text-muted small mb-2"><i class="fas fa-calendar me-2"></i>November 10, 2024</p>
+                        <p>We're excited to announce access to our new academic journal database with over 10,000 peer-reviewed articles.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="announcement-card p-4">
+                        <span class="badge bg-success mb-3">Update</span>
+                        <h5 class="fw-bold">Extended Library Hours</h5>
+                        <p class="text-muted small mb-2"><i class="fas fa-calendar me-2"></i>November 8, 2024</p>
+                        <p>Starting next week, the library will be open until 7 PM on weekdays to accommodate more students.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="announcement-card p-4">
+                        <span class="badge bg-info mb-3">Event</span>
+                        <h5 class="fw-bold">Book Donation Drive</h5>
+                        <p class="text-muted small mb-2"><i class="fas fa-calendar me-2"></i>November 5, 2024</p>
+                        <p>Help us expand our collection! Donate your gently used books and receive a special bookmark.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="announcement-card p-4">
+                        <span class="badge bg-warning mb-3">Reminder</span>
+                        <h5 class="fw-bold">Book Return Deadline</h5>
+                        <p class="text-muted small mb-2"><i class="fas fa-calendar me-2"></i>November 3, 2024</p>
+                        <p>Please remember to return all borrowed books by November 15th to avoid late fees.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer bg-dark text-white py-5">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <h5 class="fw-bold mb-3">School Library</h5>
+                    <p class="text-muted">Your gateway to knowledge and learning excellence.</p>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-muted text-decoration-none">Browse Books</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">My Account</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Reservations</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="fw-bold mb-3">Resources</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-muted text-decoration-none">Digital Library</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Research Guides</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Databases</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">E-Books</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="fw-bold mb-3">Follow Us</h6>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-muted"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="bg-secondary">
+            <div class="text-center text-muted">
+                <p>&copy; 2025 School Library. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
