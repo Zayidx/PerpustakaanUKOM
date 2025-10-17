@@ -6,20 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    
+    #Membuat tabel role_data
     public function up(): void
     {
         Schema::create('role_data', function (Blueprint $table) {
             $table->id();
+            $table->string('nama_role');
+            $table->string('deskripsi_role')->nullable();
+            $table->string('icon_role');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+ 
+     
     public function down(): void
     {
         Schema::dropIfExists('role_data');
