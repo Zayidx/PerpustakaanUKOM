@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\RoleData;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -16,24 +16,48 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $roles = [
+            'Administrator' => [
+                'deskripsi_role' => 'Hak akses penuh untuk mengelola sistem perpustakaan.',
+                'icon_role' => 'bi-person-gear',
+            ],
+            'Guru' => [
+                'deskripsi_role' => 'Mengelola informasi akademik dan data perpustakaan.',
+                'icon_role' => 'bi-person-workspace',
+            ],
+            'Siswa' => [
+                'deskripsi_role' => 'Akses data buku dan riwayat peminjaman.',
+                'icon_role' => 'bi-mortarboard',
+            ],
+        ];
 
-        #Memasukkan data awal ke tabel role_data dan users
-        $this->command->warn('[Seeder][1/2] Mengisi data role...');
-        $roleId = DB::table('role_data')->insertGetId([
-            'nama_role' => 'Administrator',
-            'deskripsi_role' => 'Hak akses penuh untuk mengelola sistem perpustakaan.',
-            'icon_role' => 'bi-person-gear',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        $this->command->info('[Seeder][1/2] role_data selesai (50%).');
+        $this->command->warn('[Seeder] Menyiapkan role default...');
+        $roleIds = [];
+        $totalRoles = count($roles);
+        $index = 1;
 
-        $this->command->warn('[Seeder][2/2] Membuat pengguna awal...');
+        foreach ($roles as $namaRole => $attributes) {
+            $role = RoleData::firstOrCreate(
+                ['nama_role' => $namaRole],
+                $attributes
+            );
+
+            $roleIds[$namaRole] = $role->id;
+            $progress = (int) round(($index / $totalRoles) * 100);
+            $this->command->info(sprintf('[Seeder] Role %s siap (%d%%)', $namaRole, $progress));
+            $index++;
+        }
+
+        $this->command->warn('[Seeder] Membuat pengguna administrator awal...');
         User::factory()->create([
             'nama_user' => 'Test User',
             'email_user' => 'test@example.com',
-            'role_id' => $roleId,
+            'phone_number' => '081234567890',
+            'role_id' => $roleIds['Administrator'] ?? null,
         ]);
-        $this->command->info('[Seeder][2/2] Pengguna awal selesai (100%).');
+
+        $this->command->warn('[Seeder] Mengisi data siswa contoh (50 data)...');
+        $this->call(SiswaSeeder::class);
+        $this->command->info('[Seeder] Seeder selesai (100%).');
     }
 }

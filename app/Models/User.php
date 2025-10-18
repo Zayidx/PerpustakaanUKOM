@@ -11,13 +11,30 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-   
     protected $fillable = [
-        'name',
-        'email',
+        'nama_user',
+        'email_user',
+        'phone_number',
         'password',
+        'role_id',
     ];
-    public function role(){
-        return $this->belongsTo(Roles::class);
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'password' => 'hashed',
+    ];
+
+    public function role()
+    {
+        return $this->belongsTo(RoleData::class, 'role_id');
+    }
+
+    public function siswa()
+    {
+        return $this->hasOne(Siswa::class);
     }
 }
