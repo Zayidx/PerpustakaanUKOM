@@ -1,22 +1,22 @@
-<div>
+<div> {{-- Container utama komponen Livewire --}}
     @if (session()->has('message'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2500)" class="alert alert-success">
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2500)" class="alert alert-success"> {{-- Alert flash sukses --}}
             {{ session('message') }}
         </div>
     @endif
 
-    <div class="card">
+    <div class="card"> {{-- Kartu utama halaman --}}
         <div class="card-body">
-            <div class="d-flex justify-content-end gap-2 mb-3">
+            <div class="d-flex justify-content-end gap-2 mb-3"> {{-- Aksi pojok kanan atas --}}
                 <button wire:click="create" type="button" class="btn btn-primary" data-bs-toggle="modal"
-                    data-bs-target="#modal-form">
+                    data-bs-target="#modal-form"> {{-- Tombol tambah siswa --}}
                     <i class="bi bi-plus"></i>
                     <span class="ms-1">Tambah Siswa</span>
                 </button>
             </div>
 
             <div class="modal fade text-left" id="modal-form" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
-                aria-hidden="true" wire:ignore.self>
+                aria-hidden="true" wire:ignore.self> {{-- Modal create/edit siswa --}}
                 <div class="modal-dialog modal-dialog-scrollable" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -28,8 +28,8 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            <form wire:submit.prevent="store" enctype="multipart/form-data">
-                                <div class="mb-3">
+                            <form wire:submit.prevent="store" enctype="multipart/form-data"> {{-- Form Livewire --}}
+                                <div class="mb-3"> {{-- Input nama --}}
                                     <label for="nama" class="form-label">Nama Lengkap</label>
                                     <input type="text" id="nama" class="form-control" wire:model.defer="nama">
                                     @error('nama')
@@ -37,7 +37,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-3"> {{-- Input email --}}
                                     <label for="email" class="form-label">Email</label>
                                     <input type="email" id="email" class="form-control" wire:model.defer="email">
                                     @error('email')
@@ -45,7 +45,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-3"> {{-- Input telepon --}}
                                     <label for="phone_number" class="form-label">Nomor Telepon</label>
                                     <input type="text" id="phone_number" class="form-control" wire:model.defer="phone_number">
                                     @error('phone_number')
@@ -53,7 +53,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="row">
+                                <div class="row"> {{-- Input password & konfirmasi --}}
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="password" class="form-label">Password</label>
@@ -74,7 +74,7 @@
                                     </div>
                                 </div>
 
-                                <div class="row">
+                                <div class="row"> {{-- Input NISN dan NIS --}}
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="nisn" class="form-label">NISN</label>
@@ -95,7 +95,7 @@
                                     </div>
                                 </div>
 
-                                <div class="row">
+                                <div class="row"> {{-- Input NIP opsional dan gender --}}
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="nip" class="form-label">NIP (opsional)</label>
@@ -119,7 +119,7 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-3"> {{-- Input alamat --}}
                                     <label for="alamat" class="form-label">Alamat</label>
                                     <input type="text" id="alamat" class="form-control" wire:model.defer="alamat">
                                     @error('alamat')
@@ -127,7 +127,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-3"> {{-- Input foto dengan preview --}}
                                     <label for="foto" class="form-label">Foto</label>
                                     <input type="file" id="foto" class="form-control" wire:model="foto" accept="image/*">
                                     @error('foto')
@@ -142,7 +142,7 @@
                                         @endif
                                     </div>
                                 </div>
-                                <div class="modal-footer">
+                                <div class="modal-footer"> {{-- Tombol aksi modal --}}
                                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button>
                                     <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="store,foto">
                                         <span wire:loading.remove>{{ $siswa_id ? 'Simpan Perubahan' : 'Simpan' }}</span>
@@ -156,10 +156,10 @@
                 </div>
             </div>
 
-        <div class="table-responsive">
+        <div class="table-responsive"> {{-- Tabel daftar siswa --}}
             <table class="table table-striped">
                 <thead>
-                    <tr>
+                    <tr> {{-- Header tabel --}}
                         <th class="text-center">No.</th>
                         <th>Nama</th>
                         <th>Email</th>
@@ -175,7 +175,7 @@
                 </thead>
                 <tbody>
                     @forelse ($this->listSiswa as $item)
-                        <tr wire:key="row-{{ $item->id }}">
+                        <tr wire:key="row-{{ $item->id }}"> {{-- Satu baris data siswa --}}
                             <td class="text-center">{{ $loop->iteration + ($this->listSiswa->currentPage() - 1) * $this->listSiswa->perPage() }}</td>
                             <td>{{ $item->user->nama_user ?? '-' }}</td>
                             <td>{{ $item->user->email_user ?? '-' }}</td>
@@ -195,26 +195,26 @@
                             <td>
                                 <div class="d-flex gap-2">
                                     <button wire:click="edit({{ $item->id }})" data-bs-toggle="modal"
-                                        data-bs-target="#modal-form" class="btn btn-sm btn-warning">Edit</button>
+                                        data-bs-target="#modal-form" class="btn btn-sm btn-warning">Edit</button> {{-- Tombol edit --}}
                                     <button wire:confirm="Yakin ingin menghapus data {{ $item->user->nama_user ?? 'siswa' }}?"
                                         wire:click="delete({{ $item->id }})"
-                                        class="btn btn-sm btn-danger">Hapus</button>
+                                        class="btn btn-sm btn-danger">Hapus</button> {{-- Tombol hapus --}}
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="11" class="text-center text-muted">Belum ada data siswa.</td>
+                            <td colspan="11" class="text-center text-muted">Belum ada data siswa.</td> {{-- Pesan tabel kosong --}}
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        <div class="card-footer">
+        <div class="card-footer"> {{-- Kontrol pagination --}}
             <div class="d-flex justify-content-between align-items-center gap-3">
                 <div>
-                    <label class="form-label me-2 mb-0">Data per halaman</label>
+                    <label class="form-label me-2 mb-0">Data per halaman</label> {{-- Dropdown jumlah data --}}
                     <select wire:model="perPage" class="form-select form-select-sm w-auto d-inline-block">
                         <option value="5">5</option>
                         <option value="10">10</option>
@@ -222,7 +222,7 @@
                     </select>
                 </div>
                 <div>
-                    {{ $this->listSiswa->onEachSide(1)->links() }}
+                    {{ $this->listSiswa->onEachSide(1)->links() }} {{-- Navigasi pagination --}}
                 </div>
             </div>
         </div>
@@ -242,7 +242,7 @@
         if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
             return;
         }
-        const instance = bootstrap.Modal.getInstance(modalElement) ?? new bootstrap.Modal(modalElement);
+        const instance = bootstrap.Modal.getInstance(modalElement) ?? new bootstrap.Modal(modalElement); {{-- Tutup modal bootstrap setelah aksi Livewire --}}
         instance.hide();
     });
 </script>

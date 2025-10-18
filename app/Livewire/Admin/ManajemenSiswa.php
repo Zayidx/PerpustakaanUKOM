@@ -1,51 +1,51 @@
-<?php
+<?php // Komponen Livewire untuk fitur manajemen siswa
 
-namespace App\Livewire\Admin;
+namespace App\Livewire\Admin; // Namespace untuk komponen admin
 
-use App\Models\RoleData;
-use App\Models\Siswa;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Url;
-use Livewire\Component;
-use Livewire\WithPagination;
-use Livewire\WithFileUploads;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use App\Models\RoleData; // Model untuk tabel role_data
+use App\Models\Siswa; // Model relasi detail siswa
+use App\Models\User; // Model user bawaan Laravel
+use Illuminate\Support\Facades\DB; // Facade transaksi database
+use Illuminate\Support\Facades\Hash; // Facade hashing password
+use Illuminate\Support\Facades\Storage; // Facade penyimpanan file
+use Illuminate\Validation\Rule; // Rule validasi dinamis
+use Livewire\Attributes\Computed; // Attribute untuk properti terhitung
+use Livewire\Attributes\Layout; // Attribute layout komponen
+use Livewire\Attributes\Title; // Attribute judul halaman
+use Livewire\Attributes\Url; // Attribute sinkronisasi URL
+use Livewire\Component; // Base class Livewire
+use Livewire\WithPagination; // Trait pagination Livewire
+use Livewire\WithFileUploads; // Trait upload file Livewire
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile; // Representasi file upload sementara
 
-class ManajemenSiswa extends Component
-{
-    use WithFileUploads;
-    use WithPagination;
+class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD siswa
+{ 
+    use WithFileUploads; // Mengaktifkan dukungan upload file pada komponen Livewire
+    use WithPagination; // Mengaktifkan pagination Livewire untuk tabel siswa
 
-    protected $paginationTheme = 'bootstrap';
+    protected $paginationTheme = 'bootstrap'; // Menggunakan gaya pagination Bootstrap bawaan template
 
     #[Title('Halaman Manajemen Siswa')]
     #[Url(except: "")]
     #[Layout('components.layouts.dashboard-layouts')]
-    public $perPage = 5;
+    public $perPage = 5; // Jumlah data per halaman tabel
 
-    public $siswa_id;
-    public $user_id;
-    public $nama = '';
-    public $email = '';
-    public $phone_number = '';
-    public $password;
-    public $password_confirmation;
-    public $alamat = '';
-    public $jenis_kelamin = 'laki-laki';
-    public $nisn = '';
-    public $nis = '';
-    public $nip = '';
-    public $foto;
-    public $existingFoto = '';
+    public $siswa_id; // ID siswa untuk mode edit
+    public $user_id; // ID user terkait siswa
+    public $nama = ''; // Nama lengkap siswa
+    public $email = ''; // Email siswa
+    public $phone_number = ''; // Nomor telepon siswa
+    public $password; // Password baru (opsional saat edit)
+    public $password_confirmation; // Konfirmasi password
+    public $alamat = ''; // Alamat siswa
+    public $jenis_kelamin = 'laki-laki'; // Default jenis kelamin
+    public $nisn = ''; // Nomor Induk Siswa Nasional
+    public $nis = ''; // Nomor Induk Siswa internal
+    public $nip = ''; // NIP opsional
+    public $foto; // File foto yang baru diupload
+    public $existingFoto = ''; // Path foto lama bila ada
 
-    protected $messages = [
+    protected $messages = [ // Pesan error kustom berbahasa Indonesia
         'nama.required' => 'Nama siswa wajib diisi.',
         'nama.string' => 'Nama siswa harus berupa teks.',
         'nama.max' => 'Nama siswa maksimal :max karakter.',
@@ -84,18 +84,20 @@ class ManajemenSiswa extends Component
         'foto.max' => 'Ukuran foto maksimal :max kilobyte.',
     ];
 
+    // Dipicu ketika dropdown jumlah data per halaman berubah
     public function updatedPerPage(): void
     {
-        $this->perPage = max(1, (int) $this->perPage);
-        $this->resetPage();
+        $this->perPage = max(1, (int) $this->perPage); // Menjaga nilai perPage minimal 1
+        $this->resetPage(); // Kembali ke halaman pertama saat jumlah per halaman berubah
     }
 
+    // Kumpulan rules validasi dinamis
     protected function rules(): array
     {
-        $passwordRules = $this->siswa_id ? ['nullable'] : ['required'];
-        $passwordRules[] = 'min:8';
+        $passwordRules = $this->siswa_id ? ['nullable'] : ['required']; // Password wajib diisi saat create
+        $passwordRules[] = 'min:8'; // Minimal 8 karakter
 
-        $passwordConfirmationRules = $this->password ? ['same:password'] : ['nullable'];
+        $passwordConfirmationRules = $this->password ? ['same:password'] : ['nullable']; // Konfirmasi hanya dicek jika password diisi
 
         return [
             'nama' => ['required', 'string', 'max:255'],
@@ -125,40 +127,42 @@ class ManajemenSiswa extends Component
         ];
     }
 
+    // Reset form saat tombol tambah ditekan
     public function create(): void
     {
-        $this->resetForm();
-        $this->resetValidation();
+        $this->resetForm(); // Kosongkan seluruh field
+        $this->resetValidation(); // Bersihkan pesan error
     }
 
+    // Simpan atau perbarui data siswa
     public function store(): void
     {
         if ($this->password === '') {
-            $this->password = null;
+            $this->password = null; // Livewire kadang mengirim string kosong, ubah jadi null
         }
 
         if ($this->password_confirmation === '') {
-            $this->password_confirmation = null;
+            $this->password_confirmation = null; // Samakan perlakuan konfirmasi password
         }
 
-        $this->validate();
+        $this->validate(); // Jalankan validasi semua field
 
-        $roleId = RoleData::where('nama_role', 'Siswa')->value('id');
+        $roleId = RoleData::where('nama_role', 'Siswa')->value('id'); // Ambil ID role siswa
         if (!$roleId) {
             session()->flash('message', 'Role Siswa belum dikonfigurasi. Silakan tambahkan role terlebih dahulu.');
             return;
         }
 
         $imagePath = $this->existingFoto;
-        if ($this->foto instanceof TemporaryUploadedFile) {
-            Storage::disk('public')->makeDirectory('admin/foto-siswa');
-            if ($this->existingFoto) {
+        if ($this->foto instanceof TemporaryUploadedFile) { // Jika ada upload baru
+            Storage::disk('public')->makeDirectory('admin/foto-siswa'); // Pastikan folder ada
+            if ($this->existingFoto) { // Hapus foto lama bila ada
                 Storage::disk('public')->delete($this->existingFoto);
             }
-            $imagePath = $this->foto->store('admin/foto-siswa', 'public');
+            $imagePath = $this->foto->store('admin/foto-siswa', 'public'); // Simpan foto baru
         }
 
-        $nama = trim($this->nama);
+        $nama = trim($this->nama); // Normalisasi input untuk menghindari spasi tak perlu
         $email = strtolower(trim($this->email));
         $phone = trim($this->phone_number);
         $nisn = trim($this->nisn);
@@ -168,15 +172,15 @@ class ManajemenSiswa extends Component
 
         DB::transaction(function () use ($roleId, $imagePath, $nama, $email, $phone, $nisn, $nis, $nip, $alamat) {
             if ($this->siswa_id) {
-                $siswa = Siswa::with('user')->findOrFail($this->siswa_id);
-                $user = $siswa->user;
-                $user->nama_user = $nama;
-                $user->email_user = $email;
-                $user->phone_number = $phone;
-                if ($this->password) {
+                $siswa = Siswa::with('user')->findOrFail($this->siswa_id); // Mode edit, cari data lama
+                $user = $siswa->user; // Ambil relasi user
+                $user->nama_user = $nama; // Update nama
+                $user->email_user = $email; // Update email
+                $user->phone_number = $phone; // Update telepon
+                if ($this->password) { // Password hanya diganti jika diisi
                     $user->password = Hash::make($this->password);
                 }
-                $user->role_id = $roleId;
+                $user->role_id = $roleId; // Pastikan role tetap siswa
                 $user->save();
 
                 $siswa->update([
@@ -211,15 +215,16 @@ class ManajemenSiswa extends Component
             }
         });
 
-        $this->resetForm();
+        $this->resetForm(); // Bersihkan form setelah simpan
         session()->flash('message', 'Data siswa berhasil disimpan.');
-        $this->dispatch('close-modal', id: 'modal-form');
+        $this->dispatch('close-modal', id: 'modal-form'); // Tutup modal via JS
     }
 
+    // Muat data siswa untuk mode edit
     public function edit(int $id): void
     {
-        $this->resetValidation();
-        $siswa = Siswa::with('user')->findOrFail($id);
+        $this->resetValidation(); // Bersihkan error lama
+        $siswa = Siswa::with('user')->findOrFail($id); // Ambil data siswa beserta user
 
         $this->siswa_id = $siswa->id;
         $this->user_id = $siswa->user->id ?? null;
@@ -236,13 +241,15 @@ class ManajemenSiswa extends Component
         $this->password_confirmation = null;
     }
 
+    // Validasi foto setiap kali input berubah
     public function updatedFoto(): void
     {
         if ($this->foto) {
-            $this->validateOnly('foto');
+            $this->validateOnly('foto'); // Validasi sehingga error langsung muncul jika file tidak sesuai
         }
     }
 
+    // Hapus siswa beserta user terkait
     public function delete(int $id): void
     {
         $siswa = Siswa::with('user')->findOrFail($id);
@@ -264,37 +271,38 @@ class ManajemenSiswa extends Component
     }
 
     #[Computed]
-    public function listSiswa()
+    public function listSiswa() // Data untuk tabel dengan pagination
     {
         return Siswa::with('user')->orderByDesc('created_at')->paginate($this->perPage);
     }
 
-    public function render()
+    public function render() // Render view Livewire
     {
-        return view('livewire.admin.manajemen-siswa');
+        return view('livewire.admin.manajemen-siswa'); // Render tampilan Livewire
     }
 
+    // Membersihkan seluruh state form ke nilai awal
     private function resetForm(): void
     {
         $this->reset([
-            'siswa_id',
-            'user_id',
-            'nama',
-            'email',
-            'phone_number',
-            'password',
-            'password_confirmation',
-            'alamat',
-            'jenis_kelamin',
-            'nisn',
-            'nis',
-            'nip',
-            'foto',
-            'existingFoto',
+            'siswa_id', // Reset ID siswa
+            'user_id', // Reset ID user
+            'nama', // Kosongkan nama
+            'email', // Kosongkan email
+            'phone_number', // Kosongkan telepon
+            'password', // Kosongkan password
+            'password_confirmation', // Kosongkan konfirmasi password
+            'alamat', // Kosongkan alamat
+            'jenis_kelamin', // Akan di-set ulang di bawah
+            'nisn', // Kosongkan NISN
+            'nis', // Kosongkan NIS
+            'nip', // Kosongkan NIP
+            'foto', // Reset file upload
+            'existingFoto', // Hapus referensi foto lama
         ]);
 
-        $this->jenis_kelamin = 'laki-laki';
-        $this->resetErrorBag();
-        $this->resetValidation();
+        $this->jenis_kelamin = 'laki-laki'; // Default pilihan gender
+        $this->resetErrorBag(); // Hapus pesan kesalahan sebelumnya
+        $this->resetValidation(); // Bersihkan status validasi
     }
 }
