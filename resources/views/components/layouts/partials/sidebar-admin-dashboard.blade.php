@@ -1,9 +1,9 @@
- <div id="sidebar">
+<div id="sidebar">
      <div class="sidebar-wrapper active">
          <div class="sidebar-header position-relative">
              <div class="d-flex justify-content-between align-items-center">
-                 <div class="logo">
-                     <a href="index.html"><img src="{{ asset('storage/assets/compiled/svg/logo.svg') }}" alt="Logo"
+                <div class="logo">
+                     <a wire:navigate href="{{ route('admin.dashboard') }}"><img src="{{ asset('storage/assets/compiled/svg/logo.svg') }}" alt="Logo"
                              srcset=""></a>
                  </div>
                  <div class="theme-toggle d-flex gap-2  align-items-center mt-2">
@@ -43,17 +43,20 @@
          <div class="sidebar-menu">
              <ul class="menu">
                  <li class="sidebar-title">Menu</li>
-
                  <li class="sidebar-item {{ Request::routeIs('admin.dashboard') ? 'active' : '' }} ">
-                     <a href="index.html" class='sidebar-link'>
+                     <a wire:navigate href="{{ route('admin.dashboard') }}" class='sidebar-link'>
                          <i class="bi bi-grid-fill"></i>
                          <span>Dashboard</span>
                      </a>
-
-
                  </li>
 
-                 
+                 <li class="sidebar-title">CRUD</li>
+                 <li class="sidebar-item {{ Request::routeIs('admin.manajemen-siswa') ? 'active' : '' }} ">
+                     <a wire:navigate href="{{ route('admin.manajemen-siswa') }}" class='sidebar-link'>
+                        <i class="bi bi-person-vcard"></i>
+                         <span>Manajemen Siswa</span>
+                     </a>
+                 </li>
              </ul>
          </div>
      </div>

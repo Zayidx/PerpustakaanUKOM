@@ -23,9 +23,7 @@
 <body>
     <script src="{{ asset('storage/assets/static/js/initTheme.js') }}"></script>
     <div id="app">
-       
-           @include('components.layouts.partials.sidebar-admin-dashboard')
-        </div>
+        @include('components.layouts.partials.sidebar-admin-dashboard')
         <div id="main">
             <header class="mb-3">
                 <a href="#" class="burger-btn d-block d-xl-none">
@@ -38,7 +36,7 @@
             </div>
             <div class="page-content">
                 <section class="row">
-                    <div class="col-12 col-lg-9">
+                    <div class="col-12 ">
                         {{ $slot }}
                     </div>
                 </section>
@@ -68,6 +66,30 @@
     <!-- Need: Apexcharts -->
     <script src="{{ asset('storage/assets/extensions/apexcharts/apexcharts.min.js') }}"></script>
     <script src="{{ asset('storage/assets/static/js/pages/dashboard.js') }}"></script>
+
+    <script>
+        document.addEventListener('livewire:navigated', () => {
+            if (typeof window.setTheme === 'function') {
+                const stored = localStorage.getItem('theme');
+                if (stored) {
+                    document.body.classList.remove('light', 'dark');
+                    window.setTheme(stored, false);
+                }
+            } else {
+                const stored = localStorage.getItem('theme');
+                if (stored) {
+                    document.body.classList.remove('light', 'dark');
+                    document.body.classList.add(stored);
+                    document.documentElement.setAttribute('data-bs-theme', stored);
+                }
+            }
+
+            const toggler = document.getElementById('toggle-dark');
+            if (toggler) {
+                toggler.checked = localStorage.getItem('theme') === 'dark';
+            }
+        });
+    </script>
 
 </body>
 
