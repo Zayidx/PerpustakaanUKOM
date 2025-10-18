@@ -14,7 +14,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
         <div class="container-fluid px-4">
             <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#home">
-                <img src="{{ asset('storage/assets/logo.png') }}" alt="Ruang Membaca" style="height: 32px;">
+                <img src="{{ asset('assets/logo.png') }}" alt="Ruang Membaca" style="height: 32px;">
                 <span>Ruang Membaca</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Buka navigasi">
@@ -49,7 +49,7 @@
                 </div>
                 <div class="col-lg-6 text-center">
                     <div class="hero-image">
-                        <img src="{{ asset('storage/assets/img/capybara.png') }}" alt="Ilustrasi pembaca" class="hero-illustration">
+                        <img src="{{ asset('assets/img/capybara.png') }}" alt="Ilustrasi pembaca" class="hero-illustration">
                     </div>
                 </div>
             </div>
@@ -96,7 +96,7 @@
                 <div class="col-md-4 mb-4">
                     <div class="book-card">
                         <div class="book-image bg-gradient-1 d-flex align-items-center justify-content-center">
-                            <img src="{{ asset('storage/assets/img/capybara.png') }}" alt="Sampul Petualangan Dimulai" class="book-thumbnail">
+                            <img src="{{ asset('assets/img/capybara.png') }}" alt="Sampul Petualangan Dimulai" class="book-thumbnail">
                         </div>
                         <div class="p-3">
                             <h5 class="fw-bold">Petualangan Dimulai</h5>
@@ -115,7 +115,7 @@
                 <div class="col-md-4 mb-4">
                     <div class="book-card">
                         <div class="book-image bg-gradient-2 d-flex align-items-center justify-content-center">
-                            <img src="{{ asset('storage/assets/img/capybara.png') }}" alt="Sampul Keajaiban Sains" class="book-thumbnail">
+                            <img src="{{ asset('assets/img/capybara.png') }}" alt="Sampul Keajaiban Sains" class="book-thumbnail">
                         </div>
                         <div class="p-3">
                             <h5 class="fw-bold">Keajaiban Sains</h5>
@@ -134,7 +134,7 @@
                 <div class="col-md-4 mb-4">
                     <div class="book-card">
                         <div class="book-image bg-gradient-3 d-flex align-items-center justify-content-center">
-                            <img src="{{ asset('storage/assets/img/capybara.png') }}" alt="Sampul Kronik Sejarah" class="book-thumbnail">
+                            <img src="{{ asset('assets/img/capybara.png') }}" alt="Sampul Kronik Sejarah" class="book-thumbnail">
                         </div>
                         <div class="p-3">
                             <h5 class="fw-bold">Kronik Sejarah</h5>

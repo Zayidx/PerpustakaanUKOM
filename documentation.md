@@ -51,7 +51,7 @@ Route::get('/admin/manajemen-siswa', \App\Livewire\Admin\ManajemenSiswa::class)
 ## 5. Integrasi Tema & Navigasi
 
 - Sidebar admin menggunakan `wire:navigate` agar perpindahan antar halaman tanpa reload dan tetap menyimpan state dark/light mode.
-- `public/storage/assets/static/js/components/dark.js` mengekspos `setTheme()` dan membersihkan kelas lama sebelum menambah baru.
+- `public/assets/static/js/components/dark.js` mengekspos `setTheme()` dan membersihkan kelas lama sebelum menambah baru.
 - `dashboard-layouts.blade.php` mendengarkan event `livewire:navigated` untuk menerapkan kembali tema setelah navigasi.
 
 ## 6. Tips Penggunaan
