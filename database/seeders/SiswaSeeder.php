@@ -43,7 +43,6 @@ class SiswaSeeder extends Seeder
                 'user_id' => $user->id,
                 'nisn' => $faker->unique()->numerify('00##########'),
                 'nis' => $faker->unique()->numerify('########'),
-                'nip' => $faker->boolean(30) ? $faker->unique()->numerify('##########') : null,
                 'alamat' => $faker->address(),
                 'jenis_kelamin' => $gender,
                 'foto' => null,

@@ -29,6 +29,21 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
     #[Url(except: "")]
     #[Layout('components.layouts.dashboard-layouts')]
     public $perPage = 5; // Jumlah data per halaman tabel
+    public array $perPageOptions = [5, 10, 25]; // Opsi dropdown per halaman
+    public $search = ''; // Kata kunci pencarian
+    public $genderFilter = 'all'; // Filter jenis kelamin
+    public string $sort = 'created_at_desc'; // Opsi sorting default
+    public array $sortOptions = [
+        'created_at_desc' => 'Terbaru',
+        'created_at_asc' => 'Terlama',
+        'nama_user_asc' => 'Nama A-Z',
+        'nama_user_desc' => 'Nama Z-A',
+    ];
+    public array $genderOptions = [
+        'all' => 'Semua Gender',
+        'laki-laki' => 'Laki-laki',
+        'perempuan' => 'Perempuan',
+    ];
 
     public $siswa_id; // ID siswa untuk mode edit
     public $user_id; // ID user terkait siswa
@@ -41,7 +56,6 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
     public $jenis_kelamin = 'laki-laki'; // Default jenis kelamin
     public $nisn = ''; // Nomor Induk Siswa Nasional
     public $nis = ''; // Nomor Induk Siswa internal
-    public $nip = ''; // NIP opsional
     public $foto; // File foto yang baru diupload
     public $existingFoto = ''; // Path foto lama bila ada
 
@@ -77,18 +91,41 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
         'nis.digits_between' => 'NIS harus terdiri dari :min sampai :max digit.',
         'nis.unique' => 'NIS tersebut sudah terdaftar.',
 
-        'nip.string' => 'NIP harus berupa teks.',
-        'nip.max' => 'NIP maksimal :max karakter.',
-
         'foto.image' => 'File foto harus berupa gambar.',
         'foto.max' => 'Ukuran foto maksimal :max kilobyte.',
     ];
 
-    // Dipicu ketika dropdown jumlah data per halaman berubah
-    public function updatedPerPage(): void
+    public function mount(): void
     {
-        $this->perPage = max(1, (int) $this->perPage); // Menjaga nilai perPage minimal 1
+        $this->perPage = $this->normalizePerPage($this->perPage); // Pastikan nilai awal valid
+        $this->sort = $this->normalizeSort($this->sort); // Pastikan opsi sort valid
+        $this->genderFilter = $this->normalizeGender($this->genderFilter); // Pastikan filter gender valid
+        $this->search = trim((string) $this->search); // Normalisasi kata kunci awal
+    }
+
+    // Dipicu ketika dropdown jumlah data per halaman berubah
+    public function updatedPerPage($value): void
+    {
+        $this->perPage = $this->normalizePerPage($value); // Menjaga nilai sesuai opsi
         $this->resetPage(); // Kembali ke halaman pertama saat jumlah per halaman berubah
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->search = trim((string) $this->search); // Hilangkan spasi berlebih
+        $this->resetPage(); // Reset pagination agar pencarian dimulai dari halaman pertama
+    }
+
+    public function updatedGenderFilter($value): void
+    {
+        $this->genderFilter = $this->normalizeGender($value); // Pastikan filter valid
+        $this->resetPage(); // Reset pagination setelah filter berubah
+    }
+
+    public function updatedSort($value): void
+    {
+        $this->sort = $this->normalizeSort($value); // Pastikan opsi sort valid
+        $this->resetPage(); // Reset pagination setelah sort berubah
     }
 
     // Kumpulan rules validasi dinamis
@@ -122,7 +159,6 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
                 'digits_between:4,20',
                 Rule::unique('siswa', 'nis')->ignore($this->siswa_id),
             ],
-            'nip' => ['nullable', 'string', 'max:30'],
             'foto' => ['nullable', 'image', 'max:1024'],
         ];
     }
@@ -167,10 +203,9 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
         $phone = trim($this->phone_number);
         $nisn = trim($this->nisn);
         $nis = trim($this->nis);
-        $nip = $this->nip ? trim($this->nip) : null;
         $alamat = $this->alamat ? trim($this->alamat) : null;
 
-        DB::transaction(function () use ($roleId, $imagePath, $nama, $email, $phone, $nisn, $nis, $nip, $alamat) {
+        DB::transaction(function () use ($roleId, $imagePath, $nama, $email, $phone, $nisn, $nis, $alamat) {
             if ($this->siswa_id) {
                 $siswa = Siswa::with('user')->findOrFail($this->siswa_id); // Mode edit, cari data lama
                 $user = $siswa->user; // Ambil relasi user
@@ -186,7 +221,6 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
                 $siswa->update([
                     'nisn' => $nisn,
                     'nis' => $nis,
-                    'nip' => $nip,
                     'alamat' => $alamat,
                     'jenis_kelamin' => $this->jenis_kelamin,
                     'foto' => $imagePath,
@@ -204,7 +238,6 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
                     'user_id' => $user->id,
                     'nisn' => $nisn,
                     'nis' => $nis,
-                    'nip' => $nip,
                     'alamat' => $alamat,
                     'jenis_kelamin' => $this->jenis_kelamin,
                     'foto' => $imagePath,
@@ -233,7 +266,6 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
         $this->phone_number = $siswa->user->phone_number ?? '';
         $this->nisn = $siswa->nisn;
         $this->nis = $siswa->nis;
-        $this->nip = $siswa->nip;
         $this->alamat = $siswa->alamat;
         $this->jenis_kelamin = $siswa->jenis_kelamin;
         $this->existingFoto = $siswa->foto;
@@ -273,12 +305,65 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
     #[Computed]
     public function listSiswa() // Data untuk tabel dengan pagination
     {
-        return Siswa::with('user')->orderByDesc('created_at')->paginate($this->perPage);
+        [$sortField, $sortDirection] = $this->resolveSort();
+
+        $query = Siswa::query()
+            ->with('user')
+            ->when($this->search !== '', function ($query) {
+                $searchTerm = '%' . $this->search . '%';
+
+                $query->where(function ($query) use ($searchTerm) {
+                    $query->where('nisn', 'like', $searchTerm)
+                        ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                            $userQuery->where('nama_user', 'like', $searchTerm);
+                        });
+                });
+            })
+            ->when($this->genderFilter !== 'all', function ($query) {
+                $query->where('jenis_kelamin', $this->genderFilter);
+            });
+
+        if ($sortField === 'users.nama_user') {
+            $query->leftJoin('users', 'users.id', '=', 'siswa.user_id')
+                ->select('siswa.*')
+                ->orderBy('users.nama_user', $sortDirection);
+        } else {
+            $query->orderBy($sortField, $sortDirection);
+        }
+
+        return $query->paginate($this->perPage);
     }
 
     public function render() // Render view Livewire
     {
         return view('livewire.admin.manajemen-siswa'); // Render tampilan Livewire
+    }
+
+    private function normalizeGender($value): string
+    {
+        return array_key_exists($value, $this->genderOptions) ? $value : 'all';
+    }
+
+    private function normalizeSort($value): string
+    {
+        return array_key_exists($value, $this->sortOptions) ? $value : 'created_at_desc';
+    }
+
+    private function resolveSort(): array
+    {
+        return match ($this->sort) {
+            'created_at_asc' => ['siswa.created_at', 'asc'],
+            'nama_user_asc' => ['users.nama_user', 'asc'],
+            'nama_user_desc' => ['users.nama_user', 'desc'],
+            default => ['siswa.created_at', 'desc'],
+        };
+    }
+
+    private function normalizePerPage($value): int
+    {
+        $value = (int) $value;
+
+        return in_array($value, $this->perPageOptions, true) ? $value : $this->perPageOptions[0];
     }
 
     // Membersihkan seluruh state form ke nilai awal
@@ -296,7 +381,6 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
             'jenis_kelamin', // Akan di-set ulang di bawah
             'nisn', // Kosongkan NISN
             'nis', // Kosongkan NIS
-            'nip', // Kosongkan NIP
             'foto', // Reset file upload
             'existingFoto', // Hapus referensi foto lama
         ]);
