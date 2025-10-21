@@ -12,6 +12,8 @@ Route::middleware(['auth', 'role:Administrator,Admin'])
         Route::get('/manajemen-jurusan', \App\Livewire\Admin\ManajemenJurusan::class)->name('manajemen-jurusan');
         Route::get('/manajemen-admin', \App\Livewire\Admin\ManajemenPetugas::class)->name('manajemen-admin');
         Route::get('/manajemen-guru', \App\Livewire\Admin\ManajemenGuru::class)->name('manajemen-guru');
+        Route::get('/manajemen-acara', \App\Livewire\Admin\ManajemenAcara::class)->name('manajemen-acara');
+        Route::get('/manajemen-acara/kategori', \App\Livewire\Admin\KategoriAcara::class)->name('kategori-acara');
         Route::get('/pengumuman', \App\Livewire\Admin\ManajemenPengumuman::class)->name('pengumuman');
         Route::get('/pengumuman/kategori', \App\Livewire\Admin\ManajemenKategoriPengumuman::class)->name('kategori-pengumuman');
     });

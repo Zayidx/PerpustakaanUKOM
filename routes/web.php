@@ -2,7 +2,7 @@
 
 use App\Livewire\Auth\Login;
 use App\Models\Pengumuman as PengumumanModel;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Acara;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,8 +13,25 @@ Route::get('/', function () {
         ->with(['kategori'])
         ->get();
 
+    $upcomingEvents = Acara::query()
+        ->where('mulai_at', '>=', now()->startOfDay())
+        ->orderBy('mulai_at')
+        ->take(4)
+        ->get();
+
+    if ($upcomingEvents->count() < 4) {
+        $additional = Acara::query()
+            ->where('mulai_at', '<', now()->startOfDay())
+            ->orderByDesc('mulai_at')
+            ->take(4 - $upcomingEvents->count())
+            ->get();
+
+        $upcomingEvents = $upcomingEvents->concat($additional)->values();
+    }
+
     return view('welcome', [
         'latestAnnouncements' => $latestAnnouncements,
+        'upcomingEvents' => $upcomingEvents,
     ]);
 })->name('welcome');
 

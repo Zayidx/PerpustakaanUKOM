@@ -7,6 +7,7 @@ use App\Models\Pengumuman;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class PengumumanSeeder extends Seeder
@@ -46,7 +47,7 @@ class PengumumanSeeder extends Seeder
                     'nama_user' => $name,
                     'email_user' => Str::slug($name) . '@perpus.local',
                     'phone_number' => '0812' . str_pad((string) random_int(1000000, 9999999), 7, '0', STR_PAD_LEFT),
-                    'password' => 'password',
+                    'password' => Hash::make('password'),
                     'role_id' => $firstRoleId,
                 ]));
             }

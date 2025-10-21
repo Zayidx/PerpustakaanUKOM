@@ -75,10 +75,23 @@
                         <span>Manajemen Admin</span>
                     </a>
                 </li>
-                    <li class="sidebar-item {{ Request::routeIs('admin.manajemen-guru') ? 'active' : '' }} ">
+                <li class="sidebar-item {{ Request::routeIs('admin.manajemen-guru') ? 'active' : '' }} ">
                     <a href="{{ route('admin.manajemen-guru') }}" class='sidebar-link'>
                         <i class="bi bi-diagram-3-fill"></i>
                         <span>Manajemen Guru</span>
+                    </a>
+                </li>
+                <li class="sidebar-title mt-4">Acara</li>
+                <li class="sidebar-item {{ Request::routeIs('admin.manajemen-acara') ? 'active' : '' }} ">
+                    <a href="{{ route('admin.manajemen-acara') }}" class='sidebar-link'>
+                        <i class="bi bi-calendar-event"></i>
+                        <span>Manajemen Acara</span>
+                    </a>
+                </li>
+                <li class="sidebar-item {{ Request::routeIs('admin.kategori-acara') ? 'active' : '' }} ">
+                    <a href="{{ route('admin.kategori-acara') }}" class='sidebar-link'>
+                        <i class="bi bi-collection"></i>
+                        <span>Kategori Acara</span>
                     </a>
                 </li>
                 <li class="sidebar-title mt-4">Pengumuman</li>

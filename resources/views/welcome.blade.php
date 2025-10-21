@@ -1,5 +1,9 @@
 @extends('components.layouts.partials.template-welcome')
 
+@php
+    use Illuminate\Support\Str;
+@endphp
+
 @push('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
     <style>
@@ -247,69 +251,81 @@
                 <p class="text-muted mb-0">Ikuti kegiatan terbaru dan perluas jejaring belajar Anda.</p>
             </div>
             <div class="row row-cols-1 row-cols-md-2 g-4">
-                <div class="col" data-aos="fade-up" data-aos-delay="150">
-                    <div class="event-card p-4 h-100">
-                        <div class="d-flex gap-3">
-                            <div class="event-date rounded-3 text-center px-3 py-2">
-                                <div class="fw-bold fs-4">15</div>
-                                <div class="small">Nov</div>
+                @forelse ($upcomingEvents as $index => $event)
+                    <div class="col" data-aos="fade-up" data-aos-delay="{{ 150 + ($index * 50) }}">
+                        <button type="button"
+                                class="event-card p-4 h-100 w-100 text-start border-0"
+                                data-bs-toggle="modal"
+                                data-bs-target="#eventDetailModal"
+                                data-title="{{ e($event->judul) }}"
+                                data-date="{{ $event->mulai_at?->translatedFormat('d F Y') ?? '-' }}"
+                                data-day="{{ $event->mulai_at?->translatedFormat('d') ?? '--' }}"
+                                data-month="{{ $event->mulai_at?->translatedFormat('M') ?? '--' }}"
+                                data-time="{{ $event->mulai_at?->translatedFormat('H.i') ?? '-' }}{{ $event->selesai_at ? ' - ' . $event->selesai_at->translatedFormat('H.i') : '' }}"
+                                data-location="{{ e($event->lokasi) }}"
+                                data-description="{{ e(Str::of($event->deskripsi ?? '')->stripTags()->replace(['\r\n', '\n', '\r'], ' ')) }}"
+                                data-poster="{{ $event->poster_url ? e($event->poster_url) : '' }}">
+                            <div class="d-flex gap-3 align-items-start">
+                                <div class="event-date rounded-3 text-center px-3 py-2">
+                                    <div class="fw-bold fs-4">{{ $event->mulai_at?->translatedFormat('d') ?? '--' }}</div>
+                                    <div class="small text-uppercase">{{ $event->mulai_at?->translatedFormat('M') ?? '--' }}</div>
+                                </div>
+                                <div>
+                                    @if ($event->kategori?->nama)
+                                        <span class="badge bg-primary-subtle text-primary mb-2">{{ $event->kategori->nama }}</span>
+                                    @endif
+                                    <h5 class="fw-bold mb-2 text-dark">{{ $event->judul }}</h5>
+                                    <p class="text-muted mb-1"><i class="fa-regular fa-clock me-2"></i>{{ $event->mulai_at?->translatedFormat('H.i') ?? '-' }}@if ($event->selesai_at) &ndash; {{ $event->selesai_at->translatedFormat('H.i') }}@endif</p>
+                                    <p class="text-muted mb-0"><i class="fa-solid fa-location-dot me-2"></i>{{ $event->lokasi }}</p>
+                                </div>
                             </div>
-                            <div>
-                                <h5 class="fw-bold mb-2">Pertemuan Klub Buku</h5>
-                                <p class="text-muted mb-1"><i class="fa-regular fa-clock me-2"></i>14.00 - 15.30</p>
-                                <p class="text-muted mb-0"><i class="fa-solid fa-location-dot me-2"></i>Aula Perpustakaan</p>
-                            </div>
+                        </button>
+                    </div>
+                @empty
+                    <div class="col">
+                        <div class="event-card p-4 text-center h-100">
+                            <h5 class="fw-bold mb-2">Belum ada acara terjadwal</h5>
+                            <p class="text-muted mb-0">Nantikan jadwal acara terbaru dari kami.</p>
                         </div>
                     </div>
-                </div>
-                <div class="col" data-aos="fade-up" data-aos-delay="200">
-                    <div class="event-card p-4 h-100">
-                        <div class="d-flex gap-3">
-                            <div class="event-date rounded-3 text-center px-3 py-2">
-                                <div class="fw-bold fs-4">22</div>
-                                <div class="small">Nov</div>
-                            </div>
-                            <div>
-                                <h5 class="fw-bold mb-2">Jumpa Penulis</h5>
-                                <p class="text-muted mb-1"><i class="fa-regular fa-clock me-2"></i>15.00 - 17.00</p>
-                                <p class="text-muted mb-0"><i class="fa-solid fa-location-dot me-2"></i>Aula Utama</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col" data-aos="fade-up" data-aos-delay="250">
-                    <div class="event-card p-4 h-100">
-                        <div class="d-flex gap-3">
-                            <div class="event-date rounded-3 text-center px-3 py-2">
-                                <div class="fw-bold fs-4">29</div>
-                                <div class="small">Nov</div>
-                            </div>
-                            <div>
-                                <h5 class="fw-bold mb-2">Peluncuran Tantangan Membaca</h5>
-                                <p class="text-muted mb-1"><i class="fa-regular fa-clock me-2"></i>13.00 - 14.00</p>
-                                <p class="text-muted mb-0"><i class="fa-solid fa-location-dot me-2"></i>Aula Perpustakaan</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col" data-aos="fade-up" data-aos-delay="300">
-                    <div class="event-card p-4 h-100">
-                        <div class="d-flex gap-3">
-                            <div class="event-date rounded-3 text-center px-3 py-2">
-                                <div class="fw-bold fs-4">05</div>
-                                <div class="small">Des</div>
-                            </div>
-                            <div>
-                                <h5 class="fw-bold mb-2">Orientasi Perpustakaan</h5>
-                                <p class="text-muted mb-1"><i class="fa-regular fa-clock me-2"></i>10.00 - 11.00</p>
-                                <p class="text-muted mb-0"><i class="fa-solid fa-location-dot me-2"></i>Ruang Rapat</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @endforelse
             </div>
         </div>
     </section>
+
+    <div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventDetailModalLabel">Detail Acara</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="event-date-modal text-center p-3 rounded-3 bg-primary text-white mb-3">
+                                <div class="fs-1 fw-bold" id="eventModalDay">--</div>
+                                <div class="text-uppercase" id="eventModalMonth">---</div>
+                            </div>
+                            <div id="eventModalPosterWrapper" class="rounded overflow-hidden d-none">
+                                <img src="" alt="Poster Acara" id="eventModalPoster" class="img-fluid">
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h3 class="fw-bold mb-3" id="eventModalTitle"></h3>
+                            <p class="text-muted mb-2"><i class="fa-regular fa-calendar me-2"></i><span id="eventModalDate">-</span></p>
+                            <p class="text-muted mb-3"><i class="fa-regular fa-clock me-2"></i><span id="eventModalTime">-</span></p>
+                            <p class="text-muted mb-4"><i class="fa-solid fa-location-dot me-2"></i><span id="eventModalLocation">-</span></p>
+                            <p class="mb-0" id="eventModalDescription"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Testimonials Section -->
     <section class="testimonials-section py-5 bg-light scroll-target" data-aos="fade-up" data-aos-delay="100">
@@ -527,10 +543,6 @@
                 </a>
             </div>
 
-            @php
-                use Illuminate\Support\Str;
-            @endphp
-
             <div class="row row-cols-1 row-cols-md-2 g-4">
                 @forelse ($latestAnnouncements as $index => $announcement)
                     <div class="col" data-aos="fade-up" data-aos-delay="{{ 150 + ($index * 50) }}">
@@ -590,6 +602,42 @@
                         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 150);
                 }
+            }
+
+            const eventModalEl = document.getElementById('eventDetailModal');
+            if (eventModalEl) {
+                eventModalEl.addEventListener('show.bs.modal', event => {
+                    const trigger = event.relatedTarget;
+                    if (!trigger) {
+                        return;
+                    }
+
+                    const dayEl = document.getElementById('eventModalDay');
+                    const monthEl = document.getElementById('eventModalMonth');
+                    const titleEl = document.getElementById('eventModalTitle');
+                    const dateEl = document.getElementById('eventModalDate');
+                    const timeEl = document.getElementById('eventModalTime');
+                    const locationEl = document.getElementById('eventModalLocation');
+                    const descriptionEl = document.getElementById('eventModalDescription');
+                    const posterWrapper = document.getElementById('eventModalPosterWrapper');
+                    const posterEl = document.getElementById('eventModalPoster');
+
+                    dayEl.textContent = trigger.dataset.day || '--';
+                    monthEl.textContent = trigger.dataset.month || '---';
+                    titleEl.textContent = trigger.dataset.title || 'Detail Acara';
+                    dateEl.textContent = trigger.dataset.date || '-';
+                    timeEl.textContent = trigger.dataset.time || '-';
+                    locationEl.textContent = trigger.dataset.location || '-';
+                    descriptionEl.textContent = trigger.dataset.description || 'Tidak ada deskripsi tambahan.';
+
+                    if (trigger.dataset.poster) {
+                        posterEl.src = trigger.dataset.poster;
+                        posterWrapper.classList.remove('d-none');
+                    } else {
+                        posterEl.src = '';
+                        posterWrapper.classList.add('d-none');
+                    }
+                });
             }
         });
     </script>

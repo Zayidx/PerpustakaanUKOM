@@ -66,6 +66,7 @@ class DatabaseSeeder extends Seeder
             PetugasSeeder::class,
             GuruSeeder::class,
             PengumumanSeeder::class,
+            AcaraSeeder::class,
         ]);
 
         $this->call(DefaultUserSeeder::class);
