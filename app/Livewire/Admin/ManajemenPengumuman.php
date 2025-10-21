@@ -4,8 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\KategoriPengumuman;
 use App\Models\Pengumuman as PengumumanModel;
-use App\Models\RoleData;
-use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -14,7 +13,7 @@ use Livewire\WithPagination;
 
 #[Layout('components.layouts.dashboard-layouts')]
 #[Title('Manajemen Pengumuman')]
-class Pengumuman extends Component
+class ManajemenPengumuman extends Component
 {
     use WithPagination;
 
@@ -24,6 +23,17 @@ class Pengumuman extends Component
     public string $statusFilter = 'all';
     public int $perPage = 10;
     public array $perPageOptions = [10, 25, 50];
+    public string $sort = 'published_desc';
+    public array $sortOptions = [
+        'published_desc' => 'Publikasi Terbaru',
+        'published_asc' => 'Publikasi Terlama',
+        'judul_asc' => 'Judul A-Z',
+        'judul_desc' => 'Judul Z-A',
+        'created_desc' => 'Dibuat Terbaru',
+        'created_asc' => 'Dibuat Terlama',
+        'admin_name_asc' => 'Penulis A-Z',
+        'admin_name_desc' => 'Penulis Z-A',
+    ];
     public array $statusOptions = [
         'all' => 'Semua Status',
         'draft' => 'Draft',
@@ -33,7 +43,8 @@ class Pengumuman extends Component
     public ?int $pengumumanId = null;
     public string $judul = '';
     public ?int $kategori_pengumuman_id = null;
-    public ?int $owner_id = null;
+    public ?int $admin_id = null;
+    public string $admin_name = '';
     public string $status = 'draft';
     public ?string $thumbnail_url = null;
     public ?string $thumbnail_caption = null;
@@ -45,8 +56,8 @@ class Pengumuman extends Component
         'judul.max' => 'Judul pengumuman maksimal 255 karakter.',
         'kategori_pengumuman_id.required' => 'Kategori pengumuman wajib dipilih.',
         'kategori_pengumuman_id.exists' => 'Kategori pengumuman tidak valid.',
-        'owner_id.required' => 'Penanggung jawab wajib dipilih.',
-        'owner_id.exists' => 'Penanggung jawab tidak valid.',
+        'admin_id.required' => 'Admin penulis wajib dipilih.',
+        'admin_id.exists' => 'Admin penulis tidak valid.',
         'status.required' => 'Status pengumuman wajib dipilih.',
         'status.in' => 'Status pengumuman tidak valid.',
         'thumbnail_url.url' => 'URL thumbnail tidak valid.',
@@ -60,12 +71,20 @@ class Pengumuman extends Component
         return [
             'judul' => ['required', 'string', 'min:5', 'max:255'],
             'kategori_pengumuman_id' => ['required', 'exists:kategori_pengumuman,id'],
-            'owner_id' => ['required', 'exists:users,id'],
+            'admin_id' => ['required', 'exists:users,id'],
             'status' => ['required', 'in:draft,published'],
             'thumbnail_url' => ['nullable', 'url'],
             'thumbnail_caption' => ['nullable', 'string', 'max:255'],
             'konten' => ['required', 'string', 'min:20'],
         ];
+    }
+
+    public function mount(): void
+    {
+        $this->perPage = $this->normalizePerPage($this->perPage);
+        $this->statusFilter = $this->normalizeStatus($this->statusFilter);
+        $this->sort = $this->normalizeSort($this->sort);
+        $this->search = trim((string) $this->search);
     }
 
     public function updatedSearch($value): void
@@ -76,26 +95,29 @@ class Pengumuman extends Component
 
     public function updatedStatusFilter($value): void
     {
-        if (! array_key_exists($value, $this->statusOptions)) {
-            $this->statusFilter = 'all';
-        }
+        $this->statusFilter = $this->normalizeStatus($value);
+        $this->resetPage();
+    }
 
+    public function updatedSort($value): void
+    {
+        $this->sort = $this->normalizeSort($value);
         $this->resetPage();
     }
 
     public function updatedPerPage($value): void
     {
-        $this->perPage = in_array((int) $value, $this->perPageOptions, true)
-            ? (int) $value
-            : $this->perPageOptions[0];
+        $this->perPage = $this->normalizePerPage($value);
 
         $this->resetPage();
     }
 
     public function render()
     {
-        $pengumuman = PengumumanModel::query()
-            ->with(['kategori', 'owner.role'])
+        [$sortField, $sortDirection, $requiresJoin] = $this->resolveSort();
+
+        $query = PengumumanModel::query()
+            ->with(['kategori', 'admin.role'])
             ->when($this->search !== '', function ($query) {
                 $query->where(function ($subQuery) {
                     $subQuery->where('judul', 'like', '%' . $this->search . '%')
@@ -104,20 +126,28 @@ class Pengumuman extends Component
             })
             ->when($this->statusFilter !== 'all', function ($query) {
                 $query->where('status', $this->statusFilter);
-            })
-            ->latest()
-            ->paginate($this->perPage);
+            });
 
-        return view('livewire.admin.pengumuman', [
+        if ($requiresJoin) {
+            $query->leftJoin('users', 'users.id', '=', 'pengumuman.admin_id')
+                ->select('pengumuman.*')
+                ->orderBy($sortField, $sortDirection);
+        } else {
+            $query->orderBy($sortField, $sortDirection);
+        }
+
+        $pengumuman = $query->paginate($this->perPage);
+
+        return view('livewire.admin.manajemen-pengumuman', [
             'pengumumanList' => $pengumuman,
             'kategoriOptions' => KategoriPengumuman::orderBy('nama')->get(),
-            'ownerOptions' => $this->ownerOptions(),
         ]);
     }
 
     public function create(): void
     {
         $this->resetForm();
+        $this->assignCurrentAdmin();
         $this->dispatch('initialize-editor', content: $this->konten);
     }
 
@@ -130,17 +160,18 @@ class Pengumuman extends Component
         $this->pengumumanId = $pengumuman->id;
         $this->judul = $pengumuman->judul;
         $this->kategori_pengumuman_id = $pengumuman->kategori_pengumuman_id;
-        $this->owner_id = $pengumuman->owner_id;
         $this->status = $pengumuman->status;
         $this->thumbnail_url = $pengumuman->thumbnail_url;
         $this->thumbnail_caption = $pengumuman->thumbnail_caption;
         $this->konten = $pengumuman->konten;
 
+        $this->assignCurrentAdmin();
         $this->dispatch('initialize-editor', content: $this->konten);
     }
 
     public function save(): void
     {
+        $this->ensureAdminAssigned();
         $data = $this->validate();
         $isUpdate = (bool) $this->pengumumanId;
 
@@ -155,7 +186,7 @@ class Pengumuman extends Component
                 'judul' => $data['judul'],
                 'slug' => $slug,
                 'kategori_pengumuman_id' => $data['kategori_pengumuman_id'],
-                'owner_id' => $data['owner_id'],
+                'admin_id' => $data['admin_id'],
                 'thumbnail_url' => $data['thumbnail_url'],
                 'thumbnail_caption' => $data['thumbnail_caption'],
                 'konten' => $data['konten'],
@@ -186,7 +217,8 @@ class Pengumuman extends Component
             'pengumumanId',
             'judul',
             'kategori_pengumuman_id',
-            'owner_id',
+            'admin_id',
+            'admin_name',
             'status',
             'thumbnail_url',
             'thumbnail_caption',
@@ -199,16 +231,16 @@ class Pengumuman extends Component
         $this->resetValidation();
     }
 
-    private function ownerOptions()
+    private function assignCurrentAdmin(): void
     {
-        $allowedRoles = RoleData::whereIn('nama_role', ['Administrator', 'Petugas'])
-            ->pluck('id');
+        $user = Auth::user();
+        $this->admin_id = $user?->id;
+        $this->admin_name = $user?->nama_user ?? 'Admin tidak tersedia';
+    }
 
-        return User::query()
-            ->with('role')
-            ->whereIn('role_id', $allowedRoles)
-            ->orderBy('nama_user')
-            ->get();
+    private function ensureAdminAssigned(): void
+    {
+        $this->assignCurrentAdmin();
     }
 
     private function generateSlug(string $judul): string
@@ -227,5 +259,37 @@ class Pengumuman extends Component
         }
 
         return $slug;
+    }
+
+    private function normalizePerPage($value): int
+    {
+        $value = (int) $value;
+
+        return in_array($value, $this->perPageOptions, true) ? $value : $this->perPageOptions[0];
+    }
+
+    private function normalizeStatus(string $value): string
+    {
+        return array_key_exists($value, $this->statusOptions) ? $value : 'all';
+    }
+
+    private function normalizeSort(string $value): string
+    {
+        return array_key_exists($value, $this->sortOptions) ? $value : 'published_desc';
+    }
+
+    private function resolveSort(): array
+    {
+        return match ($this->sort) {
+            'published_asc' => ['pengumuman.published_at', 'asc', false],
+            'published_desc' => ['pengumuman.published_at', 'desc', false],
+            'judul_asc' => ['pengumuman.judul', 'asc', false],
+            'judul_desc' => ['pengumuman.judul', 'desc', false],
+            'created_asc' => ['pengumuman.created_at', 'asc', false],
+            'created_desc' => ['pengumuman.created_at', 'desc', false],
+            'admin_name_asc' => ['users.nama_user', 'asc', true],
+            'admin_name_desc' => ['users.nama_user', 'desc', true],
+            default => ['pengumuman.published_at', 'desc', false],
+        };
     }
 }

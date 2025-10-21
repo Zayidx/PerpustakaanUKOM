@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->string('judul');
             $table->string('slug')->unique();
             $table->foreignId('kategori_pengumuman_id')->constrained('kategori_pengumuman')->cascadeOnDelete();
-            $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('admin_id')->constrained('users')->cascadeOnDelete();
             $table->string('thumbnail_url')->nullable();
             $table->string('thumbnail_caption')->nullable();
             $table->longText('konten');

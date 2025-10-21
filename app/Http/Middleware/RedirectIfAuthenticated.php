@@ -33,7 +33,7 @@ class RedirectIfAuthenticated
         $roleName = optional($user->loadMissing('role')->role)->nama_role;
 
         return match ($roleName) {
-            'Administrator', 'Petugas' => route('admin.dashboard'),
+            'Administrator', 'Admin' => route('admin.dashboard'),
             'Guru' => route('guru.dashboard'),
             'Siswa' => route('siswa.dashboard'),
             default => null,

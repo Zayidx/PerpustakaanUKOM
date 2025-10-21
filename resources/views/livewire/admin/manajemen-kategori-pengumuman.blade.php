@@ -27,11 +27,11 @@
                             </div>
                         </div>
 
-                        <div style="flex: 0 1 120px;">
+                        <div style="flex: 0 1 180px;">
                             <select class="form-select form-select-sm"
-                                    wire:model.live="perPage">
-                                @foreach ($perPageOptions as $value)
-                                    <option value="{{ $value }}">{{ $value }}/hal</option>
+                                    wire:model.live="sort">
+                                @foreach ($sortOptions as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -53,8 +53,8 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-striped table-bordered align-middle">
-                    <thead class="table-light">
+                <table class="table table-striped align-middle">
+                    <thead>
                         <tr>
                             <th class="text-center" style="width: 60px;">No.</th>
                             <th>Nama Kategori</th>
@@ -64,10 +64,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($kategoriList as $index => $kategori)
+                        @forelse ($kategoriList as $kategori)
                             <tr wire:key="kategori-{{ $kategori->id }}">
                                 <td class="text-center">
-                                    {{ $kategoriList->firstItem() + $index }}
+                                    {{ $loop->iteration + ($kategoriList->currentPage() - 1) * $kategoriList->perPage() }}
                                 </td>
                                 <td class="fw-semibold">
                                     {{ $kategori->nama }}
@@ -107,7 +107,15 @@
         </div>
 
         <div class="card-footer">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label me-0 mb-0">Data per halaman</label>
+                    <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
+                        @foreach ($perPageOptions as $value)
+                            <option value="{{ $value }}">{{ $value }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="small text-muted">
                     Menampilkan {{ $kategoriList->count() }} dari {{ $kategoriList->total() }} kategori
                 </div>

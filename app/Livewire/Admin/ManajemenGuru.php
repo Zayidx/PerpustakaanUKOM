@@ -28,6 +28,23 @@ class ManajemenGuru extends Component
     #[Url(except: "")]
     #[Layout('components.layouts.dashboard-layouts')]
     public $perPage = 5;
+    public array $perPageOptions = [5, 10, 25];
+    public string $search = '';
+    public string $genderFilter = 'all';
+    public array $genderOptions = [
+        'all' => 'Semua Gender',
+        'Laki-laki' => 'Laki-laki',
+        'Perempuan' => 'Perempuan',
+    ];
+    public string $sort = 'created_at_desc';
+    public array $sortOptions = [
+        'created_at_desc' => 'Terbaru',
+        'created_at_asc' => 'Terlama',
+        'nama_user_asc' => 'Nama A-Z',
+        'nama_user_desc' => 'Nama Z-A',
+        'mata_pelajaran_asc' => 'Mapel A-Z',
+        'mata_pelajaran_desc' => 'Mapel Z-A',
+    ];
 
     public $guru_id;
     public $user_id;
@@ -76,8 +93,35 @@ class ManajemenGuru extends Component
         ];
     }
 
-    public function updatedPerPage()
+    public function mount(): void
     {
+        $this->perPage = $this->normalizePerPage($this->perPage);
+        $this->genderFilter = $this->normalizeGender($this->genderFilter);
+        $this->sort = $this->normalizeSort($this->sort);
+        $this->search = trim((string) $this->search);
+    }
+
+    public function updatedPerPage($value): void
+    {
+        $this->perPage = $this->normalizePerPage($value);
+        $this->resetPage();
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->search = trim((string) $this->search);
+        $this->resetPage();
+    }
+
+    public function updatedGenderFilter($value): void
+    {
+        $this->genderFilter = $this->normalizeGender($value);
+        $this->resetPage();
+    }
+
+    public function updatedSort($value): void
+    {
+        $this->sort = $this->normalizeSort($value);
         $this->resetPage();
     }
 
@@ -195,7 +239,37 @@ class ManajemenGuru extends Component
     #[Computed]
     public function listGuru()
     {
-        return Guru::with('user')->orderByDesc('created_at')->paginate($this->perPage);
+        [$sortField, $sortDirection] = $this->resolveSort();
+
+        $query = Guru::query()
+            ->with('user')
+            ->when($this->search !== '', function ($query) {
+                $term = '%' . $this->search . '%';
+
+                $query->where(function ($query) use ($term) {
+                    $query->where('guru.nip', 'like', $term)
+                        ->orWhere('guru.mata_pelajaran', 'like', $term)
+                        ->orWhere('guru.alamat', 'like', $term)
+                        ->orWhereHas('user', function ($userQuery) use ($term) {
+                            $userQuery->where('nama_user', 'like', $term)
+                                ->orWhere('email_user', 'like', $term)
+                                ->orWhere('phone_number', 'like', $term);
+                        });
+                });
+            })
+            ->when($this->genderFilter !== 'all', function ($query) {
+                $query->where('guru.jenis_kelamin', $this->genderFilter);
+            });
+
+        if ($sortField === 'users.nama_user') {
+            $query->leftJoin('users', 'users.id', '=', 'guru.user_id')
+                ->select('guru.*')
+                ->orderBy('users.nama_user', $sortDirection);
+        } else {
+            $query->orderBy($sortField, $sortDirection);
+        }
+
+        return $query->paginate($this->perPage);
     }
 
     public function render()
@@ -223,5 +297,34 @@ class ManajemenGuru extends Component
         $this->jenis_kelamin = 'Laki-laki';
          $this->resetErrorBag(); 
         $this->resetValidation();
+    }
+
+    private function normalizeGender(string $value): string
+    {
+        return array_key_exists($value, $this->genderOptions) ? $value : 'all';
+    }
+
+    private function normalizeSort(string $value): string
+    {
+        return array_key_exists($value, $this->sortOptions) ? $value : 'created_at_desc';
+    }
+
+    private function resolveSort(): array
+    {
+        return match ($this->sort) {
+            'created_at_asc' => ['guru.created_at', 'asc'],
+            'nama_user_asc' => ['users.nama_user', 'asc'],
+            'nama_user_desc' => ['users.nama_user', 'desc'],
+            'mata_pelajaran_asc' => ['guru.mata_pelajaran', 'asc'],
+            'mata_pelajaran_desc' => ['guru.mata_pelajaran', 'desc'],
+            default => ['guru.created_at', 'desc'],
+        };
+    }
+
+    private function normalizePerPage($value): int
+    {
+        $value = (int) $value;
+
+        return in_array($value, $this->perPageOptions, true) ? $value : $this->perPageOptions[0];
     }
 }

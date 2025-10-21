@@ -17,7 +17,7 @@ class Pengumuman extends Model
         'judul',
         'slug',
         'kategori_pengumuman_id',
-        'owner_id',
+        'admin_id',
         'thumbnail_url',
         'thumbnail_caption',
         'konten',
@@ -34,9 +34,9 @@ class Pengumuman extends Model
         return $this->belongsTo(KategoriPengumuman::class, 'kategori_pengumuman_id');
     }
 
-    public function owner(): BelongsTo
+    public function admin(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'owner_id');
+        return $this->belongsTo(User::class, 'admin_id');
     }
 
     public function getKontenHtmlAttribute(): string

@@ -359,7 +359,7 @@
                             <i class="fa-solid fa-star"></i>
                             <i class="fa-regular fa-star"></i>
                         </div>
-                        <p class="mb-4">"Petugas perpustakaannya ramah dan selalu siap membantu. Sangat nyaman untuk belajar."</p>
+                        <p class="mb-4">"Admin perpustakaannya ramah dan selalu siap membantu. Sangat nyaman untuk belajar."</p>
                         <div class="author">
                             <div class="avatar">
                                 <i class="fa-solid fa-user"></i>
@@ -481,43 +481,53 @@
     <!-- Announcements Section -->
     <section class="announcements-section py-5 scroll-target" data-aos="fade-up" data-aos-delay="100">
         <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="fw-bold">Pengumuman Terbaru</h2>
-                <p class="text-muted mb-0">Tetap up-to-date dengan informasi penting dari perpustakaan.</p>
+            <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-5">
+                <div class="text-center text-lg-start">
+                    <h2 class="fw-bold">Pengumuman Terbaru</h2>
+                    <p class="text-muted mb-0">Tetap up-to-date dengan informasi penting dari perpustakaan.</p>
+                </div>
+                <a href="{{ route('landing.pengumuman') }}" class="btn btn-primary">
+                    <i class="fa-solid fa-bullhorn me-2"></i> Lihat Semua Pengumuman
+                </a>
             </div>
+
+            @php
+                use Illuminate\Support\Str;
+            @endphp
+
             <div class="row row-cols-1 row-cols-md-2 g-4">
-                <div class="col" data-aos="fade-up" data-aos-delay="150">
-                    <article class="announcement-card p-4 h-100">
-                        <span class="badge bg-primary mb-3">Baru</span>
-                        <h5 class="fw-bold">Basis Data Digital Baru Tersedia</h5>
-                        <p class="text-muted small mb-2"><i class="fa-regular fa-calendar me-2"></i>10 November 2024</p>
-                        <p class="mb-0">Kami dengan senang hati mengumumkan akses ke basis data jurnal akademik baru dengan lebih dari 10.000 artikel teruji sejawat.</p>
-                    </article>
-                </div>
-                <div class="col" data-aos="fade-up" data-aos-delay="200">
-                    <article class="announcement-card p-4 h-100">
-                        <span class="badge bg-success mb-3">Pembaruan</span>
-                        <h5 class="fw-bold">Jam Operasional Perpustakaan Diperpanjang</h5>
-                        <p class="text-muted small mb-2"><i class="fa-regular fa-calendar me-2"></i>8 November 2024</p>
-                        <p class="mb-0">Mulai pekan depan, perpustakaan buka hingga pukul 19.00 pada hari kerja untuk melayani lebih banyak siswa.</p>
-                    </article>
-                </div>
-                <div class="col" data-aos="fade-up" data-aos-delay="250">
-                    <article class="announcement-card p-4 h-100">
-                        <span class="badge bg-info mb-3 text-dark">Acara</span>
-                        <h5 class="fw-bold">Donasi Buku Bersama</h5>
-                        <p class="text-muted small mb-2"><i class="fa-regular fa-calendar me-2"></i>5 November 2024</p>
-                        <p class="mb-0">Bantu kami menambah koleksi! Donasikan buku bekas layak baca Anda dan dapatkan pembatas buku spesial.</p>
-                    </article>
-                </div>
-                <div class="col" data-aos="fade-up" data-aos-delay="300">
-                    <article class="announcement-card p-4 h-100">
-                        <span class="badge bg-warning text-dark mb-3">Pengingat</span>
-                        <h5 class="fw-bold">Batas Pengembalian Buku</h5>
-                        <p class="text-muted small mb-2"><i class="fa-regular fa-calendar me-2"></i>3 November 2024</p>
-                        <p class="mb-0">Jangan lupa mengembalikan semua buku yang dipinjam sebelum 15 November agar terhindar dari denda.</p>
-                    </article>
-                </div>
+                @forelse ($latestAnnouncements as $index => $announcement)
+                    <div class="col" data-aos="fade-up" data-aos-delay="{{ 150 + ($index * 50) }}">
+                        <article class="announcement-card p-4 h-100 shadow-sm border-0">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <span class="badge bg-primary-subtle text-primary">
+                                    {{ $announcement->kategori->nama ?? 'Umum' }}
+                                </span>
+                                <small class="text-muted">
+                                    <i class="fa-regular fa-calendar me-2"></i>
+                                    {{ $announcement->published_at?->translatedFormat('d M Y') ?? '-' }}
+                                </small>
+                            </div>
+                            <h5 class="fw-bold mb-2">
+                                <a href="{{ route('landing.pengumuman.detail', $announcement->slug) }}"
+                                   class="text-decoration-none text-dark stretched-link">
+                                    {{ $announcement->judul }}
+                                </a>
+                            </h5>
+                            <p class="text-muted mb-0">
+                                {{ Str::limit(strip_tags($announcement->konten_html), 140) }}
+                            </p>
+                        </article>
+                    </div>
+                @empty
+                    <div class="col">
+                        <div class="announcement-card p-4 text-center">
+                            <img src="https://illustrations.popsy.co/gray/searching.svg" alt="" class="mb-3" style="max-width: 180px;">
+                            <h5 class="fw-bold">Belum ada pengumuman terbaru</h5>
+                            <p class="text-muted mb-0">Saat informasi baru tersedia, Anda akan melihatnya di sini.</p>
+                        </div>
+                    </div>
+                @endforelse
             </div>
         </div>
     </section>

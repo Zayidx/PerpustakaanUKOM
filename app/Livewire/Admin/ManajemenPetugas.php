@@ -25,10 +25,25 @@ class ManajemenPetugas extends Component
 
     protected string $paginationTheme = 'bootstrap';
 
-    #[Title('Halaman Manajemen Petugas Perpus')]
+    #[Title('Halaman Manajemen Admin')]
     #[Url(except: "")]
     #[Layout('components.layouts.dashboard-layouts')]
     public int $perPage = 5;
+    public array $perPageOptions = [5, 10, 25];
+    public string $search = '';
+    public string $genderFilter = 'all';
+    public string $sort = 'created_at_desc';
+    public array $sortOptions = [
+        'created_at_desc' => 'Terbaru',
+        'created_at_asc' => 'Terlama',
+        'nama_user_asc' => 'Nama A-Z',
+        'nama_user_desc' => 'Nama Z-A',
+    ];
+    public array $genderOptions = [
+        'all' => 'Semua Gender',
+        'laki-laki' => 'Laki-laki',
+        'perempuan' => 'Perempuan',
+    ];
 
     public ?int $petugas_id = null;
     public ?int $user_id = null;
@@ -44,11 +59,11 @@ class ManajemenPetugas extends Component
     public string $existingFoto = '';
 
     protected array $messages = [
-        'nama.required' => 'Nama petugas wajib diisi.',
-        'nama.string' => 'Nama petugas harus berupa teks.',
-        'nama.max' => 'Nama petugas maksimal :max karakter.',
+        'nama.required' => 'Nama admin wajib diisi.',
+        'nama.string' => 'Nama admin harus berupa teks.',
+        'nama.max' => 'Nama admin maksimal :max karakter.',
 
-        'email.required' => 'Email petugas wajib diisi.',
+        'email.required' => 'Email admin wajib diisi.',
         'email.email' => 'Format email tidak valid.',
         'email.max' => 'Email maksimal :max karakter.',
         'email.unique' => 'Email tersebut sudah terdaftar.',
@@ -76,9 +91,35 @@ class ManajemenPetugas extends Component
         'foto.max' => 'Ukuran foto maksimal :max kilobyte.',
     ];
 
-    public function updatedPerPage(): void
+    public function mount(): void
     {
-        $this->perPage = max(1, (int) $this->perPage);
+        $this->perPage = $this->normalizePerPage($this->perPage);
+        $this->genderFilter = $this->normalizeGender($this->genderFilter);
+        $this->sort = $this->normalizeSort($this->sort);
+        $this->search = trim((string) $this->search);
+    }
+
+    public function updatedPerPage($value): void
+    {
+        $this->perPage = $this->normalizePerPage($value);
+        $this->resetPage();
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->search = trim((string) $this->search);
+        $this->resetPage();
+    }
+
+    public function updatedGenderFilter($value): void
+    {
+        $this->genderFilter = $this->normalizeGender($value);
+        $this->resetPage();
+    }
+
+    public function updatedSort($value): void
+    {
+        $this->sort = $this->normalizeSort($value);
         $this->resetPage();
     }
 
@@ -131,7 +172,7 @@ class ManajemenPetugas extends Component
         $this->validate();
 
         $roleId = RoleData::firstOrCreate(
-            ['nama_role' => 'Petugas'],
+            ['nama_role' => 'Admin'],
             [
                 'deskripsi_role' => 'Pengelola operasional perpustakaan.',
                 'icon_role' => 'bi-person-badge',
@@ -197,7 +238,7 @@ class ManajemenPetugas extends Component
         });
 
         $this->resetForm();
-        session()->flash('message', 'Data petugas berhasil disimpan.');
+        session()->flash('message', 'Data admin berhasil disimpan.');
         $this->dispatch('close-modal', id: 'modal-form');
     }
 
@@ -243,16 +284,43 @@ class ManajemenPetugas extends Component
             $petugas->delete();
         });
 
-        session()->flash('message', 'Data petugas berhasil dihapus.');
+        session()->flash('message', 'Data admin berhasil dihapus.');
         $this->resetForm();
     }
 
     #[Computed]
     public function listPetugasPerpus()
     {
-        return PetugasPerpus::with('user')
-            ->orderByDesc('created_at')
-            ->paginate($this->perPage);
+        [$sortField, $sortDirection] = $this->resolveSort();
+
+        $query = PetugasPerpus::query()
+            ->with('user')
+            ->when($this->search !== '', function ($query) {
+                $term = '%' . $this->search . '%';
+
+                $query->where(function ($query) use ($term) {
+                    $query->where('petugas.nip', 'like', $term)
+                        ->orWhere('petugas.alamat', 'like', $term)
+                        ->orWhereHas('user', function ($userQuery) use ($term) {
+                            $userQuery->where('nama_user', 'like', $term)
+                                ->orWhere('email_user', 'like', $term)
+                                ->orWhere('phone_number', 'like', $term);
+                        });
+                });
+            })
+            ->when($this->genderFilter !== 'all', function ($query) {
+                $query->where('petugas.jenis_kelamin', $this->genderFilter);
+            });
+
+        if ($sortField === 'users.nama_user') {
+            $query->leftJoin('users', 'users.id', '=', 'petugas.user_id')
+                ->select('petugas.*')
+                ->orderBy('users.nama_user', $sortDirection);
+        } else {
+            $query->orderBy($sortField, $sortDirection);
+        }
+
+        return $query->paginate($this->perPage);
     }
 
     public function render()
@@ -280,5 +348,32 @@ class ManajemenPetugas extends Component
         $this->jenis_kelamin = 'laki-laki';
         $this->resetErrorBag();
         $this->resetValidation();
+    }
+
+    private function normalizeGender(string $value): string
+    {
+        return array_key_exists($value, $this->genderOptions) ? $value : 'all';
+    }
+
+    private function normalizeSort(string $value): string
+    {
+        return array_key_exists($value, $this->sortOptions) ? $value : 'created_at_desc';
+    }
+
+    private function resolveSort(): array
+    {
+        return match ($this->sort) {
+            'created_at_asc' => ['petugas.created_at', 'asc'],
+            'nama_user_asc' => ['users.nama_user', 'asc'],
+            'nama_user_desc' => ['users.nama_user', 'desc'],
+            default => ['petugas.created_at', 'desc'],
+        };
+    }
+
+    private function normalizePerPage($value): int
+    {
+        $value = (int) $value;
+
+        return in_array($value, $this->perPageOptions, true) ? $value : $this->perPageOptions[0];
     }
 }

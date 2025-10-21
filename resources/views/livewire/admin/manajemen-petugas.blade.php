@@ -7,21 +7,60 @@
 
     <div class="card"> {{-- Kartu utama halaman --}}
         <div class="card-body">
-            <div class="d-flex justify-content-end gap-2 mb-3"> {{-- Aksi pojok kanan atas --}}
-                <button wire:click="create" type="button" class="btn btn-primary" data-bs-toggle="modal"
-                    data-bs-target="#modal-form"> {{-- Tombol tambah petugas --}}
-                    <i class="bi bi-plus"></i>
-                    <span class="ms-1">Tambah Petugas</span>
-                </button>
+            <div class="row align-items-center g-2 g-md-3 mb-3">
+                <div class="col-12 col-md">
+                    <div class="d-flex flex-wrap align-items-stretch gap-2">
+                        <div style="flex: 0 1 220px;">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Nama / Email / NIP"
+                                       wire:model.live.debounce.500ms="search">
+                            </div>
+                        </div>
+
+                        <div style="flex: 0 1 140px;">
+                            <select class="form-select form-select-sm"
+                                    wire:model.live="genderFilter">
+                                @foreach ($genderOptions as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div style="flex: 0 1 160px;">
+                            <select class="form-select form-select-sm"
+                                    wire:model.live="sort">
+                                @foreach ($sortOptions as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-auto">
+                    <div class="d-grid d-md-flex justify-content-md-end">
+                        <button wire:click="create"
+                                type="button"
+                                class="btn btn-primary btn-sm w-100 w-md-auto"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modal-form">
+                            <i class="bi bi-plus"></i>
+                            <span class="ms-1">Tambah Admin</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div class="modal fade text-left" id="modal-form" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
-                aria-hidden="true" wire:ignore.self> {{-- Modal create/edit petugas --}}
+                aria-hidden="true" wire:ignore.self> {{-- Modal create/edit admin --}}
                 <div class="modal-dialog modal-dialog-scrollable" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title">
-                                {{ $petugas_id ? 'Edit Data Petugas' : 'Tambah Data Petugas' }}
+                                {{ $petugas_id ? 'Edit Data Admin' : 'Tambah Data Admin' }}
                             </h5>
                             <button type="button" class="close rounded-pill" data-bs-dismiss="modal" aria-label="Close">
                                 <i data-feather="x"></i>
@@ -120,7 +159,7 @@
                                         @if ($foto)
                                             <img src="{{ $foto->temporaryUrl() }}" alt="Preview" class="img-fluid rounded" style="max-width: 200px;">
                                         @elseif ($existingFoto)
-                                            <img src="{{ asset('storage/' . $existingFoto) }}" alt="Foto Petugas" class="img-fluid rounded" style="max-width: 200px;">
+                                            <img src="{{ asset('storage/' . $existingFoto) }}" alt="Foto Admin" class="img-fluid rounded" style="max-width: 200px;">
                                         @endif
                                     </div>
                                 </div>
@@ -138,7 +177,7 @@
                 </div>
             </div>
 
-        <div class="table-responsive"> {{-- Tabel daftar petugas --}}
+        <div class="table-responsive"> {{-- Tabel daftar admin --}}
             <table class="table table-striped">
                 <thead>
                     <tr> {{-- Header tabel --}}
@@ -155,7 +194,7 @@
                 </thead>
                 <tbody>
                     @forelse ($this->listPetugasPerpus as $item)
-                        <tr wire:key="row-{{ $item->id }}"> {{-- Satu baris data petugas --}}
+                        <tr wire:key="row-{{ $item->id }}"> {{-- Satu baris data admin --}}
                             <td class="text-center">{{ $loop->iteration + ($this->listPetugasPerpus->currentPage() - 1) * $this->listPetugasPerpus->perPage() }}</td>
                             <td>{{ $item->user->nama_user ?? '-' }}</td>
                             <td>{{ $item->user->email_user ?? '-' }}</td>
@@ -165,7 +204,7 @@
                             <td>{{ $item->alamat ?? '-' }}</td>
                             <td class="w-25">
                                 @if ($item->foto)
-                                    <img src="{{ asset('storage/' . $item->foto) }}" class="img-fluid rounded" alt="Foto Petugas" style="max-width: 100px;">
+                                    <img src="{{ asset('storage/' . $item->foto) }}" class="img-fluid rounded" alt="Foto Admin" style="max-width: 100px;">
                                 @else
                                     <span class="text-muted">Belum ada foto</span>
                                 @endif
@@ -174,7 +213,7 @@
                                 <div class="d-flex gap-2">
                                     <button wire:click="edit({{ $item->id }})" data-bs-toggle="modal"
                                         data-bs-target="#modal-form" class="btn btn-sm btn-warning">Edit</button> {{-- Tombol edit --}}
-                                    <button wire:confirm="Yakin ingin menghapus data {{ $item->user->nama_user ?? 'petugas' }}?"
+                                    <button wire:confirm="Yakin ingin menghapus data {{ $item->user->nama_user ?? 'admin' }}?"
                                         wire:click="delete({{ $item->id }})"
                                         class="btn btn-sm btn-danger">Hapus</button> {{-- Tombol hapus --}}
                                 </div>
@@ -182,7 +221,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center text-muted">Belum ada data petugas.</td> {{-- Pesan tabel kosong --}}
+                            <td colspan="9" class="text-center text-muted">Belum ada data admin.</td> {{-- Pesan tabel kosong --}}
                         </tr>
                     @endforelse
                 </tbody>
@@ -194,9 +233,9 @@
                 <div>
                     <label class="form-label me-2 mb-0">Data per halaman</label> {{-- Dropdown jumlah data --}}
                     <select wire:model.live="perPage" class="form-select form-select-sm w-auto d-inline-block">
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="25">25</option>
+                        @foreach ($perPageOptions as $option)
+                            <option value="{{ $option }}">{{ $option }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div>

@@ -11,7 +11,7 @@ use Livewire\WithPagination;
 
 #[Layout('components.layouts.dashboard-layouts')]
 #[Title('Kategori Pengumuman')]
-class KategoriPengumuman extends Component
+class ManajemenKategoriPengumuman extends Component
 {
     use WithPagination;
 
@@ -20,6 +20,15 @@ class KategoriPengumuman extends Component
     public string $search = '';
     public int $perPage = 10;
     public array $perPageOptions = [10, 25, 50];
+    public string $sort = 'created_desc';
+    public array $sortOptions = [
+        'created_desc' => 'Terbaru',
+        'created_asc' => 'Terlama',
+        'nama_asc' => 'Nama A-Z',
+        'nama_desc' => 'Nama Z-A',
+        'pengumuman_desc' => 'Pengumuman Terbanyak',
+        'pengumuman_asc' => 'Pengumuman Tersedikit',
+    ];
 
     public ?int $kategoriId = null;
     public string $nama = '';
@@ -45,6 +54,13 @@ class KategoriPengumuman extends Component
         ];
     }
 
+    public function mount(): void
+    {
+        $this->perPage = $this->normalizePerPage($this->perPage);
+        $this->sort = $this->normalizeSort($this->sort);
+        $this->search = trim((string) $this->search);
+    }
+
     public function updatedSearch($value): void
     {
         $this->search = trim((string) $value);
@@ -53,24 +69,30 @@ class KategoriPengumuman extends Component
 
     public function updatedPerPage($value): void
     {
-        $this->perPage = in_array((int) $value, $this->perPageOptions, true)
-            ? (int) $value
-            : $this->perPageOptions[0];
+        $this->perPage = $this->normalizePerPage($value);
 
+        $this->resetPage();
+    }
+
+    public function updatedSort($value): void
+    {
+        $this->sort = $this->normalizeSort($value);
         $this->resetPage();
     }
 
     public function render()
     {
+        [$sortField, $sortDirection] = $this->resolveSort();
+
         $kategori = KategoriPengumumanModel::query()
             ->withCount('pengumuman')
             ->when($this->search !== '', function ($query) {
                 $query->where('nama', 'like', '%' . $this->search . '%');
             })
-            ->orderByDesc('created_at')
+            ->orderBy($sortField, $sortDirection)
             ->paginate($this->perPage);
 
-        return view('livewire.admin.kategori-pengumuman', [
+        return view('livewire.admin.manajemen-kategori-pengumuman', [
             'kategoriList' => $kategori,
         ]);
     }
@@ -127,5 +149,30 @@ class KategoriPengumuman extends Component
     {
         $this->reset(['kategoriId', 'nama', 'deskripsi']);
         $this->resetValidation();
+    }
+
+    private function normalizePerPage($value): int
+    {
+        $value = (int) $value;
+
+        return in_array($value, $this->perPageOptions, true) ? $value : $this->perPageOptions[0];
+    }
+
+    private function normalizeSort(string $value): string
+    {
+        return array_key_exists($value, $this->sortOptions) ? $value : 'created_desc';
+    }
+
+    private function resolveSort(): array
+    {
+        return match ($this->sort) {
+            'created_asc' => ['created_at', 'asc'],
+            'created_desc' => ['created_at', 'desc'],
+            'nama_asc' => ['nama', 'asc'],
+            'nama_desc' => ['nama', 'desc'],
+            'pengumuman_asc' => ['pengumuman_count', 'asc'],
+            'pengumuman_desc' => ['pengumuman_count', 'desc'],
+            default => ['created_at', 'desc'],
+        };
     }
 }

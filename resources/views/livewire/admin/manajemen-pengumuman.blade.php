@@ -13,7 +13,7 @@
     @endif
 
     <div class="card">
-        <div class="card-body">
+        <div class="card-body d-flex flex-column">
             <div class="row align-items-center g-2 g-md-3 mb-3">
                 <div class="col-12 col-md">
                     <div class="d-flex flex-wrap align-items-stretch gap-2">
@@ -31,6 +31,15 @@
                             <select class="form-select form-select-sm"
                                     wire:model.live="statusFilter">
                                 @foreach ($statusOptions as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div style="flex: 0 1 180px;">
+                            <select class="form-select form-select-sm"
+                                    wire:model.live="sort">
+                                @foreach ($sortOptions as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
                             </select>
@@ -56,14 +65,15 @@
                 </div>
             </div>
 
-            <div class="table-responsive">
+            <div class="table-responsive flex-grow-1 overflow-auto"
+                 style="max-height: calc(100vh - 360px);">
                 <table class="table table-striped align-middle">
                     <thead>
                         <tr>
                             <th class="text-center" style="width: 72px;">No.</th>
                             <th>Judul</th>
                             <th>Kategori</th>
-                            <th>Penanggung Jawab</th>
+                            <th>Penulis</th>
                             <th class="text-center" style="width: 120px;">Status</th>
                             <th class="text-nowrap" style="width: 180px;">Tanggal Publikasi</th>
                             <th class="text-center" style="width: 160px;">Aksi</th>
@@ -84,7 +94,7 @@
                                     </div>
                                 </td>
                                 <td>{{ $item->kategori->nama ?? '-' }}</td>
-                                <td>{{ $item->owner->nama_user ?? '-' }}</td>
+                                <td>{{ $item->admin->nama_user ?? '-' }}</td>
                                 <td class="text-center">
                                     @if ($item->status === 'published')
                                         <span class="badge bg-success">Published</span>
@@ -159,7 +169,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form wire:submit.prevent="save">
-                    <div class="modal-body">
+                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                         <div class="mb-3">
                             <label for="judul" class="form-label">Judul Pengumuman</label>
                             <input type="text"
@@ -186,23 +196,7 @@
                                     <span class="text-danger small">{{ $message }}</span>
                                 @enderror
                             </div>
-                            <div class="col-md-6">
-                                <label for="owner_id" class="form-label">Penanggung Jawab</label>
-                                <select id="owner_id"
-                                        class="form-select"
-                                        wire:model.defer="owner_id">
-                                    <option value="">Pilih Pengguna</option>
-                                    @foreach ($ownerOptions as $owner)
-                                        <option value="{{ $owner->id }}">
-                                            {{ $owner->nama_user }}
-                                            ({{ $owner->role->nama_role ?? '-' }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('owner_id')
-                                    <span class="text-danger small">{{ $message }}</span>
-                                @enderror
-                            </div>
+                            {{-- Penulis otomatis mengikuti admin yang login --}}
                         </div>
 
                         <div class="row g-3 mt-1">

@@ -20,8 +20,8 @@ class PetugasSeeder extends Seeder
     {
         $faker = Faker::create('id_ID');
 
-        $rolePetugas = RoleData::firstOrCreate(
-            ['nama_role' => 'Petugas'],
+        $roleAdmin = RoleData::firstOrCreate(
+            ['nama_role' => 'Admin'],
             [
                 'deskripsi_role' => 'Mengelola data buku, peminjaman, dan anggota.',
                 'icon_role' => 'bi-briefcase',
@@ -36,7 +36,7 @@ class PetugasSeeder extends Seeder
                 'email_user' => $faker->unique()->safeEmail(),
                 'phone_number' => $faker->unique()->numerify('08##########'),
                 'password' => Hash::make('password'),
-                'role_id' => $rolePetugas->id,
+                'role_id' => $roleAdmin->id,
             ]);
 
             PetugasPerpus::create([

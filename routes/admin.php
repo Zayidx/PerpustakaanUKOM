@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'role:Administrator,Petugas'])
+Route::middleware(['auth', 'role:Administrator,Admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -12,6 +12,6 @@ Route::middleware(['auth', 'role:Administrator,Petugas'])
         Route::get('/manajemen-jurusan', \App\Livewire\Admin\ManajemenJurusan::class)->name('manajemen-jurusan');
         Route::get('/manajemen-admin', \App\Livewire\Admin\ManajemenPetugas::class)->name('manajemen-admin');
         Route::get('/manajemen-guru', \App\Livewire\Admin\ManajemenGuru::class)->name('manajemen-guru');
-        Route::get('/pengumuman', \App\Livewire\Admin\Pengumuman::class)->name('pengumuman');
-        Route::get('/pengumuman/kategori', \App\Livewire\Admin\KategoriPengumuman::class)->name('kategori-pengumuman');
+        Route::get('/pengumuman', \App\Livewire\Admin\ManajemenPengumuman::class)->name('pengumuman');
+        Route::get('/pengumuman/kategori', \App\Livewire\Admin\ManajemenKategoriPengumuman::class)->name('kategori-pengumuman');
     });
