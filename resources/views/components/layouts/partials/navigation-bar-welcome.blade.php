@@ -10,11 +10,11 @@
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav align-items-lg-center">
-                    <li class="nav-item"><a class="nav-link" href="#home">Beranda</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#books">Buku</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#events">Acara</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#services">Layanan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#contact">Kontak</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}#home">Beranda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}#books">Buku</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}#events">Acara</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}#services">Layanan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}#contact">Kontak</a></li>
                 </ul>
                 <a class="btn btn-primary ms-lg-3 mt-3 mt-lg-0 d-inline-flex align-items-center justify-content-center px-4" href="{{ route('login') }}">Masuk</a>
             </div>

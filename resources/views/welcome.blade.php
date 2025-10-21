@@ -16,6 +16,42 @@
                 scroll-margin-top: 120px;
             }
         }
+
+        .announcements-section .announcement-card {
+            border-radius: 1rem;
+            background: #ffffff;
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.08);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .announcements-section .announcement-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 45px rgba(15, 23, 42, 0.18);
+            background: linear-gradient(145deg, #1f3c88 0%, #3575d3 100%);
+        }
+
+        .announcements-section .announcement-card .badge {
+            border-radius: 999px;
+            letter-spacing: 0.02em;
+            padding: 0.35rem 0.9rem;
+        }
+
+        .announcements-section .announcement-card:hover .badge {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            color: #ffffff;
+        }
+
+        .announcements-section .announcement-card a.stretched-link {
+            color: #1f2937;
+            transition: color 0.2s ease;
+        }
+
+        .announcements-section .announcement-card:hover a.stretched-link,
+        .announcements-section .announcement-card:hover .text-muted {
+            color: #ffffff !important;
+        }
     </style>
 @endpush
 
@@ -479,7 +515,7 @@
     </section>
 
     <!-- Announcements Section -->
-    <section class="announcements-section py-5 scroll-target" data-aos="fade-up" data-aos-delay="100">
+    <section id="announcements" class="announcements-section py-5 scroll-target" data-aos="fade-up" data-aos-delay="100">
         <div class="container">
             <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-5">
                 <div class="text-center text-lg-start">
@@ -544,6 +580,16 @@
                     offset: 120,
                     easing: 'ease-out-cubic'
                 });
+            }
+
+            const hash = window.location.hash;
+            if (hash) {
+                const target = document.querySelector(hash);
+                if (target) {
+                    setTimeout(() => {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 150);
+                }
             }
         });
     </script>

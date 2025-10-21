@@ -16,7 +16,7 @@ Route::get('/', function () {
     return view('welcome', [
         'latestAnnouncements' => $latestAnnouncements,
     ]);
-});
+})->name('welcome');
 
 // Route Role Admin
 require __DIR__.'/admin.php';
