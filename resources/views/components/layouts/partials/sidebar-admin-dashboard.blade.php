@@ -72,7 +72,13 @@
                  <li class="sidebar-item {{ Request::routeIs('admin.manajemen-admin') ? 'active' : '' }} ">
                     <a href="{{ route('admin.manajemen-admin') }}" class='sidebar-link'>
                         <i class="bi bi-diagram-3-fill"></i>
-                        <span>Manajemen admin</span>
+                        <span>Manajemen Admin</span>
+                    </a>
+                </li>
+                    <li class="sidebar-item {{ Request::routeIs('admin.manajemen-guru') ? 'active' : '' }} ">
+                    <a href="{{ route('admin.manajemen-guru') }}" class='sidebar-link'>
+                        <i class="bi bi-diagram-3-fill"></i>
+                        <span>Manajemen Guru</span>
                     </a>
                 </li>
                 <li class="sidebar-title mt-4">Akun</li>
