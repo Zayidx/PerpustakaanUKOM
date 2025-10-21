@@ -3,7 +3,7 @@
         <div class="sidebar-header position-relative">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="logo">
-                    <a href="{{ route('admin.dashboard') }}"><img src="{{ asset('assets/compiled/svg/logo.svg') }}"
+                    <a href="{{ route('admin.dashboard') }}"><img src="{{ asset('assets/img/logo.png') }}"  
                             alt="Logo" srcset=""></a>
                 </div>
                 <div class="theme-toggle d-flex gap-2  align-items-center mt-2">
@@ -79,6 +79,19 @@
                     <a href="{{ route('admin.manajemen-guru') }}" class='sidebar-link'>
                         <i class="bi bi-diagram-3-fill"></i>
                         <span>Manajemen Guru</span>
+                    </a>
+                </li>
+                <li class="sidebar-title mt-4">Pengumuman</li>
+                <li class="sidebar-item {{ Request::routeIs('admin.pengumuman') ? 'active' : '' }} ">
+                    <a href="{{ route('admin.pengumuman') }}" class='sidebar-link'>
+                        <i class="bi bi-megaphone-fill"></i>
+                        <span>Manajemen Pengumuman</span>
+                    </a>
+                </li>
+                <li class="sidebar-item {{ Request::routeIs('admin.kategori-pengumuman') ? 'active' : '' }} ">
+                    <a href="{{ route('admin.kategori-pengumuman') }}" class='sidebar-link'>
+                        <i class="bi bi-tags-fill"></i>
+                        <span>Kategori Pengumuman</span>
                     </a>
                 </li>
                 <li class="sidebar-title mt-4">Akun</li>
