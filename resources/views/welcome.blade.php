@@ -1,11 +1,30 @@
 @extends('components.layouts.partials.template-welcome')
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        section.scroll-target {
+            scroll-margin-top: 96px;
+        }
+
+        @media (min-width: 992px) {
+            section.scroll-target {
+                scroll-margin-top: 120px;
+            }
+        }
+    </style>
+@endpush
+
 @section('content')
     <!-- Hero Section -->
-    <section id="home" class="hero-section py-5 overflow-hidden">
+    <section id="home" class="hero-section py-5 overflow-hidden scroll-target">
         <div class="container">
-            <div class="row align-items-center gy-5">
-                <div class="col-12 col-lg-6 text-center text-lg-start">
+            <div class="row align-items-center gy-5" data-aos="fade-up" data-aos-duration="900">
+                <div class="col-12 col-lg-6 text-center text-lg-start" data-aos="fade-right" data-aos-delay="100">
                     <h1 class="display-4 fw-bold mb-4">Selamat Datang di Pusat Belajar Anda</h1>
                     <p class="lead mb-4">Jelajahi ribuan buku, sumber belajar, dan program yang dirancang untuk menginspirasi perjalanan belajar Anda.</p>
                     <form class="input-group input-group-lg mb-4 mx-auto mx-lg-0 shadow-sm" style="max-width: 420px;" role="search">
@@ -20,9 +39,9 @@
                         <a href="#services" class="btn btn-outline-primary btn-lg px-4">Pelajari Lebih Lanjut</a>
                     </div>
                 </div>
-                <div class="col-12 col-lg-6 text-center">
+                <div class="col-12 col-lg-6 text-center" data-aos="fade-left" data-aos-delay="200">
                     <div class="hero-image position-relative mx-auto">
-                        <img src="{{ asset('assets/img/capybara.png') }}" alt="Ilustrasi pembaca" class="hero-illustration img-fluid" decoding="async" fetchpriority="high" width="480" height="480">
+                        <img src="{{ asset('assets/img/hero.webp') }}" alt="Ilustrasi pembaca" class="hero-illustration img-fluid" decoding="async" fetchpriority="high" height="550">
                     </div>
                 </div>
             </div>
@@ -30,28 +49,28 @@
     </section>
 
     <!-- Statistics Section -->
-    <section class="statistics-section py-5 bg-light">
+    <section class="statistics-section py-5 bg-light scroll-target" data-aos="fade-up" data-aos-delay="100">
         <div class="container">
             <div class="row row-cols-2 row-cols-md-4 g-4 text-center justify-content-center">
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="100">
                     <div class="stat-card p-4 h-100">
                         <h3 class="text-primary fw-bold mb-2">50K+</h3>
                         <p class="text-muted mb-0">Buku Tersedia</p>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="200">
                     <div class="stat-card p-4 h-100">
                         <h3 class="text-primary fw-bold mb-2">2K+</h3>
                         <p class="text-muted mb-0">Anggota Aktif</p>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="300">
                     <div class="stat-card p-4 h-100">
                         <h3 class="text-primary fw-bold mb-2">100+</h3>
                         <p class="text-muted mb-0">Acara Tahunan</p>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="400">
                     <div class="stat-card p-4 h-100">
                         <h3 class="text-primary fw-bold mb-2">24/7</h3>
                         <p class="text-muted mb-0">Akses Digital</p>
@@ -62,22 +81,22 @@
     </section>
 
     <!-- Buku Unggulan Section -->
-    <section id="books" class="featured-books py-5">
+    <section id="books" class="featured-books py-5 scroll-target" data-aos="fade-up" data-aos-delay="100">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="fw-bold">Buku Unggulan</h2>
                 <p class="text-muted mb-0">Pilihan terbaik untuk menemani perjalanan belajar Anda.</p>
             </div>
             <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="150">
                     <div class="book-card h-100 d-flex flex-column">
                         <div class="book-image bg-gradient-1">
-                            <img src="{{ asset('assets/img/capybara.png') }}" alt="Sampul Langit Pengetahuan" class="book-thumbnail" loading="lazy" decoding="async" width="320" height="420">
+                            <img src="{{ asset('assets/img/buku/BungkamSuara.jpg') }}" alt="Sampul Langit Pengetahuan" class="book-thumbnail" loading="lazy" decoding="async" width="320" height="420">
                         </div>
                         <div class="p-3 d-flex flex-column gap-2 flex-grow-1">
                             <div>
-                                <h5 class="fw-bold mb-1">Langit Pengetahuan</h5>
-                                <p class="text-muted small mb-2">Oleh Diah Ramadhani</p>
+                                <h5 class="fw-bold mb-1">Bungkam Suara</h5>
+                                <p class="text-muted small mb-2">Oleh JS.Khairen</p>
                                 <div class="text-warning small">
                                     <i class="fa-solid fa-star"></i>
                                     <i class="fa-solid fa-star"></i>
@@ -90,15 +109,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="200">
                     <div class="book-card h-100 d-flex flex-column">
                         <div class="book-image bg-gradient-2">
-                            <img src="{{ asset('assets/img/capybara.png') }}" alt="Sampul Strategi Belajar Efektif" class="book-thumbnail" loading="lazy" decoding="async" width="320" height="420">
+                            <img src="{{ asset('assets/img/buku/KamiBukanSarjanaKertas.jpg') }}" alt="Sampul Strategi Belajar Efektif" class="book-thumbnail" loading="lazy" decoding="async" width="320" height="420">
                         </div>
                         <div class="p-3 d-flex flex-column gap-2 flex-grow-1">
                             <div>
-                                <h5 class="fw-bold mb-1">Strategi Belajar Efektif</h5>
-                                <p class="text-muted small mb-2">Oleh Kevin Mahendra</p>
+                                <h5 class="fw-bold mb-1">Kami Bukan Sarjana Kertas</h5>
+                                <p class="text-muted small mb-2">Oleh JS.Khairen</p>
                                 <div class="text-warning small">
                                     <i class="fa-solid fa-star"></i>
                                     <i class="fa-solid fa-star"></i>
@@ -111,15 +130,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="250">
                     <div class="book-card h-100 d-flex flex-column">
                         <div class="book-image bg-gradient-3">
-                            <img src="{{ asset('assets/img/capybara.png') }}" alt="Sampul Kronik Sejarah" class="book-thumbnail" loading="lazy" decoding="async" width="320" height="420">
+                            <img src="{{ asset('assets/img/buku/DompetAyahSepatuIbu.jpeg') }}" alt="Sampul Kronik Sejarah" class="book-thumbnail" loading="lazy" decoding="async" width="320" height="420">
                         </div>
                         <div class="p-3 d-flex flex-column gap-2 flex-grow-1">
                             <div>
-                                <h5 class="fw-bold mb-1">Kronik Sejarah</h5>
-                                <p class="text-muted small mb-2">Oleh Emma Williams</p>
+                                <h5 class="fw-bold mb-1">Dompet Ayah Sepatu Ibu</h5>
+                                <p class="text-muted small mb-2">Oleh JS.Khairen</p>
                                 <div class="text-warning small">
                                     <i class="fa-solid fa-star"></i>
                                     <i class="fa-solid fa-star"></i>
@@ -137,14 +156,14 @@
     </section>
 
     <!-- Services Section -->
-    <section id="services" class="services-section py-5 bg-light">
+    <section id="services" class="services-section py-5 bg-light scroll-target" data-aos="fade-up" data-aos-delay="100">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="fw-bold">Layanan Kami</h2>
                 <p class="text-muted mb-0">Fasilitas lengkap untuk mendukung pengalaman belajar terbaik.</p>
             </div>
             <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4">
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="150">
                     <div class="service-card text-center p-4 h-100">
                         <div class="service-icon">
                             <i class="fa-solid fa-book-open"></i>
@@ -153,7 +172,7 @@
                         <p class="text-muted mb-0">Akses ke 50.000+ buku dari berbagai genre dan mata pelajaran.</p>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="200">
                     <div class="service-card text-center p-4 h-100">
                         <div class="service-icon">
                             <i class="fa-solid fa-users"></i>
@@ -162,7 +181,7 @@
                         <p class="text-muted mb-0">Ruang belajar kolaboratif untuk kerja kelompok.</p>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="250">
                     <div class="service-card text-center p-4 h-100">
                         <div class="service-icon">
                             <i class="fa-solid fa-laptop"></i>
@@ -171,7 +190,7 @@
                         <p class="text-muted mb-0">E-book, jurnal, dan basis data daring tersedia 24/7.</p>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="300">
                     <div class="service-card text-center p-4 h-100">
                         <div class="service-icon">
                             <i class="fa-solid fa-star"></i>
@@ -185,14 +204,14 @@
     </section>
 
     <!-- Events Section -->
-    <section id="events" class="events-section py-5">
+    <section id="events" class="events-section py-5 scroll-target" data-aos="fade-up" data-aos-delay="100">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="fw-bold">Acara Mendatang</h2>
                 <p class="text-muted mb-0">Ikuti kegiatan terbaru dan perluas jejaring belajar Anda.</p>
             </div>
             <div class="row row-cols-1 row-cols-md-2 g-4">
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="150">
                     <div class="event-card p-4 h-100">
                         <div class="d-flex gap-3">
                             <div class="event-date rounded-3 text-center px-3 py-2">
@@ -207,7 +226,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="200">
                     <div class="event-card p-4 h-100">
                         <div class="d-flex gap-3">
                             <div class="event-date rounded-3 text-center px-3 py-2">
@@ -222,7 +241,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="250">
                     <div class="event-card p-4 h-100">
                         <div class="d-flex gap-3">
                             <div class="event-date rounded-3 text-center px-3 py-2">
@@ -237,7 +256,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="300">
                     <div class="event-card p-4 h-100">
                         <div class="d-flex gap-3">
                             <div class="event-date rounded-3 text-center px-3 py-2">
@@ -257,14 +276,14 @@
     </section>
 
     <!-- Testimonials Section -->
-    <section class="testimonials-section py-5 bg-light">
+    <section class="testimonials-section py-5 bg-light scroll-target" data-aos="fade-up" data-aos-delay="100">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="fw-bold">Kata Para Siswa</h2>
                 <p class="text-muted mb-0">Pengalaman nyata dari para pengunjung Ruang Membaca.</p>
             </div>
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="150">
                     <div class="testimonial-card h-100">
                         <span class="quote-icon"><i class="fa-solid fa-quote-right"></i></span>
                         <div class="mb-3 text-warning">
@@ -286,7 +305,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="200">
                     <div class="testimonial-card h-100">
                         <span class="quote-icon"><i class="fa-solid fa-quote-right"></i></span>
                         <div class="mb-3 text-warning">
@@ -308,7 +327,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="250">
                     <div class="testimonial-card h-100">
                         <span class="quote-icon"><i class="fa-solid fa-quote-right"></i></span>
                         <div class="mb-3 text-warning">
@@ -330,7 +349,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="300">
                     <div class="testimonial-card h-100">
                         <span class="quote-icon"><i class="fa-solid fa-quote-right"></i></span>
                         <div class="mb-3 text-warning">
@@ -352,7 +371,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="350">
                     <div class="testimonial-card h-100">
                         <span class="quote-icon"><i class="fa-solid fa-quote-right"></i></span>
                         <div class="mb-3 text-warning">
@@ -374,7 +393,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="400">
                     <div class="testimonial-card h-100">
                         <span class="quote-icon"><i class="fa-solid fa-quote-right"></i></span>
                         <div class="mb-3 text-warning">
@@ -401,10 +420,10 @@
     </section>
 
     <!-- Newsletter Section -->
-    <section class="newsletter-section py-5">
+    <section class="newsletter-section py-5 scroll-target" data-aos="fade-up" data-aos-delay="100">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-lg-8">
+                <div class="col-lg-8" data-aos="zoom-in" data-aos-delay="200">
                     <div class="newsletter-card text-center text-white">
                         <h2 class="fw-bold mb-3">Tetap Terinformasi</h2>
                         <p class="mb-4">Berlangganan buletin kami untuk rekomendasi buku, acara, dan kabar terbaru perpustakaan.</p>
@@ -420,35 +439,35 @@
     </section>
 
     <!-- Library Info Section -->
-    <section id="contact" class="contact-section py-5 bg-light">
+    <section id="contact" class="contact-section py-5 bg-light scroll-target" data-aos="fade-up" data-aos-delay="100">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="fw-bold">Library Information</h2>
                 <p class="text-muted mb-0">Hubungi kami melalui kanal berikut untuk bantuan dan informasi terbaru.</p>
             </div>
             <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="150">
                     <div class="info-card text-center h-100">
                         <i class="fas fa-map-marker-alt text-primary mb-3 fs-3"></i>
                         <h5 class="fw-bold mb-2">Location</h5>
                         <p class="text-muted mb-0">123 Education Street<br>Sekolah Harapan, Kota 12345</p>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="200">
                     <div class="info-card text-center h-100">
                         <i class="fas fa-phone text-primary mb-3 fs-3"></i>
                         <h5 class="fw-bold mb-2">Phone</h5>
                         <p class="text-muted mb-0">(555) 123-4567<br>Sen-Jum: 08.00 - 18.00</p>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="250">
                     <div class="info-card text-center h-100">
                         <i class="fas fa-envelope text-primary mb-3 fs-3"></i>
                         <h5 class="fw-bold mb-2">Email</h5>
                         <p class="text-muted mb-0">info@schoollibrary.edu<br>support@schoollibrary.edu</p>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="zoom-in" data-aos-delay="300">
                     <div class="info-card text-center h-100">
                         <i class="fas fa-clock text-primary mb-3 fs-3"></i>
                         <h5 class="fw-bold mb-2">Hours</h5>
@@ -460,14 +479,14 @@
     </section>
 
     <!-- Announcements Section -->
-    <section class="announcements-section py-5">
+    <section class="announcements-section py-5 scroll-target" data-aos="fade-up" data-aos-delay="100">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="fw-bold">Pengumuman Terbaru</h2>
                 <p class="text-muted mb-0">Tetap up-to-date dengan informasi penting dari perpustakaan.</p>
             </div>
             <div class="row row-cols-1 row-cols-md-2 g-4">
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="150">
                     <article class="announcement-card p-4 h-100">
                         <span class="badge bg-primary mb-3">Baru</span>
                         <h5 class="fw-bold">Basis Data Digital Baru Tersedia</h5>
@@ -475,7 +494,7 @@
                         <p class="mb-0">Kami dengan senang hati mengumumkan akses ke basis data jurnal akademik baru dengan lebih dari 10.000 artikel teruji sejawat.</p>
                     </article>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="200">
                     <article class="announcement-card p-4 h-100">
                         <span class="badge bg-success mb-3">Pembaruan</span>
                         <h5 class="fw-bold">Jam Operasional Perpustakaan Diperpanjang</h5>
@@ -483,7 +502,7 @@
                         <p class="mb-0">Mulai pekan depan, perpustakaan buka hingga pukul 19.00 pada hari kerja untuk melayani lebih banyak siswa.</p>
                     </article>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="250">
                     <article class="announcement-card p-4 h-100">
                         <span class="badge bg-info mb-3 text-dark">Acara</span>
                         <h5 class="fw-bold">Donasi Buku Bersama</h5>
@@ -491,7 +510,7 @@
                         <p class="mb-0">Bantu kami menambah koleksi! Donasikan buku bekas layak baca Anda dan dapatkan pembatas buku spesial.</p>
                     </article>
                 </div>
-                <div class="col">
+                <div class="col" data-aos="fade-up" data-aos-delay="300">
                     <article class="announcement-card p-4 h-100">
                         <span class="badge bg-warning text-dark mb-3">Pengingat</span>
                         <h5 class="fw-bold">Batas Pengembalian Buku</h5>
@@ -503,3 +522,19 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.AOS) {
+                AOS.init({
+                    once: true,
+                    duration: 800,
+                    offset: 120,
+                    easing: 'ease-out-cubic'
+                });
+            }
+        });
+    </script>
+@endpush
