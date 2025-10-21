@@ -13,6 +13,8 @@ class Siswa extends Model
 
     protected $fillable = [
         'user_id',
+        'kelas_id',
+        'jurusan_id',
         'nisn',
         'nis',
         'alamat',
@@ -23,5 +25,15 @@ class Siswa extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function kelas()
+    {
+        return $this->belongsTo(Kelas::class);
+    }
+
+    public function jurusan()
+    {
+        return $this->belongsTo(Jurusan::class);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin; // Namespace untuk komponen admin
 
+use App\Models\Jurusan; // Model untuk tabel jurusan
+use App\Models\Kelas; // Model untuk tabel kelas
 use App\Models\RoleData; // Model untuk tabel role_data
 use App\Models\Siswa; // Model relasi detail siswa
 use App\Models\User; // Model user bawaan Laravel
@@ -56,6 +58,8 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
     public $jenis_kelamin = 'laki-laki'; // Default jenis kelamin
     public $nisn = ''; // Nomor Induk Siswa Nasional
     public $nis = ''; // Nomor Induk Siswa internal
+    public $kelas_id; // Kelas terkait siswa
+    public $jurusan_id; // Jurusan terkait siswa
     public $foto; // File foto yang baru diupload
     public $existingFoto = ''; // Path foto lama bila ada
 
@@ -93,6 +97,12 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
 
         'foto.image' => 'File foto harus berupa gambar.',
         'foto.max' => 'Ukuran foto maksimal :max kilobyte.',
+
+        'kelas_id.required' => 'Kelas wajib dipilih.',
+        'kelas_id.exists' => 'Kelas yang dipilih tidak valid.',
+
+        'jurusan_id.required' => 'Jurusan wajib dipilih.',
+        'jurusan_id.exists' => 'Jurusan yang dipilih tidak valid.',
     ];
 
     public function mount(): void
@@ -149,6 +159,8 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
             'password_confirmation' => $passwordConfirmationRules,
             'alamat' => ['nullable', 'string', 'max:255'],
             'jenis_kelamin' => ['required', 'in:laki-laki,perempuan'],
+            'kelas_id' => ['required', Rule::exists('kelas', 'id')],
+            'jurusan_id' => ['required', Rule::exists('jurusan', 'id')],
             'nisn' => [
                 'required',
                 'digits_between:8,20',
@@ -204,8 +216,10 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
         $nisn = trim($this->nisn);
         $nis = trim($this->nis);
         $alamat = $this->alamat ? trim($this->alamat) : null;
+        $kelasId = (int) $this->kelas_id;
+        $jurusanId = (int) $this->jurusan_id;
 
-        DB::transaction(function () use ($roleId, $imagePath, $nama, $email, $phone, $nisn, $nis, $alamat) {
+        DB::transaction(function () use ($roleId, $imagePath, $nama, $email, $phone, $nisn, $nis, $alamat, $kelasId, $jurusanId) {
             if ($this->siswa_id) {
                 $siswa = Siswa::with('user')->findOrFail($this->siswa_id); // Mode edit, cari data lama
                 $user = $siswa->user; // Ambil relasi user
@@ -223,6 +237,8 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
                     'nis' => $nis,
                     'alamat' => $alamat,
                     'jenis_kelamin' => $this->jenis_kelamin,
+                    'kelas_id' => $kelasId,
+                    'jurusan_id' => $jurusanId,
                     'foto' => $imagePath,
                 ]);
             } else {
@@ -240,6 +256,8 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
                     'nis' => $nis,
                     'alamat' => $alamat,
                     'jenis_kelamin' => $this->jenis_kelamin,
+                    'kelas_id' => $kelasId,
+                    'jurusan_id' => $jurusanId,
                     'foto' => $imagePath,
                 ]);
 
@@ -257,7 +275,7 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
     public function edit(int $id): void
     {
         $this->resetValidation(); // Bersihkan error lama
-        $siswa = Siswa::with('user')->findOrFail($id); // Ambil data siswa beserta user
+        $siswa = Siswa::with(['user', 'kelas', 'jurusan'])->findOrFail($id); // Ambil data siswa beserta relasi kunci
 
         $this->siswa_id = $siswa->id;
         $this->user_id = $siswa->user->id ?? null;
@@ -268,6 +286,8 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
         $this->nis = $siswa->nis;
         $this->alamat = $siswa->alamat;
         $this->jenis_kelamin = $siswa->jenis_kelamin;
+        $this->kelas_id = $siswa->kelas_id;
+        $this->jurusan_id = $siswa->jurusan_id;
         $this->existingFoto = $siswa->foto;
         $this->password = null;
         $this->password_confirmation = null;
@@ -303,12 +323,24 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
     }
 
     #[Computed]
+    public function kelasOptions()
+    {
+        return Kelas::orderBy('nama_kelas')->get();
+    }
+
+    #[Computed]
+    public function jurusanOptions()
+    {
+        return Jurusan::orderBy('nama_jurusan')->get();
+    }
+
+    #[Computed]
     public function listSiswa() // Data untuk tabel dengan pagination
     {
         [$sortField, $sortDirection] = $this->resolveSort();
 
         $query = Siswa::query()
-            ->with('user')
+            ->with(['user', 'kelas', 'jurusan'])
             ->when($this->search !== '', function ($query) {
                 $searchTerm = '%' . $this->search . '%';
 
@@ -316,6 +348,12 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
                     $query->where('nisn', 'like', $searchTerm)
                         ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
                             $userQuery->where('nama_user', 'like', $searchTerm);
+                        })
+                        ->orWhereHas('kelas', function ($kelasQuery) use ($searchTerm) {
+                            $kelasQuery->where('nama_kelas', 'like', $searchTerm);
+                        })
+                        ->orWhereHas('jurusan', function ($jurusanQuery) use ($searchTerm) {
+                            $jurusanQuery->where('nama_jurusan', 'like', $searchTerm);
                         });
                 });
             })
@@ -381,11 +419,15 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
             'jenis_kelamin', // Akan di-set ulang di bawah
             'nisn', // Kosongkan NISN
             'nis', // Kosongkan NIS
+            'kelas_id', // Kosongkan kelas
+            'jurusan_id', // Kosongkan jurusan
             'foto', // Reset file upload
             'existingFoto', // Hapus referensi foto lama
         ]);
 
         $this->jenis_kelamin = 'laki-laki'; // Default pilihan gender
+        $this->kelas_id = null;
+        $this->jurusan_id = null;
         $this->resetErrorBag(); // Hapus pesan kesalahan sebelumnya
         $this->resetValidation(); // Bersihkan status validasi
     }

@@ -6,37 +6,67 @@
     </div>
     @endif
 
-    <div class="card"> {{-- Kartu utama halaman --}}
+    <div class="card"> 
         <div class="card-body">
-            <div class="row align-items-md-center justify-content-md-between g-2 g-md-3 mb-3">
-                {{-- Filter dan aksi --}}
-                <div class="col-12 col-md-4 col-lg-4 col-xl-3">
-                    <div class="d-flex flex-column flex-lg-row flex-lg-wrap align-items-stretch gap-2">
-                        <div class="input-group input-group-sm flex-grow-1">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control w-100" placeholder="Masukan Nama/NISN"
-                                wire:model.live.debounce.500ms="search">
-                        </div>
-                        <select class="form-select form-select-sm w-100 flex-lg-fill" wire:model.live="genderFilter">
-                            @foreach ($genderOptions as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        <select class="form-select form-select-sm w-100 flex-lg-fill" wire:model.live="sort">
-                            @foreach ($sortOptions as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="col-12 col-md-3 col-lg-3 col-xl-2 d-flex justify-content-md-end">
-                    <button wire:click="create" type="button" class="btn btn-primary w-100 w-md-auto" data-bs-toggle="modal"
-                        data-bs-target="#modal-form"> {{-- Tombol tambah siswa --}}
-                        <i class="bi bi-plus"></i>
-                        <span class="ms-1">Tambah Siswa</span>
-                    </button>
-                </div>
-            </div>
+           <div class="row align-items-center g-2 g-md-3 mb-3">
+
+  <div class="col-12 col-md">
+    <div class="d-flex flex-wrap align-items-stretch gap-2">
+  
+      <div style="flex: 0 1 180px;">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Nama / NISN"
+            wire:model.live.debounce.500ms="search"
+          >
+        </div>
+      </div>
+
+     
+      <div style="flex: 0 1 120px;">
+        <select
+          class="form-select form-select-sm"
+          wire:model.live="genderFilter"
+        >
+          @foreach ($genderOptions as $value => $label)
+            <option value="{{ $value }}">{{ $label }}</option>
+          @endforeach
+        </select>
+      </div>
+
+      <div style="flex: 0 1 140px;">
+        <select
+          class="form-select form-select-sm"
+          wire:model.live="sort"
+        >
+          @foreach ($sortOptions as $value => $label)
+            <option value="{{ $value }}">{{ $label }}</option>
+          @endforeach
+        </select>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="col-12 col-md-auto">
+    <div class="d-grid d-md-flex justify-content-md-end">
+      <button
+        wire:click="create"
+        type="button"
+        class="btn btn-primary btn-sm w-100 w-md-auto"
+        data-bs-toggle="modal"
+        data-bs-target="#modal-form"
+      >
+        <i class="bi bi-plus"></i>
+        <span class="ms-1">Tambah Siswa</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 
             <div class="modal fade text-left" id="modal-form" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
                 aria-hidden="true" wire:ignore.self> {{-- Modal create/edit siswa --}}
@@ -128,9 +158,40 @@
                                         <option value="laki-laki">Laki-laki</option>
                                         <option value="perempuan">Perempuan</option>
                                     </select>
-                                    @error('jenis_kelamin')
-                                    <span class="text-danger small">{{ $message }}</span>
-                                    @enderror
+                                @error('jenis_kelamin')
+                                <span class="text-danger small">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="kelas_id" class="form-label">Kelas</label>
+                                            <select id="kelas_id" class="form-select" wire:model.defer="kelas_id">
+                                                <option value="">Pilih Kelas</option>
+                                                @foreach ($this->kelasOptions as $kelas)
+                                                <option value="{{ $kelas->id }}">{{ $kelas->nama_kelas }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('kelas_id')
+                                            <span class="text-danger small">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="jurusan_id" class="form-label">Jurusan</label>
+                                            <select id="jurusan_id" class="form-select" wire:model.defer="jurusan_id">
+                                                <option value="">Pilih Jurusan</option>
+                                                @foreach ($this->jurusanOptions as $jurusan)
+                                                <option value="{{ $jurusan->id }}">{{ $jurusan->nama_jurusan }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('jurusan_id')
+                                            <span class="text-danger small">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="mb-3"> {{-- Input alamat --}}
@@ -185,6 +246,8 @@
                         <th>NISN</th>
                         <th>NIS</th>
                         <th>Jenis Kelamin</th>
+                        <th>Kelas</th>
+                        <th>Jurusan</th>
                         <th>Alamat</th>
                         <th>Foto</th>
                         <th>Aksi</th>
@@ -202,6 +265,8 @@
                         <td>{{ $item->nisn }}</td>
                         <td>{{ $item->nis }}</td>
                         <td class="text-capitalize">{{ str_replace('-', ' ', $item->jenis_kelamin) }}</td>
+                        <td>{{ $item->kelas->nama_kelas ?? '-' }}</td>
+                        <td>{{ $item->jurusan->nama_jurusan ?? '-' }}</td>
                         <td>{{ $item->alamat ?? '-' }}</td>
                         <td class="w-25">
                             @if ($item->foto)
@@ -224,7 +289,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="10" class="text-center text-muted">Belum ada data siswa.</td>
+                        <td colspan="12" class="text-center text-muted">Belum ada data siswa.</td>
                         {{-- Pesan tabel kosong --}}
                     </tr>
                     @endforelse

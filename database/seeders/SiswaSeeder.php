@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Jurusan;
+use App\Models\Kelas;
 use App\Models\RoleData;
 use App\Models\Siswa;
 use App\Models\User;
@@ -20,6 +22,18 @@ class SiswaSeeder extends Seeder
     {
         $faker = Faker::create('id_ID');
 
+        $kelasCollection = Kelas::all();
+        if ($kelasCollection->isEmpty()) {
+            $this->call(KelasSeeder::class);
+            $kelasCollection = Kelas::all();
+        }
+
+        $jurusanCollection = Jurusan::all();
+        if ($jurusanCollection->isEmpty()) {
+            $this->call(JurusanSeeder::class);
+            $jurusanCollection = Jurusan::all();
+        }
+
         $roleSiswa = RoleData::firstOrCreate(
             ['nama_role' => 'Siswa'],
             [
@@ -30,6 +44,8 @@ class SiswaSeeder extends Seeder
 
         for ($i = 0; $i < self::TOTAL_SISWA; $i++) {
             $gender = $faker->randomElement(['laki-laki', 'perempuan']);
+            $kelas = $kelasCollection->random();
+            $jurusan = $jurusanCollection->random();
 
             $user = User::create([
                 'nama_user' => $faker->name($gender === 'laki-laki' ? 'male' : 'female'),
@@ -45,6 +61,8 @@ class SiswaSeeder extends Seeder
                 'nis' => $faker->unique()->numerify('########'),
                 'alamat' => $faker->address(),
                 'jenis_kelamin' => $gender,
+                'kelas_id' => $kelas->id,
+                'jurusan_id' => $jurusan->id,
                 'foto' => null,
             ]);
         }

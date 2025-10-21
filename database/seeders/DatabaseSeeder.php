@@ -56,6 +56,12 @@ class DatabaseSeeder extends Seeder
             'role_id' => $roleIds['Administrator'] ?? null,
         ]);
 
+        $this->command->warn('[Seeder] Menyiapkan data kelas dan jurusan...');
+        $this->call([
+            KelasSeeder::class,
+            JurusanSeeder::class,
+        ]);
+
         $this->command->warn('[Seeder] Mengisi data siswa contoh (50 data)...');
         $this->call(SiswaSeeder::class);
         $this->command->info('[Seeder] Seeder selesai (100%).');
