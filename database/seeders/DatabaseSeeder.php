@@ -49,18 +49,24 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->command->warn('[Seeder] Membuat pengguna administrator awal...');
-        User::factory()->create([
-            'nama_user' => 'Test User',
-            'email_user' => 'test@example.com',
-            'phone_number' => '081234567890',
-            'role_id' => $roleIds['Administrator'] ?? null,
-        ]);
+        User::updateOrCreate(
+            ['email_user' => 'test@example.com'],
+            [
+                'nama_user' => 'Test User',
+                'phone_number' => '081234567890',
+                'password' => 'password',
+                'role_id' => $roleIds['Administrator'] ?? null,
+            ],
+        );
 
         $this->command->warn('[Seeder] Menyiapkan data kelas dan jurusan...');
         $this->call([
             KelasSeeder::class,
             JurusanSeeder::class,
+            PetugasSeeder::class
         ]);
+
+        $this->call(DefaultUserSeeder::class);
 
         $this->command->warn('[Seeder] Mengisi data siswa contoh (50 data)...');
         $this->call(SiswaSeeder::class);

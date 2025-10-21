@@ -1,9 +1,9 @@
 <div id="auth-left">
     <a href="#" class="mb-4 logo">
-        <i class="fas fa-graduation-cap"></i> InfoPKL
+        <img src="{{ asset('assets/logo.png') }}" width="50" alt=""> Ruang Belajar
     </a>
     
-    <h1 class="mt-5 auth-title">Selamat datang di InfoPKL</h1>
+    <h1 class="mt-5 auth-title">Selamat datang di Ruang Belajar</h1>
     <p class="mb-5 auth-subtitle pe-5">
         Login menggunakan email & password yang benar 👋
     </p>

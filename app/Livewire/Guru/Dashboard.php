@@ -9,7 +9,7 @@ use Livewire\Component;
 class Dashboard extends Component
 {
      #[Layout('components.layouts.dashboard-layouts')]
-    #[Title('Siswa Dashboard')]
+    #[Title('Guru Dashboard')]
     public function render()
     {
         return view('livewire.guru.dashboard');

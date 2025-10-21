@@ -23,7 +23,14 @@
 <body>
     <script src="{{ asset('assets/static/js/initTheme.js') }}"></script>
     <div id="app">
-        @include('components.layouts.partials.sidebar-admin-dashboard')
+        @if (Request::routeIs('admin.*'))
+            @include('components.layouts.partials.sidebar-admin-dashboard')
+        @elseif (Request::routeIs('siswa.*'))
+            @include('components.layouts.partials.sidebar-siswa-dashboard')
+        @elseif (Request::routeIs('guru.*'))
+            @include('components.layouts.partials.sidebar-guru-dashboard')
+        @endif
+       
         <div id="main">
             <header class="mb-3">
                 <a href="#" class="burger-btn d-block d-xl-none">

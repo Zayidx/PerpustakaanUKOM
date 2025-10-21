@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,7 @@ class EnsureRole
         $user = $request->user();
 
         if (! $user) {
-            return redirect()->route('auth.login');
+            return redirect()->route('login');
         }
 
         $roleName = optional($user->loadMissing('role')->role)->nama_role;
@@ -30,9 +31,33 @@ class EnsureRole
             ->all();
 
         if ($roleName === null || ! in_array($roleName, $allowedRoles, true)) {
-            abort(403, 'Anda tidak memiliki hak akses untuk halaman ini.');
+            if ($redirect = $this->resolveDashboardRedirect($user)) {
+                return redirect()
+                    ->to($redirect)
+                    ->with('error', 'Anda tidak memiliki hak akses untuk halaman tersebut.');
+            }
+
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()
+                ->route('login')
+                ->with('error', 'Anda tidak memiliki hak akses untuk halaman tersebut.');
         }
 
         return $next($request);
+    }
+
+    private function resolveDashboardRedirect(User $user): ?string
+    {
+        $roleName = optional($user->role)->nama_role;
+
+        return match ($roleName) {
+            'Administrator', 'Petugas' => route('admin.dashboard'),
+            'Guru' => route('guru.dashboard'),
+            'Siswa' => route('siswa.dashboard'),
+            default => null,
+        };
     }
 }
