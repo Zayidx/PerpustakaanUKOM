@@ -1,7 +1,7 @@
     <!-- Navigation Header -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top py-2">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top py-2 auto-hide-navbar">
         <div class="container px-3 px-lg-4">
-            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#home">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/#home">
                 <img src="{{ asset('assets/logo.png') }}" alt="Ruang Membaca" style="height: 5rem;"  loading="lazy" decoding="async">
 
             </a>
@@ -20,3 +20,57 @@
             </div>
         </div>
     </nav>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const navbar = document.querySelector('.auto-hide-navbar');
+                if (!navbar) {
+                    return;
+                }
+
+                const navCollapse = document.getElementById('navbarNav');
+                let lastScrollY = window.pageYOffset || document.documentElement.scrollTop;
+                let menuOpen = false;
+
+                const showNavbar = () => {
+                    navbar.classList.remove('is-hidden');
+                };
+
+                const hideNavbar = () => {
+                    if (!menuOpen) {
+                        navbar.classList.add('is-hidden');
+                    }
+                };
+
+                const handleScroll = () => {
+                    const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+                    const isAtTop = currentScrollY <= 0;
+
+                    if (isAtTop || currentScrollY < lastScrollY) {
+                        showNavbar();
+                    } else if (currentScrollY > lastScrollY) {
+                        hideNavbar();
+                    }
+
+                    lastScrollY = currentScrollY;
+                };
+
+                window.addEventListener('scroll', handleScroll, { passive: true });
+
+                if (navCollapse) {
+                    navCollapse.addEventListener('shown.bs.collapse', () => {
+                        menuOpen = true;
+                        showNavbar();
+                    });
+
+                    navCollapse.addEventListener('hidden.bs.collapse', () => {
+                        menuOpen = false;
+                        handleScroll();
+                    });
+                }
+
+                handleScroll();
+            });
+        </script>
+    @endpush

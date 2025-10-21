@@ -33,6 +33,15 @@ body {
   border-bottom: 1px solid #f0f0f0;
 }
 
+.auto-hide-navbar {
+  transition: transform 0.3s ease-in-out;
+  will-change: transform;
+}
+
+.auto-hide-navbar.is-hidden {
+  transform: translateY(-100%);
+}
+
 .navbar-brand {
   color: var(--primary-color) !important;
   font-size: 1.5rem;
