@@ -8,11 +8,32 @@ use App\Models\KategoriBuku;
 use App\Models\Penerbit;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class BukuSeeder extends Seeder
 {
     public function run(): void
     {
+        $coverDepanFile = 'DompetAyahSepatuIbu.jpeg';
+        $coverBelakangFile = 'BungkamSuara.jpg';
+
+        $coverDirectory = 'admin/cover-buku';
+        Storage::disk('public')->makeDirectory($coverDirectory);
+
+        $coverDepanPath = $coverDirectory.'/'.$coverDepanFile;
+        $coverBelakangPath = $coverDirectory.'/'.$coverBelakangFile;
+
+        $localCoverDepan = base_path('database/seeders/images/'.$coverDepanFile);
+        $localCoverBelakang = base_path('database/seeders/images/'.$coverBelakangFile);
+
+        if (is_file($localCoverDepan) && ! Storage::disk('public')->exists($coverDepanPath)) {
+            Storage::disk('public')->put($coverDepanPath, file_get_contents($localCoverDepan));
+        }
+
+        if (is_file($localCoverBelakang) && ! Storage::disk('public')->exists($coverBelakangPath)) {
+            Storage::disk('public')->put($coverBelakangPath, file_get_contents($localCoverBelakang));
+        }
+
         $buku = [
             [
                 'nama_buku' => 'Laravel 12 untuk Pemula',
@@ -73,8 +94,9 @@ class BukuSeeder extends Seeder
                     'penerbit_id' => $penerbitId,
                     'deskripsi' => $item['deskripsi'],
                     'tanggal_terbit' => Carbon::parse($item['tanggal_terbit']),
-                    'cover_depan' => null,
-                    'cover_belakang' => null,
+                    'cover_depan' => Storage::disk('public')->exists($coverDepanPath) ? $coverDepanPath : null,
+                    'cover_belakang' => Storage::disk('public')->exists($coverBelakangPath) ? $coverBelakangPath : null,
+                    'stok' => 10,
                 ]
             );
         }

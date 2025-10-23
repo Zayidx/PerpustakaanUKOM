@@ -87,6 +87,14 @@
                                     @error('tanggal_terbit') <span class="text-danger small">{{ $message }}</span> @enderror
                                 </div>
 
+                                {{-- Stok --}}
+                                <div class="mb-3">
+                                    <label for="stok" class="form-label">Stok Buku</label>
+                                    <input type="number" min="0" id="stok" class="form-control"
+                                           wire:model.defer="stok" placeholder="Masukkan jumlah stok">
+                                    @error('stok') <span class="text-danger small">{{ $message }}</span> @enderror
+                                </div>
+
                                 {{-- Cover Depan --}}
                                 <div class="mb-3">
                                     <label for="cover_depan" class="form-label">Cover Depan</label>
@@ -145,6 +153,7 @@
                             <th>Kategori</th>
                             <th>Penerbit</th>
                             <th>Tanggal Terbit</th>
+                            <th>Stok</th>
                             <th>Cover Depan</th>
                             <th>Cover Belakang</th>
                             <th>Deskripsi</th>
@@ -157,9 +166,14 @@
                                 <td class="text-center">{{ $loop->iteration }}</td>
                                 <td>{{ $item->nama_buku }}</td>
                                 <td>{{ $item->author->nama_author ?? '-' }}</td>
-                                <td>{{ $item->kategori->nama_kategori_buku ?? '-' }}</td>
-                                <td>{{ $item->penerbit->nama_penerbit ?? '-' }}</td>
-                                <td>{{ optional($item->tanggal_terbit)->format('d M Y') ?? '-' }}</td>
+                            <td>{{ $item->kategori->nama_kategori_buku ?? '-' }}</td>
+                            <td>{{ $item->penerbit->nama_penerbit ?? '-' }}</td>
+                            <td>{{ optional($item->tanggal_terbit)->format('d M Y') ?? '-' }}</td>
+                            <td>
+                                <span class="badge {{ $item->stok > 0 ? 'bg-success' : 'bg-danger' }}">
+                                    {{ $item->stok }}
+                                </span>
+                            </td>
                                 <td>
                                     @if ($item->cover_depan)
                                         <img src="{{ asset('storage/' . $item->cover_depan) }}" alt="Cover Depan" class="rounded" width="80">
@@ -189,7 +203,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="text-center text-muted">Belum ada data buku.</td>
+                                <td colspan="11" class="text-center text-muted">Belum ada data buku.</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -49,7 +49,19 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
- <li class="sidebar-title mt-4">Akun</li>
+                <li class="sidebar-item {{ Request::routeIs('siswa.buku') ? 'active' : '' }} ">
+                    <a href="{{ route('siswa.buku') }}" class='sidebar-link'>
+                        <i class="bi bi-book-half"></i>
+                        <span>Daftar Buku</span>
+                    </a>
+                </li>
+                <li class="sidebar-item {{ Request::routeIs('siswa.peminjaman*') ? 'active' : '' }} ">
+                    <a href="{{ route('siswa.peminjaman') }}" class='sidebar-link'>
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                        <span>Peminjaman Saya</span>
+                    </a>
+                </li>
+                <li class="sidebar-title mt-4">Akun</li>
                 <li class="sidebar-item">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

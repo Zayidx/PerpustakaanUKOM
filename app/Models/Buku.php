@@ -21,10 +21,12 @@ class Buku extends Model
         'tanggal_terbit',
         'cover_depan',
         'cover_belakang',
+        'stok',
     ];
 
     protected $casts = [
         'tanggal_terbit' => 'date',
+        'stok' => 'integer',
     ];
 
     public function author(): BelongsTo

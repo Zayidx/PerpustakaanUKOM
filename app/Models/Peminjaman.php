@@ -3,8 +3,46 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Peminjaman extends Model
 {
-    //
+    use HasFactory;
+
+    protected $table = 'peminjaman_data';
+
+    protected $fillable = [
+        'kode',
+        'siswa_id',
+        'guru_id',
+        'status',
+        'accepted_at',
+        'due_at',
+        'returned_at',
+        'metadata',
+    ];
+
+    protected $casts = [
+        'accepted_at' => 'datetime',
+        'due_at' => 'datetime',
+        'returned_at' => 'datetime',
+        'metadata' => 'array',
+    ];
+
+    public function siswa(): BelongsTo
+    {
+        return $this->belongsTo(Siswa::class);
+    }
+
+    public function guru(): BelongsTo
+    {
+        return $this->belongsTo(Guru::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(PeminjamanItem::class);
+    }
 }

@@ -49,7 +49,13 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
- <li class="sidebar-title mt-4">Akun</li>
+                <li class="sidebar-item {{ Request::routeIs('guru.scan-peminjaman') ? 'active' : '' }} ">
+                    <a href="{{ route('guru.scan-peminjaman') }}" class='sidebar-link'>
+                        <i class="bi bi-qr-code-scan"></i>
+                        <span>Scan Peminjaman</span>
+                    </a>
+                </li>
+                <li class="sidebar-title mt-4">Akun</li>
                 <li class="sidebar-item">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

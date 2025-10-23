@@ -42,6 +42,7 @@ class ManajemenBuku extends Component
     public $existingCoverDepan = '';
     public $existingCoverBelakang = '';
     public $editMode = false;
+    public $stok = 0;
 
     protected $messages = [
         'nama_buku.required' => 'Nama buku wajib diisi.',
@@ -52,6 +53,9 @@ class ManajemenBuku extends Component
         'deskripsi.required' => 'Deskripsi wajib diisi.',
         'tanggal_terbit.required' => 'Tanggal terbit wajib diisi.',
         'tanggal_terbit.date' => 'Tanggal terbit harus berupa format tanggal yang valid.',
+        'stok.required' => 'Stok buku wajib diisi.',
+        'stok.integer' => 'Stok buku harus berupa angka.',
+        'stok.min' => 'Stok buku tidak boleh kurang dari 0.',
         'cover_depan.image' => 'Cover depan harus berupa file gambar.',
         'cover_depan.max' => 'Ukuran cover depan maksimal 2MB.',
         'cover_belakang.image' => 'Cover belakang harus berupa file gambar.',
@@ -72,6 +76,7 @@ class ManajemenBuku extends Component
             'penerbit_id' => ['required', 'exists:penerbit,id'],
             'deskripsi' => ['required', 'string'],
             'tanggal_terbit' => ['required', 'date'],
+            'stok' => ['required', 'integer', 'min:0'],
             'cover_depan' => ['nullable', 'image', 'max:2048'],
             'cover_belakang' => ['nullable', 'image', 'max:2048'],
         ];
@@ -120,6 +125,7 @@ class ManajemenBuku extends Component
             'tanggal_terbit' => $this->tanggal_terbit,
             'cover_depan' => $coverDepanPath,
             'cover_belakang' => $coverBelakangPath,
+            'stok' => (int) $this->stok,
         ];
 
         try {
@@ -164,6 +170,7 @@ class ManajemenBuku extends Component
         $this->tanggal_terbit = $buku->tanggal_terbit?->format('Y-m-d');
         $this->existingCoverDepan = $buku->cover_depan;
         $this->existingCoverBelakang = $buku->cover_belakang;
+        $this->stok = $buku->stok;
         $this->cover_depan = null;
         $this->cover_belakang = null;
     }
@@ -233,6 +240,7 @@ class ManajemenBuku extends Component
             'existingCoverDepan',
             'existingCoverBelakang',
             'editMode',
+            'stok',
         ]);
         $this->resetErrorBag();
         $this->resetValidation();

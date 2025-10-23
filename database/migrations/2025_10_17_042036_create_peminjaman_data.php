@@ -13,7 +13,19 @@ return new class extends Migration
     {
         Schema::create('peminjaman_data', function (Blueprint $table) {
             $table->id();
+            $table->string('kode')->unique();
+            $table->unsignedBigInteger('siswa_id');
+            $table->unsignedBigInteger('guru_id')->nullable();
+            $table->enum('status', ['pending', 'accepted', 'returned', 'cancelled'])
+                ->default('pending');
+            $table->timestamp('accepted_at')->nullable();
+            $table->timestamp('due_at')->nullable();
+            $table->timestamp('returned_at')->nullable();
+            $table->json('metadata')->nullable();
             $table->timestamps();
+
+            $table->index('siswa_id');
+            $table->index('guru_id');
         });
     }
 

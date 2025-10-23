@@ -7,4 +7,5 @@ Route::middleware(['auth', 'role:Guru'])
     ->name('guru.')
     ->group(function () {
         Route::get('/dashboard', \App\Livewire\Guru\Dashboard::class)->name('dashboard');
+        Route::get('/scan-peminjaman', \App\Livewire\Guru\ScanPeminjaman::class)->name('scan-peminjaman');
     });
