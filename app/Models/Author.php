@@ -6,19 +6,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class KategoriBuku extends Model
+class Author extends Model
 {
     use HasFactory;
 
-    protected $table = 'kategori_buku';
+    protected $table = 'authors';
 
     protected $fillable = [
-        'nama_kategori_buku',
-        'deskripsi_kategori_buku',
+        'nama_author',
+        'email_author',
+        'no_telp',
+        'alamat',
+        'foto',
     ];
 
     public function buku(): HasMany
     {
-        return $this->hasMany(Buku::class, 'kategori_id');
+        return $this->hasMany(Buku::class);
     }
 }

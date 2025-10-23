@@ -3,7 +3,7 @@
         <div class="sidebar-header position-relative">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="logo">
-                    <a href="{{ route('admin.dashboard') }}"><img src="{{ asset('assets/img/logo.png') }}"  
+                    <a href="{{ route('admin.dashboard') }}"><img src="{{ asset('assets/compiled/svg/logo.svg') }}"
                             alt="Logo" srcset=""></a>
                 </div>
                 <div class="theme-toggle d-flex gap-2  align-items-center mt-2">
@@ -69,7 +69,7 @@
                         <span>Manajemen Jurusan</span>
                     </a>
                 </li>
-                 <li class="sidebar-item {{ Request::routeIs('admin.manajemen-admin') ? 'active' : '' }} ">
+                <li class="sidebar-item {{ Request::routeIs('admin.manajemen-admin') ? 'active' : '' }} ">
                     <a href="{{ route('admin.manajemen-admin') }}" class='sidebar-link'>
                         <i class="bi bi-diagram-3-fill"></i>
                         <span>Manajemen Admin</span>
@@ -81,7 +81,35 @@
                         <span>Manajemen Guru</span>
                     </a>
                 </li>
-                <li class="sidebar-title mt-4">Acara</li>
+
+                <li class="sidebar-item {{ Request::routeIs('admin.manajemen-author') ? 'active' : '' }} ">
+                    <a href="{{ route('admin.manajemen-author') }}" class='sidebar-link'>
+                        <i class="bi bi-diagram-3-fill"></i>
+                        <span>Manajemen Author</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item {{ Request::routeIs('admin.kategori-buku') ? 'active' : '' }} ">
+                    <a href="{{ route('admin.kategori-buku') }}" class='sidebar-link'>
+                        <i class="bi bi-diagram-3-fill"></i>
+                        <span>Kategori Buku</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item {{ Request::routeIs('admin.penerbit-buku') ? 'active' : '' }} ">
+                    <a href="{{ route('admin.penerbit-buku') }}" class='sidebar-link'>
+                        <i class="bi bi-diagram-3-fill"></i>
+                        <span>Penerbit Buku</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item {{ Request::routeIs('admin.buku') ? 'active' : '' }} ">
+                    <a href="{{ route('admin.buku') }}" class='sidebar-link'>
+                        <i class="bi bi-diagram-3-fill"></i>
+                        <span>Buku</span>
+                    </a>
+                </li>
+<li class="sidebar-title mt-4">Acara</li>
                 <li class="sidebar-item {{ Request::routeIs('admin.manajemen-acara') ? 'active' : '' }} ">
                     <a href="{{ route('admin.manajemen-acara') }}" class='sidebar-link'>
                         <i class="bi bi-calendar-event"></i>

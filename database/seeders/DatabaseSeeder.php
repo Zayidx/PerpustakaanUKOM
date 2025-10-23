@@ -71,6 +71,14 @@ class DatabaseSeeder extends Seeder
 
         $this->call(DefaultUserSeeder::class);
 
+        $this->command->warn('[Seeder] Menyiapkan data referensi buku...');
+        $this->call([
+            AuthorSeeder::class,
+            KategoriBukuSeeder::class,
+            PenerbitSeeder::class,
+            BukuSeeder::class,
+        ]);
+
         $this->command->warn('[Seeder] Mengisi data siswa contoh (50 data)...');
         $this->call(SiswaSeeder::class);
         $this->command->info('[Seeder] Seeder selesai (100%).');
