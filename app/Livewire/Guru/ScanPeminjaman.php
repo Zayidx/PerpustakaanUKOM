@@ -21,11 +21,12 @@ class ScanPeminjaman extends Component
     public ?string $errorMessage = null;
 
     #[On('qr-scanned')]
-    public function handleScan(string $payload): void
+    public function handleScan(mixed $event): void
     {
         $this->reset(['errorMessage', 'loan', 'lastPayload']);
 
-        $data = json_decode($payload, true);
+        $payload = is_string($event) ? $event : ($event['payload'] ?? null);
+        $data = $payload ? json_decode($payload, true) : null;
 
         if (! is_array($data) || empty($data['code'])) {
             $this->errorMessage = 'QR code tidak valid.';
@@ -87,8 +88,9 @@ class ScanPeminjaman extends Component
     }
 
     #[On('qr-scanner-error')]
-    public function handleScannerError(?string $message = null): void
+    public function handleScannerError(mixed $event = null): void
     {
+        $message = is_string($event) ? $event : ($event['message'] ?? null);
         $this->errorMessage = $message ?: null;
     }
 

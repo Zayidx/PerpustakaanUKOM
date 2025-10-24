@@ -177,7 +177,7 @@ class LoanFlowTest extends TestCase
         ], JSON_THROW_ON_ERROR);
 
         Livewire::test(ScanPeminjaman::class)
-            ->dispatch('qr-scanned', $payload)
+            ->dispatch('qr-scanned', ['payload' => $payload])
             ->assertSet('loan.status', 'accepted');
 
         $loan->refresh();

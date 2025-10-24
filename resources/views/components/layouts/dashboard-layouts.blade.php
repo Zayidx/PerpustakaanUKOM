@@ -72,8 +72,10 @@
 
 
     <!-- Need: Apexcharts -->
-    <script src="{{ asset('assets/extensions/apexcharts/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('assets/static/js/pages/dashboard.js') }}"></script>
+    @if (Request::routeIs('*.dashboard'))
+        <script src="{{ asset('assets/extensions/apexcharts/apexcharts.min.js') }}"></script>
+        <script src="{{ asset('assets/static/js/pages/dashboard.js') }}"></script>
+    @endif
     @stack('scripts')
 
     <script>
