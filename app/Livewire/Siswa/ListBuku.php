@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -72,6 +73,19 @@ class ListBuku extends Component
     public function showDetail(int $bookId): void
     {
         $this->detailBookId = $bookId;
+        $this->dispatch('show-detail-modal');
+    }
+
+    public function clearDetail(): void
+    {
+        $this->detailBookId = null;
+        $this->dispatch('hide-detail-modal');
+    }
+
+    #[On('detail-modal-hidden')]
+    public function handleDetailModalHidden(): void
+    {
+        $this->detailBookId = null;
     }
 
     public function removeFromSelection(int $bookId): void
@@ -84,6 +98,7 @@ class ListBuku extends Component
     {
         $this->selectedBooks = [];
         session()->forget('loan_cart');
+        $this->dispatch('hide-loan-modal');
     }
 
     public function generateLoanCode()
@@ -151,6 +166,7 @@ class ListBuku extends Component
 
         session()->forget('loan_cart');
         $this->selectedBooks = [];
+        $this->dispatch('hide-loan-modal');
 
         return $this->redirectRoute('siswa.kode-peminjaman', ['kode' => $loan->kode], navigate: true);
     }
@@ -176,11 +192,21 @@ class ListBuku extends Component
             ->orderBy('nama_buku')
             ->paginate(12);
 
+        $books->setCollection(
+            $books->getCollection()->map(function (Buku $book) {
+                return $book->append(['cover_depan_url', 'cover_belakang_url']);
+            })
+        );
+
         $selectedBooks = Buku::query()
             ->with(['author', 'kategori'])
             ->whereIn('id', $this->selectedBooks)
             ->get()
             ->sortBy(fn ($book) => array_search($book->id, $this->selectedBooks, true) ?? PHP_INT_MAX);
+
+        $selectedBooks = $selectedBooks->map(function (Buku $book) {
+            return $book->append(['cover_depan_url', 'cover_belakang_url']);
+        })->values();
 
         $missingSelection = array_diff($this->selectedBooks, $selectedBooks->pluck('id')->all());
         if (! empty($missingSelection)) {
@@ -188,9 +214,17 @@ class ListBuku extends Component
             session()->put('loan_cart', $this->selectedBooks);
         }
 
-        $detailBook = $this->detailBookId
-            ? Buku::with(['author', 'kategori', 'penerbit'])->find($this->detailBookId)
-            : null;
+        $detailBook = null;
+
+        if ($this->detailBookId) {
+            $detailBook = Buku::with(['author', 'kategori', 'penerbit'])->find($this->detailBookId);
+
+            if (! $detailBook) {
+                $this->clearDetail();
+            } else {
+                $detailBook->append(['cover_depan_url', 'cover_belakang_url']);
+            }
+        }
 
         return view('livewire.siswa.list-buku', [
             'books' => $books,

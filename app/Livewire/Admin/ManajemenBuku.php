@@ -8,6 +8,7 @@ use App\Models\KategoriBuku;
 use App\Models\Penerbit;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -41,6 +42,8 @@ class ManajemenBuku extends Component
     public $cover_belakang;
     public $existingCoverDepan = '';
     public $existingCoverBelakang = '';
+    public $existingCoverDepanUrl = '';
+    public $existingCoverBelakangUrl = '';
     public $editMode = false;
     public $stok = 0;
 
@@ -102,7 +105,7 @@ class ManajemenBuku extends Component
 
         $coverDepanPath = $this->existingCoverDepan;
         if ($this->cover_depan instanceof TemporaryUploadedFile) {
-            if ($coverDepanPath) {
+            if ($coverDepanPath && $this->shouldDeleteFromStorage($coverDepanPath)) {
                 Storage::disk('public')->delete($coverDepanPath);
             }
             $coverDepanPath = $this->cover_depan->store('admin/cover-buku', 'public');
@@ -110,7 +113,7 @@ class ManajemenBuku extends Component
 
         $coverBelakangPath = $this->existingCoverBelakang;
         if ($this->cover_belakang instanceof TemporaryUploadedFile) {
-            if ($coverBelakangPath) {
+            if ($coverBelakangPath && $this->shouldDeleteFromStorage($coverBelakangPath)) {
                 Storage::disk('public')->delete($coverBelakangPath);
             }
             $coverBelakangPath = $this->cover_belakang->store('admin/cover-buku', 'public');
@@ -170,6 +173,8 @@ class ManajemenBuku extends Component
         $this->tanggal_terbit = $buku->tanggal_terbit?->format('Y-m-d');
         $this->existingCoverDepan = $buku->cover_depan;
         $this->existingCoverBelakang = $buku->cover_belakang;
+        $this->existingCoverDepanUrl = $this->resolveCoverUrl($buku->cover_depan);
+        $this->existingCoverBelakangUrl = $this->resolveCoverUrl($buku->cover_belakang);
         $this->stok = $buku->stok;
         $this->cover_depan = null;
         $this->cover_belakang = null;
@@ -179,11 +184,11 @@ class ManajemenBuku extends Component
     {
         $buku = BukuModel::findOrFail($id);
 
-        if ($buku->cover_depan) {
+        if ($buku->cover_depan && $this->shouldDeleteFromStorage($buku->cover_depan)) {
             Storage::disk('public')->delete($buku->cover_depan);
         }
 
-        if ($buku->cover_belakang) {
+        if ($buku->cover_belakang && $this->shouldDeleteFromStorage($buku->cover_belakang)) {
             Storage::disk('public')->delete($buku->cover_belakang);
         }
 
@@ -239,10 +244,52 @@ class ManajemenBuku extends Component
             'cover_belakang',
             'existingCoverDepan',
             'existingCoverBelakang',
+            'existingCoverDepanUrl',
+            'existingCoverBelakangUrl',
             'editMode',
             'stok',
         ]);
         $this->resetErrorBag();
         $this->resetValidation();
+    }
+
+    private function resolveCoverUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        $normalized = ltrim($path, '/');
+
+        if (Str::startsWith($normalized, ['http://', 'https://'])) {
+            return $normalized;
+        }
+
+        if (Str::startsWith($normalized, 'storage/')) {
+            return asset($normalized);
+        }
+
+        $publicPath = public_path($normalized);
+        if (is_file($publicPath)) {
+            return asset($normalized);
+        }
+
+        $storagePath = storage_path('app/public/'.$normalized);
+        if (is_file($storagePath)) {
+            return asset('storage/'.$normalized);
+        }
+
+        return null;
+    }
+
+    private function shouldDeleteFromStorage(?string $path): bool
+    {
+        if (! $path) {
+            return false;
+        }
+
+        $normalized = ltrim($path, '/');
+
+        return ! Str::startsWith($normalized, 'assets/');
     }
 }

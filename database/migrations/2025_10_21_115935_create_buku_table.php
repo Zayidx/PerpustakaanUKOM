@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create('buku', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_buku'); 
-            $table->foreignId('author_id')->constrained('authors')->onDelete('cascade'); 
-            $table->foreignId('kategori_id')->constrained('kategori_buku')->onDelete('cascade'); 
-            $table->string('penerbit'); 
-            $table->text('deskripsi'); 
-            $table->date('tanggal_terbit'); 
-            $table->year('tahun_terbit'); 
+            $table->string('nama_buku');
+            $table->foreignId('author_id')->constrained('authors')->cascadeOnDelete();
+            $table->foreignId('kategori_id')->constrained('kategori_buku')->cascadeOnDelete();
+            $table->foreignId('penerbit_id')->nullable()->constrained('penerbit')->nullOnDelete();
+            $table->text('deskripsi');
+            $table->date('tanggal_terbit');
+            $table->string('cover_depan')->nullable();
+            $table->string('cover_belakang')->nullable();
+            $table->unsignedInteger('stok')->default(0);
             $table->timestamps();
         });
     }

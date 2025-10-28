@@ -103,8 +103,8 @@
 
                                     @if ($cover_depan)
                                         <img src="{{ $cover_depan->temporaryUrl() }}" alt="Preview Cover Depan" class="mt-2 rounded" width="200">
-                                    @elseif ($existingCoverDepan)
-                                        <img src="{{ asset('storage/' . $existingCoverDepan) }}" alt="Cover Depan Buku" class="mt-2 rounded" width="200">
+                                    @elseif ($existingCoverDepanUrl)
+                                        <img src="{{ $existingCoverDepanUrl }}" alt="Cover Depan Buku" class="mt-2 rounded" width="200">
                                     @endif
                                 </div>
 
@@ -116,8 +116,8 @@
 
                                     @if ($cover_belakang)
                                         <img src="{{ $cover_belakang->temporaryUrl() }}" alt="Preview Cover Belakang" class="mt-2 rounded" width="200">
-                                    @elseif ($existingCoverBelakang)
-                                        <img src="{{ asset('storage/' . $existingCoverBelakang) }}" alt="Cover Belakang Buku" class="mt-2 rounded" width="200">
+                                    @elseif ($existingCoverBelakangUrl)
+                                        <img src="{{ $existingCoverBelakangUrl }}" alt="Cover Belakang Buku" class="mt-2 rounded" width="200">
                                     @endif
                                 </div>
 
@@ -175,15 +175,15 @@
                                 </span>
                             </td>
                                 <td>
-                                    @if ($item->cover_depan)
-                                        <img src="{{ asset('storage/' . $item->cover_depan) }}" alt="Cover Depan" class="rounded" width="80">
+                                    @if ($item->cover_depan_url)
+                                        <img src="{{ $item->cover_depan_url }}" alt="Cover Depan" class="rounded" width="80">
                                     @else
                                         <span class="text-muted">Tidak ada</span>
                                     @endif
                                 </td>
                                 <td>
-                                    @if ($item->cover_belakang)
-                                        <img src="{{ asset('storage/' . $item->cover_belakang) }}" alt="Cover Belakang" class="rounded" width="80">
+                                    @if ($item->cover_belakang_url)
+                                        <img src="{{ $item->cover_belakang_url }}" alt="Cover Belakang" class="rounded" width="80">
                                     @else
                                         <span class="text-muted">Tidak ada</span>
                                     @endif
