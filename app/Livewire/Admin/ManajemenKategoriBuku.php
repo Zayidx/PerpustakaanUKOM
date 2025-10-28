@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\KategoriBuku;
-use App\Models\Author; // ✅ Tambahkan ini
+use App\Models\Author; 
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -43,30 +43,30 @@ class ManajemenKategoriBuku extends Component
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('kategori_buku', 'nama_kategori_buku')->ignore($this->kategori_id)
+                Rule::unique('kategori_buku', 'nama_kategori_buku')->ignore($this->kategori_id) // Validasi unik, abaikan ID saat edit
             ],
-            'deskripsi_kategori_buku' => ['required', 'string'],
+            'deskripsi_kategori_buku' => ['required', 'string'], // Deskripsi wajib diisi
         ];
-    }
+    } // Aturan validasi untuk form kategori buku
 
     public function updatedPerPage()
     {
         $this->resetPage();
-    }
+    } // Reset pagination ke halaman pertama saat jumlah item per halaman berubah
 
     public function create()
     {
         $this->resetForm();
         $this->editMode = false;
         $this->resetValidation();
-    }
+    } // Reset form untuk membuat kategori baru
 
     public function store()
     {
-        $this->validate();
+        $this->validate(); // Jalankan validasi sebelum menyimpan
 
         if ($this->editMode && $this->kategori_id) {
-            $kategori = KategoriBuku::findOrFail($this->kategori_id);
+            $kategori = KategoriBuku::findOrFail($this->kategori_id); // Ambil data kategori yang akan diedit
 
             $kategori->update([
                 'nama_kategori_buku' => $this->nama_kategori_buku,
@@ -75,7 +75,7 @@ class ManajemenKategoriBuku extends Component
 
             session()->flash('message', 'Kategori buku berhasil diperbarui.');
         } else {
-            KategoriBuku::create([
+            KategoriBuku::create([ // Buat kategori baru
                 'nama_kategori_buku' => $this->nama_kategori_buku,
                 'deskripsi_kategori_buku' => $this->deskripsi_kategori_buku,
             ]);
@@ -84,35 +84,35 @@ class ManajemenKategoriBuku extends Component
         }
 
         $this->resetForm();
-        $this->dispatch('close-modal', id: 'modal-form');
-    }
+        $this->dispatch('close-modal', id: 'modal-form'); // Kirim event untuk menutup modal
+    } // Simpan data kategori buku baru atau perbarui data kategori yang sudah ada
 
     public function edit($id)
     {
         $this->resetValidation();
 
-        $kategori = KategoriBuku::findOrFail((int) $id);
+        $kategori = KategoriBuku::findOrFail((int) $id); // Ambil data kategori berdasarkan ID
 
-        $this->editMode = true;
+        $this->editMode = true; // Aktifkan mode edit
         $this->kategori_id = $kategori->id;
         $this->nama_kategori_buku = $kategori->nama_kategori_buku;
         $this->deskripsi_kategori_buku = $kategori->deskripsi_kategori_buku;
-    }
+    } // Ambil data kategori berdasarkan ID untuk dimuat ke form edit
 
     public function delete($id)
     {
-        $kategori = KategoriBuku::findOrFail((int) $id);
-        $kategori->delete();
+        $kategori = KategoriBuku::findOrFail((int) $id); // Ambil data kategori berdasarkan ID
+        $kategori->delete(); // Hapus dari database
 
         session()->flash('message', 'Kategori buku berhasil dihapus.');
         $this->resetForm();
-    }
+    } // Hapus data kategori buku berdasarkan ID
 
     #[Computed]
     public function listKategoriBuku()
     {
-        return KategoriBuku::orderBy('nama_kategori_buku', 'asc')->paginate($this->perPage);
-    }
+        return KategoriBuku::orderBy('nama_kategori_buku', 'asc')->paginate($this->perPage); // Ambil data kategori dan urutkan berdasarkan nama
+    } // Kembalikan daftar kategori buku yang telah diurutkan dan dipaginasi
 
         public function render()
     {
@@ -121,9 +121,9 @@ class ManajemenKategoriBuku extends Component
         // - listAuthors untuk dropdown Penulis jika view butuh
         return view('livewire.admin.kategori-buku', [
             'listKategoriBuku' => $this->listKategoriBuku,
-            'listAuthors' => Author::orderBy('nama_author', 'asc')->get(),
+            'listAuthors' => Author::orderBy('nama_author', 'asc')->get(), // Ambil semua author untuk dropdown
         ]);
-    }
+    } // Tampilkan tampilan komponen Livewire
 
     private function resetForm(): void
     {
@@ -133,7 +133,7 @@ class ManajemenKategoriBuku extends Component
             'deskripsi_kategori_buku',
             'editMode',
         ]);
-        $this->resetErrorBag();
-        $this->resetValidation();
-    }
+        $this->resetErrorBag(); // Hapus pesan error yang mungkin ada
+        $this->resetValidation(); // Reset status validasi
+    } // Reset semua properti form ke nilai awal
 }

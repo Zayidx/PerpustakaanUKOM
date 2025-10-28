@@ -69,83 +69,83 @@ class ManajemenBuku extends Component
     {
         return [
             'nama_buku' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('buku', 'nama_buku')->ignore($this->bukuId),
+                'required', // Nama buku wajib diisi
+                'string', // Harus berupa teks
+                'max:255', // Maksimal 255 karakter
+                Rule::unique('buku', 'nama_buku')->ignore($this->bukuId), // Harus unik, abaikan saat edit
             ],
-            'author_id' => ['required', 'exists:authors,id'],
-            'kategori_id' => ['required', 'exists:kategori_buku,id'],
-            'penerbit_id' => ['required', 'exists:penerbit,id'],
-            'deskripsi' => ['required', 'string'],
-            'tanggal_terbit' => ['required', 'date'],
-            'stok' => ['required', 'integer', 'min:0'],
-            'cover_depan' => ['nullable', 'image', 'max:2048'],
-            'cover_belakang' => ['nullable', 'image', 'max:2048'],
+            'author_id' => ['required', 'exists:authors,id'], // ID author wajib dan harus ada di tabel authors
+            'kategori_id' => ['required', 'exists:kategori_buku,id'], // ID kategori wajib dan harus ada di tabel kategori_buku
+            'penerbit_id' => ['required', 'exists:penerbit,id'], // ID penerbit wajib dan harus ada di tabel penerbit
+            'deskripsi' => ['required', 'string'], // Deskripsi wajib diisi
+            'tanggal_terbit' => ['required', 'date'], // Tanggal terbit wajib dan harus format tanggal valid
+            'stok' => ['required', 'integer', 'min:0'], // Stok wajib, harus integer, minimal 0
+            'cover_depan' => ['nullable', 'image', 'max:2048'], // Cover depan opsional, harus gambar maks 2MB
+            'cover_belakang' => ['nullable', 'image', 'max:2048'], // Cover belakang opsional, harus gambar maks 2MB
         ];
-    }
+    } // Aturan validasi untuk form buku
 
     public function updatedPerPage(): void
     {
-        $this->resetPage();
-    }
+        $this->resetPage(); // Reset pagination ke halaman pertama saat jumlah item per halaman berubah
+    } // Reset pagination saat jumlah item per halaman berubah
 
     public function create(): void
     {
-        $this->resetForm();
-        $this->editMode = false;
-        $this->resetValidation();
-    }
+        $this->resetForm(); // Reset form ke kondisi awal
+        $this->editMode = false; // Nonaktifkan mode edit
+        $this->resetValidation(); // Hapus pesan validasi sebelumnya
+    } // Reset form untuk membuat buku baru
 
     public function store(): void
     {
-        $this->validate();
+        $this->validate(); // Jalankan validasi pada input
 
-        Storage::disk('public')->makeDirectory('admin/cover-buku');
+        Storage::disk('public')->makeDirectory('admin/cover-buku'); // Buat direktori cover buku jika belum ada
 
-        $coverDepanPath = $this->existingCoverDepan;
-        if ($this->cover_depan instanceof TemporaryUploadedFile) {
-            if ($coverDepanPath && $this->shouldDeleteFromStorage($coverDepanPath)) {
+        $coverDepanPath = $this->existingCoverDepan; // Gunakan cover depan lama sebagai default
+        if ($this->cover_depan instanceof TemporaryUploadedFile) { // Jika ada upload baru untuk cover depan
+            if ($coverDepanPath && $this->shouldDeleteFromStorage($coverDepanPath)) { // Hapus cover lama jika perlu
                 Storage::disk('public')->delete($coverDepanPath);
             }
-            $coverDepanPath = $this->cover_depan->store('admin/cover-buku', 'public');
+            $coverDepanPath = $this->cover_depan->store('admin/cover-buku', 'public'); // Simpan cover depan baru
         }
 
-        $coverBelakangPath = $this->existingCoverBelakang;
-        if ($this->cover_belakang instanceof TemporaryUploadedFile) {
-            if ($coverBelakangPath && $this->shouldDeleteFromStorage($coverBelakangPath)) {
+        $coverBelakangPath = $this->existingCoverBelakang; // Gunakan cover belakang lama sebagai default
+        if ($this->cover_belakang instanceof TemporaryUploadedFile) { // Jika ada upload baru untuk cover belakang
+            if ($coverBelakangPath && $this->shouldDeleteFromStorage($coverBelakangPath)) { // Hapus cover belakang lama jika perlu
                 Storage::disk('public')->delete($coverBelakangPath);
             }
-            $coverBelakangPath = $this->cover_belakang->store('admin/cover-buku', 'public');
+            $coverBelakangPath = $this->cover_belakang->store('admin/cover-buku', 'public'); // Simpan cover belakang baru
         }
 
         $payload = [
-            'nama_buku' => trim($this->nama_buku),
-            'author_id' => $this->author_id,
-            'kategori_id' => $this->kategori_id,
-            'penerbit_id' => $this->penerbit_id,
-            'deskripsi' => trim($this->deskripsi),
-            'tanggal_terbit' => $this->tanggal_terbit,
-            'cover_depan' => $coverDepanPath,
-            'cover_belakang' => $coverBelakangPath,
-            'stok' => (int) $this->stok,
+            'nama_buku' => trim($this->nama_buku), // Normalisasi nama buku
+            'author_id' => $this->author_id, // ID author
+            'kategori_id' => $this->kategori_id, // ID kategori
+            'penerbit_id' => $this->penerbit_id, // ID penerbit
+            'deskripsi' => trim($this->deskripsi), // Normalisasi deskripsi
+            'tanggal_terbit' => $this->tanggal_terbit, // Tanggal terbit
+            'cover_depan' => $coverDepanPath, // Path cover depan
+            'cover_belakang' => $coverBelakangPath, // Path cover belakang
+            'stok' => (int) $this->stok, // Konversi stok ke integer
         ];
 
         try {
-            if ($this->editMode && $this->bukuId) {
-                $buku = BukuModel::findOrFail($this->bukuId);
-                $buku->update($payload);
-                session()->flash('message', 'Data buku berhasil diperbarui.');
-            } else {
-                $buku = BukuModel::create($payload);
-                $this->bukuId = $buku->id;
-                session()->flash('message', 'Data buku berhasil ditambahkan.');
+            if ($this->editMode && $this->bukuId) { // Jika dalam mode edit
+                $buku = BukuModel::findOrFail($this->bukuId); // Ambil buku yang akan diupdate
+                $buku->update($payload); // Update data buku
+                session()->flash('message', 'Data buku berhasil diperbarui.'); // Tampilkan pesan sukses
+            } else { // Jika dalam mode create
+                $buku = BukuModel::create($payload); // Buat buku baru
+                $this->bukuId = $buku->id; // Simpan ID buku baru
+                session()->flash('message', 'Data buku berhasil ditambahkan.'); // Tampilkan pesan sukses
             }
 
-            $this->dispatch('close-modal', id: 'modal-form');
-            $this->resetForm();
-        } catch (\Throwable $e) {
-            Log::error('Gagal menyimpan data buku', [
+            $this->dispatch('close-modal', id: 'modal-form'); // Kirim event untuk menutup modal
+            $this->resetForm(); // Reset form setelah disimpan
+        } catch (\Throwable $e) { // Jika terjadi error
+            Log::error('Gagal menyimpan data buku', [ // Log error ke file
                 'error' => $e->getMessage(),
                 'nama_buku' => $this->nama_buku,
                 'author_id' => $this->author_id,
@@ -153,82 +153,82 @@ class ManajemenBuku extends Component
                 'penerbit_id' => $this->penerbit_id,
             ]);
 
-            session()->flash('message', 'Terjadi kesalahan saat menyimpan data buku.');
+            session()->flash('message', 'Terjadi kesalahan saat menyimpan data buku.'); // Tampilkan pesan error
         }
-    }
+    } // Simpan data buku baru atau perbarui yang sudah ada
 
     public function edit(int $id): void
     {
-        $this->resetValidation();
+        $this->resetValidation(); // Hapus pesan validasi sebelumnya
 
-        $buku = BukuModel::findOrFail($id);
+        $buku = BukuModel::findOrFail($id); // Ambil data buku berdasarkan ID
 
-        $this->editMode = true;
-        $this->bukuId = $buku->id;
-        $this->nama_buku = $buku->nama_buku;
-        $this->author_id = $buku->author_id;
-        $this->kategori_id = $buku->kategori_id;
-        $this->penerbit_id = $buku->penerbit_id;
-        $this->deskripsi = $buku->deskripsi;
-        $this->tanggal_terbit = $buku->tanggal_terbit?->format('Y-m-d');
-        $this->existingCoverDepan = $buku->cover_depan;
-        $this->existingCoverBelakang = $buku->cover_belakang;
-        $this->existingCoverDepanUrl = $this->resolveCoverUrl($buku->cover_depan);
-        $this->existingCoverBelakangUrl = $this->resolveCoverUrl($buku->cover_belakang);
-        $this->stok = $buku->stok;
-        $this->cover_depan = null;
-        $this->cover_belakang = null;
-    }
+        $this->editMode = true; // Aktifkan mode edit
+        $this->bukuId = $buku->id; // Set ID buku yang akan diedit
+        $this->nama_buku = $buku->nama_buku; // Muat nama buku
+        $this->author_id = $buku->author_id; // Muat ID author
+        $this->kategori_id = $buku->kategori_id; // Muat ID kategori
+        $this->penerbit_id = $buku->penerbit_id; // Muat ID penerbit
+        $this->deskripsi = $buku->deskripsi; // Muat deskripsi
+        $this->tanggal_terbit = $buku->tanggal_terbit?->format('Y-m-d'); // Muat tanggal terbit, format: YYYY-MM-DD
+        $this->existingCoverDepan = $buku->cover_depan; // Muat path cover depan
+        $this->existingCoverBelakang = $buku->cover_belakang; // Muat path cover belakang
+        $this->existingCoverDepanUrl = $this->resolveCoverUrl($buku->cover_depan); // Muat URL cover depan untuk preview
+        $this->existingCoverBelakangUrl = $this->resolveCoverUrl($buku->cover_belakang); // Muat URL cover belakang untuk preview
+        $this->stok = $buku->stok; // Muat jumlah stok
+        $this->cover_depan = null; // Reset upload cover depan
+        $this->cover_belakang = null; // Reset upload cover belakang
+    } // Muat data buku untuk mode edit
 
     public function delete(int $id): void
     {
-        $buku = BukuModel::findOrFail($id);
+        $buku = BukuModel::findOrFail($id); // Ambil data buku berdasarkan ID
 
-        if ($buku->cover_depan && $this->shouldDeleteFromStorage($buku->cover_depan)) {
-            Storage::disk('public')->delete($buku->cover_depan);
+        if ($buku->cover_depan && $this->shouldDeleteFromStorage($buku->cover_depan)) { // Jika buku memiliki cover depan yang perlu dihapus
+            Storage::disk('public')->delete($buku->cover_depan); // Hapus file cover depan dari storage
         }
 
-        if ($buku->cover_belakang && $this->shouldDeleteFromStorage($buku->cover_belakang)) {
-            Storage::disk('public')->delete($buku->cover_belakang);
+        if ($buku->cover_belakang && $this->shouldDeleteFromStorage($buku->cover_belakang)) { // Jika buku memiliki cover belakang yang perlu dihapus
+            Storage::disk('public')->delete($buku->cover_belakang); // Hapus file cover belakang dari storage
         }
 
-        $buku->delete();
+        $buku->delete(); // Hapus data buku dari database
 
-        session()->flash('message', 'Data buku berhasil dihapus.');
-        $this->resetForm();
-    }
+        session()->flash('message', 'Data buku berhasil dihapus.'); // Tampilkan pesan sukses
+        $this->resetForm(); // Reset form setelah penghapusan
+    } // Hapus data buku
 
     public function updatedCoverDepan(): void
     {
-        if ($this->cover_depan instanceof TemporaryUploadedFile) {
-            $this->validateOnly('cover_depan');
+        if ($this->cover_depan instanceof TemporaryUploadedFile) { // Jika ada file cover depan yang diupload
+            $this->validateOnly('cover_depan'); // Validasi hanya field cover depan
         }
-    }
+    } // Validasi file cover depan saat diupload
 
     public function updatedCoverBelakang(): void
     {
-        if ($this->cover_belakang instanceof TemporaryUploadedFile) {
-            $this->validateOnly('cover_belakang');
+        if ($this->cover_belakang instanceof TemporaryUploadedFile) { // Jika ada file cover belakang yang diupload
+            $this->validateOnly('cover_belakang'); // Validasi hanya field cover belakang
         }
-    }
+    } // Validasi file cover belakang saat diupload
 
     #[Computed]
     public function listBuku()
     {
-        return BukuModel::with(['author', 'kategori', 'penerbit'])
-            ->orderBy('nama_buku', 'asc')
-            ->paginate($this->perPage);
-    }
+        return BukuModel::with(['author', 'kategori', 'penerbit']) // Muat relasi author, kategori, dan penerbit
+            ->orderBy('nama_buku', 'asc') // Urutkan berdasarkan nama buku
+            ->paginate($this->perPage); // Terapkan pagination
+    } // Ambil daftar buku dengan pagination
 
     public function render()
     {
         return view('livewire.admin.buku', [
-            'listBuku' => $this->listBuku,
-            'authors' => Author::orderBy('nama_author', 'asc')->get(),
-            'kategori_buku' => KategoriBuku::orderBy('nama_kategori_buku', 'asc')->get(),
-            'penerbits' => Penerbit::orderBy('nama_penerbit', 'asc')->get(),
+            'listBuku' => $this->listBuku, // Kirim daftar buku ke view
+            'authors' => Author::orderBy('nama_author', 'asc')->get(), // Kirim daftar author ke view
+            'kategori_buku' => KategoriBuku::orderBy('nama_kategori_buku', 'asc')->get(), // Kirim daftar kategori ke view
+            'penerbits' => Penerbit::orderBy('nama_penerbit', 'asc')->get(), // Kirim daftar penerbit ke view
         ]);
-    }
+    } // Render tampilan komponen dengan data buku dan relasinya
 
     private function resetForm(): void
     {
@@ -248,48 +248,48 @@ class ManajemenBuku extends Component
             'existingCoverBelakangUrl',
             'editMode',
             'stok',
-        ]);
-        $this->resetErrorBag();
-        $this->resetValidation();
-    }
+        ]); // Reset semua properti form ke nilai awal
+        $this->resetErrorBag(); // Hapus pesan error
+        $this->resetValidation(); // Hapus status validasi
+    } // Reset form ke kondisi awal
 
     private function resolveCoverUrl(?string $path): ?string
     {
-        if (! $path) {
+        if (! $path) { // Jika path kosong, kembalikan null
             return null;
         }
 
-        $normalized = ltrim($path, '/');
+        $normalized = ltrim($path, '/'); // Hapus leading slash
 
-        if (Str::startsWith($normalized, ['http://', 'https://'])) {
+        if (Str::startsWith($normalized, ['http://', 'https://'])) { // Jika path berupa URL eksternal
             return $normalized;
         }
 
-        if (Str::startsWith($normalized, 'storage/')) {
+        if (Str::startsWith($normalized, 'storage/')) { // Jika path berada di direktori storage
             return asset($normalized);
         }
 
-        $publicPath = public_path($normalized);
+        $publicPath = public_path($normalized); // Cek apakah file ada di direktori public
         if (is_file($publicPath)) {
             return asset($normalized);
         }
 
-        $storagePath = storage_path('app/public/'.$normalized);
+        $storagePath = storage_path('app/public/'.$normalized); // Cek apakah file ada di direktori storage/app/public
         if (is_file($storagePath)) {
             return asset('storage/'.$normalized);
         }
 
-        return null;
-    }
+        return null; // Jika file tidak ditemukan
+    } // Ambil URL untuk menampilkan cover buku
 
     private function shouldDeleteFromStorage(?string $path): bool
     {
-        if (! $path) {
+        if (! $path) { // Jika path kosong, tidak perlu dihapus
             return false;
         }
 
-        $normalized = ltrim($path, '/');
+        $normalized = ltrim($path, '/'); // Hapus leading slash
 
-        return ! Str::startsWith($normalized, 'assets/');
-    }
+        return ! Str::startsWith($normalized, 'assets/'); // Jangan hapus file yang ada di direktori assets/
+    } // Cek apakah file perlu dihapus dari storage
 }

@@ -9,5 +9,5 @@ class ManajemenPeminjaman extends Component
     public function render()
     {
         return view('livewire.guru.manajemen-peminjaman');
-    }
+    } // Render tampilan komponen manajemen peminjaman
 }

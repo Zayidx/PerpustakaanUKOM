@@ -14,5 +14,5 @@ class Dashboard extends Component
     public function render()
     {
         return view('livewire.siswa.dashboard');
-    }
+    } // Render tampilan komponen dashboard siswa
 }

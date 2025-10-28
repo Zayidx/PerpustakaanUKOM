@@ -34,211 +34,211 @@ class ListBuku extends Component
 
     public function mount(): void
     {
-        $this->selectedBooks = array_values(array_filter(
-            session()->get('loan_cart', []),
-            fn ($id) => is_numeric($id)
-        ));
-    }
+        $this->selectedBooks = array_values(array_filter( // Muat daftar buku yang dipilih dari session
+            session()->get('loan_cart', []), // Ambil dari session 'loan_cart'
+            fn ($id) => is_numeric($id) // Hanya ambil ID numerik
+        )); // Reset indeks array
+    } // Muat daftar buku yang dipilih dari session saat komponen dimuat
 
     public function updatingSearch(): void
     {
-        $this->resetPage();
-    }
+        $this->resetPage(); // Reset pagination ke halaman pertama saat pencarian berubah
+    } // Reset pagination saat input pencarian berubah
 
     public function toggleSelection(int $bookId): void
     {
-        $book = Buku::query()->select(['id', 'stok', 'nama_buku'])->find($bookId);
+        $book = Buku::query()->select(['id', 'stok', 'nama_buku'])->find($bookId); // Ambil info buku
 
-        if (! $book) {
+        if (! $book) { // Cek apakah buku ditemukan
             $this->addError('selection', 'Buku tidak ditemukan.');
             return;
         }
 
-        if ($book->stok < 1) {
+        if ($book->stok < 1) { // Cek apakah stok buku habis
             $this->addError('selection', "Stok buku {$book->nama_buku} habis.");
-            $this->selectedBooks = array_values(array_diff($this->selectedBooks, [$bookId]));
-            session()->put('loan_cart', $this->selectedBooks);
+            $this->selectedBooks = array_values(array_diff($this->selectedBooks, [$bookId])); // Hapus dari pilihan
+            session()->put('loan_cart', $this->selectedBooks); // Simpan ke session
             return;
         }
 
-        if (in_array($bookId, $this->selectedBooks, true)) {
-            $this->selectedBooks = array_values(array_diff($this->selectedBooks, [$bookId]));
-        } else {
-            $this->selectedBooks[] = $bookId;
+        if (in_array($bookId, $this->selectedBooks, true)) { // Jika sudah dipilih, hapus
+            $this->selectedBooks = array_values(array_diff($this->selectedBooks, [$bookId])); // Hapus dari array
+        } else { // Jika belum dipilih, tambahkan
+            $this->selectedBooks[] = $bookId; // Tambahkan ke array
         }
 
-        session()->put('loan_cart', $this->selectedBooks);
-    }
+        session()->put('loan_cart', $this->selectedBooks); // Simpan ke session
+    } // Toggle pemilihan buku ke dalam keranjang peminjaman
 
     public function showDetail(int $bookId): void
     {
-        $this->detailBookId = $bookId;
-        $this->dispatch('show-detail-modal');
-    }
+        $this->detailBookId = $bookId; // Set ID buku yang akan ditampilkan detailnya
+        $this->dispatch('show-detail-modal'); // Kirim event untuk menampilkan modal detail
+    } // Tampilkan detail buku dalam modal
 
     public function clearDetail(): void
     {
-        $this->detailBookId = null;
-        $this->dispatch('hide-detail-modal');
-    }
+        $this->detailBookId = null; // Reset ID buku detail
+        $this->dispatch('hide-detail-modal'); // Kirim event untuk menyembunyikan modal detail
+    } // Sembunyikan modal detail buku
 
     #[On('detail-modal-hidden')]
     public function handleDetailModalHidden(): void
     {
-        $this->detailBookId = null;
-    }
+        $this->detailBookId = null; // Reset ID buku detail saat modal ditutup
+    } // Tangani event saat modal detail disembunyikan
 
     public function removeFromSelection(int $bookId): void
     {
-        $this->selectedBooks = array_values(array_diff($this->selectedBooks, [$bookId]));
-        session()->put('loan_cart', $this->selectedBooks);
-    }
+        $this->selectedBooks = array_values(array_diff($this->selectedBooks, [$bookId])); // Hapus ID buku dari array
+        session()->put('loan_cart', $this->selectedBooks); // Simpan ke session
+    } // Hapus buku dari daftar pilihan
 
     public function clearSelection(): void
     {
-        $this->selectedBooks = [];
-        session()->forget('loan_cart');
-        $this->dispatch('hide-loan-modal');
-    }
+        $this->selectedBooks = []; // Kosongkan array pilihan buku
+        session()->forget('loan_cart'); // Hapus data dari session
+        $this->dispatch('hide-loan-modal'); // Kirim event untuk menyembunyikan modal peminjaman
+    } // Kosongkan semua pilihan buku dan sembunyikan modal
 
     public function generateLoanCode()
     {
-        $user = Auth::user();
+        $user = Auth::user(); // Ambil user yang sedang login
 
-        if (! $user?->siswa) {
+        if (! $user?->siswa) { // Cek apakah user memiliki data siswa
             $this->addError('selection', 'Akun tidak memiliki data siswa.');
             return null;
         }
 
-        if (empty($this->selectedBooks)) {
+        if (empty($this->selectedBooks)) { // Cek apakah ada buku yang dipilih
             $this->addError('selection', 'Pilih minimal satu buku sebelum membuat kode peminjaman.');
             return null;
         }
 
-        $bookIds = array_values(array_unique(array_map('intval', $this->selectedBooks)));
+        $bookIds = array_values(array_unique(array_map('intval', $this->selectedBooks))); // Validasi ID buku
 
         try {
-            $loan = DB::transaction(function () use ($bookIds, $user) {
-                $books = Buku::query()
-                    ->whereIn('id', $bookIds)
-                    ->lockForUpdate()
-                    ->get();
+            $loan = DB::transaction(function () use ($bookIds, $user) { // Jalankan dalam transaksi database
+                $books = Buku::query() // Ambil data buku dengan lock untuk mencegah race condition
+                    ->whereIn('id', $bookIds) // Filter berdasarkan ID yang dipilih
+                    ->lockForUpdate() // Kunci baris untuk mencegah perubahan bersamaan
+                    ->get(); // Ambil semua buku
 
-                if ($books->count() !== count($bookIds)) {
+                if ($books->count() !== count($bookIds)) { // Cek apakah semua buku ditemukan
                     throw ValidationException::withMessages([
                         'selection' => 'Beberapa buku tidak ditemukan. Muat ulang halaman dan coba lagi.',
                     ]);
                 }
 
-                $outOfStock = $books->filter(fn ($book) => $book->stok < 1);
-                if ($outOfStock->isNotEmpty()) {
+                $outOfStock = $books->filter(fn ($book) => $book->stok < 1); // Cari buku yang stoknya habis
+                if ($outOfStock->isNotEmpty()) { // Jika ada buku yang stoknya habis
                     throw ValidationException::withMessages([
                         'selection' => 'Stok buku berikut habis: '.$outOfStock->pluck('nama_buku')->join(', '),
                     ]);
                 }
 
-                $loan = Peminjaman::create([
-                    'kode' => $this->generateUniqueCode(),
-                    'siswa_id' => $user->siswa->id,
-                    'status' => 'pending',
-                    'metadata' => [
-                        'book_ids' => $books->pluck('id')->all(),
-                        'generated_by' => $user->id,
+                $loan = Peminjaman::create([ // Buat record peminjaman baru
+                    'kode' => $this->generateUniqueCode(), // Generate kode unik
+                    'siswa_id' => $user->siswa->id, // ID siswa peminjam
+                    'status' => 'pending', // Status awal pending
+                    'metadata' => [ // Metadata tambahan
+                        'book_ids' => $books->pluck('id')->all(), // ID buku yang dipinjam
+                        'generated_by' => $user->id, // ID user yang membuat
                     ],
                 ]);
 
-                foreach ($books as $book) {
-                    PeminjamanItem::create([
-                        'peminjaman_id' => $loan->id,
-                        'buku_id' => $book->id,
-                        'quantity' => 1,
+                foreach ($books as $book) { // Untuk setiap buku yang dipinjam
+                    PeminjamanItem::create([ // Buat record item peminjaman
+                        'peminjaman_id' => $loan->id, // ID peminjaman
+                        'buku_id' => $book->id, // ID buku
+                        'quantity' => 1, // Jumlah yang dipinjam
                     ]);
 
-                    $book->decrement('stok');
+                    $book->decrement('stok'); // Kurangi stok buku
                 }
 
-                return $loan;
+                return $loan; // Kembalikan data peminjaman
             });
-        } catch (ValidationException $exception) {
-            $this->setErrorBag($exception->validator->errors());
+        } catch (ValidationException $exception) { // Tangani error validasi
+            $this->setErrorBag($exception->validator->errors()); // Set error ke bag komponen
             return null;
         }
 
-        session()->forget('loan_cart');
-        $this->selectedBooks = [];
-        $this->dispatch('hide-loan-modal');
+        session()->forget('loan_cart'); // Hapus data keranjang dari session
+        $this->selectedBooks = []; // Kosongkan array pilihan
+        $this->dispatch('hide-loan-modal'); // Sembunyikan modal peminjaman
 
-        return $this->redirectRoute('siswa.kode-peminjaman', ['kode' => $loan->kode], navigate: true);
-    }
+        return $this->redirectRoute('siswa.kode-peminjaman', ['kode' => $loan->kode], navigate: true); // Redirect ke halaman kode peminjaman
+    } // Generate kode peminjaman untuk buku yang dipilih
 
     public function render()
     {
-        $books = Buku::query()
-            ->with(['author', 'kategori', 'penerbit'])
-            ->when($this->search !== '', function ($query) {
-                $query->where(function ($inner) {
-                    $inner->where('nama_buku', 'like', '%'.$this->search.'%')
-                        ->orWhereHas('author', function ($author) {
+        $books = Buku::query() // Query utama untuk daftar buku
+            ->with(['author', 'kategori', 'penerbit']) // Muat relasi untuk tampilan
+            ->when($this->search !== '', function ($query) { // Jika ada pencarian
+                $query->where(function ($inner) { // Cari berdasarkan berbagai field
+                    $inner->where('nama_buku', 'like', '%'.$this->search.'%') // Cari di nama buku
+                        ->orWhereHas('author', function ($author) { // Cari di nama author
                             $author->where('nama_author', 'like', '%'.$this->search.'%');
                         })
-                        ->orWhereHas('kategori', function ($kategori) {
+                        ->orWhereHas('kategori', function ($kategori) { // Cari di nama kategori
                             $kategori->where('nama_kategori_buku', 'like', '%'.$this->search.'%');
                         })
-                        ->orWhereHas('penerbit', function ($penerbit) {
+                        ->orWhereHas('penerbit', function ($penerbit) { // Cari di nama penerbit
                             $penerbit->where('nama_penerbit', 'like', '%'.$this->search.'%');
                         });
                 });
             })
-            ->orderBy('nama_buku')
-            ->paginate(12);
+            ->orderBy('nama_buku') // Urutkan berdasarkan nama buku
+            ->paginate(12); // Pagination 12 buku per halaman
 
-        $books->setCollection(
-            $books->getCollection()->map(function (Buku $book) {
-                return $book->append(['cover_depan_url', 'cover_belakang_url']);
+        $books->setCollection( // Tambahkan URL cover ke setiap buku
+            $books->getCollection()->map(function (Buku $book) { // Untuk setiap buku dalam koleksi
+                return $book->append(['cover_depan_url', 'cover_belakang_url']); // Tambahkan URL cover
             })
         );
 
-        $selectedBooks = Buku::query()
-            ->with(['author', 'kategori'])
-            ->whereIn('id', $this->selectedBooks)
-            ->get()
-            ->sortBy(fn ($book) => array_search($book->id, $this->selectedBooks, true) ?? PHP_INT_MAX);
+        $selectedBooks = Buku::query() // Ambil buku yang dipilih
+            ->with(['author', 'kategori']) // Muat relasi yang diperlukan
+            ->whereIn('id', $this->selectedBooks) // Filter berdasarkan ID yang dipilih
+            ->get() // Ambil data
+            ->sortBy(fn ($book) => array_search($book->id, $this->selectedBooks, true) ?? PHP_INT_MAX); // Urutkan sesuai dengan urutan pemilihan
 
-        $selectedBooks = $selectedBooks->map(function (Buku $book) {
-            return $book->append(['cover_depan_url', 'cover_belakang_url']);
-        })->values();
+        $selectedBooks = $selectedBooks->map(function (Buku $book) { // Tambahkan URL cover ke buku yang dipilih
+            return $book->append(['cover_depan_url', 'cover_belakang_url']); // Tambahkan URL cover
+        })->values(); // Reset indeks array
 
-        $missingSelection = array_diff($this->selectedBooks, $selectedBooks->pluck('id')->all());
-        if (! empty($missingSelection)) {
-            $this->selectedBooks = array_values(array_diff($this->selectedBooks, $missingSelection));
-            session()->put('loan_cart', $this->selectedBooks);
+        $missingSelection = array_diff($this->selectedBooks, $selectedBooks->pluck('id')->all()); // Cek apakah ada buku yang dipilih tapi tidak ditemukan
+        if (! empty($missingSelection)) { // Jika ada buku yang hilang dari seleksi
+            $this->selectedBooks = array_values(array_diff($this->selectedBooks, $missingSelection)); // Hapus dari array seleksi
+            session()->put('loan_cart', $this->selectedBooks); // Simpan ke session
         }
 
-        $detailBook = null;
+        $detailBook = null; // Inisialisasi buku detail
 
-        if ($this->detailBookId) {
-            $detailBook = Buku::with(['author', 'kategori', 'penerbit'])->find($this->detailBookId);
+        if ($this->detailBookId) { // Jika ada ID buku detail
+            $detailBook = Buku::with(['author', 'kategori', 'penerbit'])->find($this->detailBookId); // Ambil data buku detail
 
-            if (! $detailBook) {
-                $this->clearDetail();
+            if (! $detailBook) { // Jika buku detail tidak ditemukan
+                $this->clearDetail(); // Bersihkan detail
             } else {
-                $detailBook->append(['cover_depan_url', 'cover_belakang_url']);
+                $detailBook->append(['cover_depan_url', 'cover_belakang_url']); // Tambahkan URL cover
             }
         }
 
-        return view('livewire.siswa.list-buku', [
-            'books' => $books,
-            'detailBook' => $detailBook,
-            'selectedBooksInfo' => $selectedBooks,
+        return view('livewire.siswa.list-buku', [ // Render view dengan data
+            'books' => $books, // Daftar buku
+            'detailBook' => $detailBook, // Buku yang ditampilkan detailnya
+            'selectedBooksInfo' => $selectedBooks, // Informasi buku yang dipilih
         ]);
-    }
+    } // Render tampilan komponen dengan daftar buku
 
     private function generateUniqueCode(): string
     {
         do {
-            $code = 'PINJ-'.Str::upper(Str::random(8));
-        } while (Peminjaman::where('kode', $code)->exists());
+            $code = 'PINJ-'.Str::upper(Str::random(8)); // Generate kode dalam format PINJ-XXXXXX
+        } while (Peminjaman::where('kode', $code)->exists()); // Ulangi hingga menemukan kode yang unik
 
-        return $code;
-    }
+        return $code; // Kembalikan kode unik
+    } // Generate kode peminjaman unik
 }

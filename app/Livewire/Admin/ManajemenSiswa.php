@@ -111,7 +111,7 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
         $this->sort = $this->normalizeSort($this->sort); // Pastikan opsi sort valid
         $this->genderFilter = $this->normalizeGender($this->genderFilter); // Pastikan filter gender valid
         $this->search = trim((string) $this->search); // Normalisasi kata kunci awal
-    }
+    } // Inisialisasi komponen dengan nilai valid
 
     // Dipicu ketika dropdown jumlah data per halaman berubah
     public function updatedPerPage($value): void
@@ -138,42 +138,42 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
         $this->resetPage(); // Reset pagination setelah sort berubah
     }
 
-    // Kumpulan rules validasi dinamis
-    protected function rules(): array
-    {
-        $passwordRules = $this->siswa_id ? ['nullable'] : ['required']; // Password wajib diisi saat create
-        $passwordRules[] = 'min:8'; // Minimal 8 karakter
+        // Kumpulan rules validasi dinamis
+        protected function rules(): array
+        {
+            $passwordRules = $this->siswa_id ? ['nullable'] : ['required']; // Password wajib diisi saat create
+            $passwordRules[] = 'min:8'; // Minimal 8 karakter
 
-        $passwordConfirmationRules = $this->password ? ['same:password'] : ['nullable']; // Konfirmasi hanya dicek jika password diisi
+            $passwordConfirmationRules = $this->password ? ['same:password'] : ['nullable']; // Konfirmasi hanya dicek jika password diisi
 
-        return [
-            'nama' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                Rule::unique('users', 'email_user')->ignore($this->user_id),
-            ],
-            'phone_number' => ['required', 'string', 'max:20'],
-            'password' => $passwordRules,
-            'password_confirmation' => $passwordConfirmationRules,
-            'alamat' => ['nullable', 'string', 'max:255'],
-            'jenis_kelamin' => ['required', 'in:laki-laki,perempuan'],
-            'kelas_id' => ['required', Rule::exists('kelas', 'id')],
-            'jurusan_id' => ['required', Rule::exists('jurusan', 'id')],
-            'nisn' => [
-                'required',
-                'digits_between:8,20',
-                Rule::unique('siswa', 'nisn')->ignore($this->siswa_id),
-            ],
-            'nis' => [
-                'required',
-                'digits_between:4,20',
-                Rule::unique('siswa', 'nis')->ignore($this->siswa_id),
-            ],
-            'foto' => ['nullable', 'image', 'max:1024'],
-        ];
-    }
+            return [
+                'nama' => ['required', 'string', 'max:255'], // Nama wajib diisi maksimal 255 karakter
+                'email' => [
+                    'required',
+                    'email',
+                    'max:255',
+                    Rule::unique('users', 'email_user')->ignore($this->user_id), // Email harus unik, abaikan saat edit
+                ],
+                'phone_number' => ['required', 'string', 'max:20'], // Nomor telepon wajib diisi
+                'password' => $passwordRules, // Aturan password berbeda saat create dan edit
+                'password_confirmation' => $passwordConfirmationRules, // Aturan konfirmasi password
+                'alamat' => ['nullable', 'string', 'max:255'], // Alamat opsional
+                'jenis_kelamin' => ['required', 'in:laki-laki,perempuan'], // Jenis kelamin wajib dan harus valid
+                'kelas_id' => ['required', Rule::exists('kelas', 'id')], // ID kelas wajib dan harus ada di tabel kelas
+                'jurusan_id' => ['required', Rule::exists('jurusan', 'id')], // ID jurusan wajib dan harus ada di tabel jurusan
+                'nisn' => [
+                    'required',
+                    'digits_between:8,20', // NISN harus 8-20 digit
+                    Rule::unique('siswa', 'nisn')->ignore($this->siswa_id), // NISN harus unik, abaikan saat edit
+                ],
+                'nis' => [
+                    'required',
+                    'digits_between:4,20', // NIS harus 4-20 digit
+                    Rule::unique('siswa', 'nis')->ignore($this->siswa_id), // NIS harus unik, abaikan saat edit
+                ],
+                'foto' => ['nullable', 'image', 'max:1024'], // Foto opsional, harus berupa gambar maks 1MB
+            ];
+        } // Aturan validasi untuk form siswa
 
     // Reset form saat tombol tambah ditekan
     public function create(): void
@@ -182,116 +182,116 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
         $this->resetValidation(); // Bersihkan pesan error
     }
 
-    // Simpan atau perbarui data siswa
-    public function store(): void
-    {
-        if ($this->password === '') {
-            $this->password = null; // Livewire kadang mengirim string kosong, ubah jadi null
-        }
-
-        if ($this->password_confirmation === '') {
-            $this->password_confirmation = null; // Samakan perlakuan konfirmasi password
-        }
-
-        $this->validate(); // Jalankan validasi semua field
-
-        $roleId = RoleData::where('nama_role', 'Siswa')->value('id'); // Ambil ID role siswa
-        if (!$roleId) {
-            session()->flash('message', 'Role Siswa belum dikonfigurasi. Silakan tambahkan role terlebih dahulu.');
-            return;
-        }
-
-        $imagePath = $this->existingFoto;
-        if ($this->foto instanceof TemporaryUploadedFile) { // Jika ada upload baru
-            Storage::disk('public')->makeDirectory('admin/foto-siswa'); // Pastikan folder ada
-            if ($this->existingFoto) { // Hapus foto lama bila ada
-                Storage::disk('public')->delete($this->existingFoto);
+        // Simpan atau perbarui data siswa
+        public function store(): void
+        {
+            if ($this->password === '') {
+                $this->password = null; // Livewire kadang mengirim string kosong, ubah jadi null
             }
-            $imagePath = $this->foto->store('admin/foto-siswa', 'public'); // Simpan foto baru
-        }
 
-        $nama = trim($this->nama); // Normalisasi input untuk menghindari spasi tak perlu
-        $email = strtolower(trim($this->email));
-        $phone = trim($this->phone_number);
-        $nisn = trim($this->nisn);
-        $nis = trim($this->nis);
-        $alamat = $this->alamat ? trim($this->alamat) : null;
-        $kelasId = (int) $this->kelas_id;
-        $jurusanId = (int) $this->jurusan_id;
+            if ($this->password_confirmation === '') {
+                $this->password_confirmation = null; // Samakan perlakuan konfirmasi password
+            }
 
-        DB::transaction(function () use ($roleId, $imagePath, $nama, $email, $phone, $nisn, $nis, $alamat, $kelasId, $jurusanId) {
-            if ($this->siswa_id) {
-                $siswa = Siswa::with('user')->findOrFail($this->siswa_id); // Mode edit, cari data lama
-                $user = $siswa->user; // Ambil relasi user
-                $user->nama_user = $nama; // Update nama
-                $user->email_user = $email; // Update email
-                $user->phone_number = $phone; // Update telepon
-                if ($this->password) { // Password hanya diganti jika diisi
-                    $user->password = Hash::make($this->password);
+            $this->validate(); // Jalankan validasi semua field
+
+            $roleId = RoleData::where('nama_role', 'Siswa')->value('id'); // Ambil ID role siswa
+            if (!$roleId) {
+                session()->flash('message', 'Role Siswa belum dikonfigurasi. Silakan tambahkan role terlebih dahulu.');
+                return;
+            }
+
+            $imagePath = $this->existingFoto;
+            if ($this->foto instanceof TemporaryUploadedFile) { // Jika ada upload baru
+                Storage::disk('public')->makeDirectory('admin/foto-siswa'); // Pastikan folder ada
+                if ($this->existingFoto) { // Hapus foto lama bila ada
+                    Storage::disk('public')->delete($this->existingFoto);
                 }
-                $user->role_id = $roleId; // Pastikan role tetap siswa
-                $user->save();
-
-                $siswa->update([
-                    'nisn' => $nisn,
-                    'nis' => $nis,
-                    'alamat' => $alamat,
-                    'jenis_kelamin' => $this->jenis_kelamin,
-                    'kelas_id' => $kelasId,
-                    'jurusan_id' => $jurusanId,
-                    'foto' => $imagePath,
-                ]);
-            } else {
-                $user = User::create([
-                    'nama_user' => $nama,
-                    'email_user' => $email,
-                    'phone_number' => $phone,
-                    'password' => Hash::make($this->password),
-                    'role_id' => $roleId,
-                ]);
-
-                $siswa = Siswa::create([
-                    'user_id' => $user->id,
-                    'nisn' => $nisn,
-                    'nis' => $nis,
-                    'alamat' => $alamat,
-                    'jenis_kelamin' => $this->jenis_kelamin,
-                    'kelas_id' => $kelasId,
-                    'jurusan_id' => $jurusanId,
-                    'foto' => $imagePath,
-                ]);
-
-                $this->siswa_id = $siswa->id;
-                $this->user_id = $user->id;
+                $imagePath = $this->foto->store('admin/foto-siswa', 'public'); // Simpan foto baru
             }
-        });
 
-        $this->resetForm(); // Bersihkan form setelah simpan
-        session()->flash('message', 'Data siswa berhasil disimpan.');
-        $this->dispatch('close-modal', id: 'modal-form'); // Tutup modal via JS
-    }
+            $nama = trim($this->nama); // Normalisasi input untuk menghindari spasi tak perlu
+            $email = strtolower(trim($this->email));
+            $phone = trim($this->phone_number);
+            $nisn = trim($this->nisn);
+            $nis = trim($this->nis);
+            $alamat = $this->alamat ? trim($this->alamat) : null;
+            $kelasId = (int) $this->kelas_id;
+            $jurusanId = (int) $this->jurusan_id;
 
-    // Muat data siswa untuk mode edit
-    public function edit(int $id): void
-    {
-        $this->resetValidation(); // Bersihkan error lama
-        $siswa = Siswa::with(['user', 'kelas', 'jurusan'])->findOrFail($id); // Ambil data siswa beserta relasi kunci
+            DB::transaction(function () use ($roleId, $imagePath, $nama, $email, $phone, $nisn, $nis, $alamat, $kelasId, $jurusanId) {
+                if ($this->siswa_id) {
+                    $siswa = Siswa::with('user')->findOrFail($this->siswa_id); // Mode edit, cari data lama
+                    $user = $siswa->user; // Ambil relasi user
+                    $user->nama_user = $nama; // Update nama
+                    $user->email_user = $email; // Update email
+                    $user->phone_number = $phone; // Update telepon
+                    if ($this->password) { // Password hanya diganti jika diisi
+                        $user->password = Hash::make($this->password);
+                    }
+                    $user->role_id = $roleId; // Pastikan role tetap siswa
+                    $user->save();
 
-        $this->siswa_id = $siswa->id;
-        $this->user_id = $siswa->user->id ?? null;
-        $this->nama = $siswa->user->nama_user ?? '';
-        $this->email = $siswa->user->email_user ?? '';
-        $this->phone_number = $siswa->user->phone_number ?? '';
-        $this->nisn = $siswa->nisn;
-        $this->nis = $siswa->nis;
-        $this->alamat = $siswa->alamat;
-        $this->jenis_kelamin = $siswa->jenis_kelamin;
-        $this->kelas_id = $siswa->kelas_id;
-        $this->jurusan_id = $siswa->jurusan_id;
-        $this->existingFoto = $siswa->foto;
-        $this->password = null;
-        $this->password_confirmation = null;
-    }
+                    $siswa->update([
+                        'nisn' => $nisn,
+                        'nis' => $nis,
+                        'alamat' => $alamat,
+                        'jenis_kelamin' => $this->jenis_kelamin,
+                        'kelas_id' => $kelasId,
+                        'jurusan_id' => $jurusanId,
+                        'foto' => $imagePath,
+                    ]);
+                } else {
+                    $user = User::create([
+                        'nama_user' => $nama,
+                        'email_user' => $email,
+                        'phone_number' => $phone,
+                        'password' => Hash::make($this->password),
+                        'role_id' => $roleId,
+                    ]);
+
+                    $siswa = Siswa::create([
+                        'user_id' => $user->id,
+                        'nisn' => $nisn,
+                        'nis' => $nis,
+                        'alamat' => $alamat,
+                        'jenis_kelamin' => $this->jenis_kelamin,
+                        'kelas_id' => $kelasId,
+                        'jurusan_id' => $jurusanId,
+                        'foto' => $imagePath,
+                    ]);
+
+                    $this->siswa_id = $siswa->id;
+                    $this->user_id = $user->id;
+                }
+            });
+
+            $this->resetForm(); // Bersihkan form setelah simpan
+            session()->flash('message', 'Data siswa berhasil disimpan.');
+            $this->dispatch('close-modal', id: 'modal-form'); // Tutup modal via JS
+        } // Simpan atau perbarui data siswa
+
+        // Muat data siswa untuk mode edit
+        public function edit(int $id): void
+        {
+            $this->resetValidation(); // Bersihkan error lama
+            $siswa = Siswa::with(['user', 'kelas', 'jurusan'])->findOrFail($id); // Ambil data siswa beserta relasi kunci
+
+            $this->siswa_id = $siswa->id;
+            $this->user_id = $siswa->user->id ?? null;
+            $this->nama = $siswa->user->nama_user ?? '';
+            $this->email = $siswa->user->email_user ?? '';
+            $this->phone_number = $siswa->user->phone_number ?? '';
+            $this->nisn = $siswa->nisn;
+            $this->nis = $siswa->nis;
+            $this->alamat = $siswa->alamat;
+            $this->jenis_kelamin = $siswa->jenis_kelamin;
+            $this->kelas_id = $siswa->kelas_id;
+            $this->jurusan_id = $siswa->jurusan_id;
+            $this->existingFoto = $siswa->foto;
+            $this->password = null;
+            $this->password_confirmation = null;
+        } // Muat data siswa untuk mode edit
 
     // Validasi foto setiap kali input berubah
     public function updatedFoto(): void
@@ -301,26 +301,26 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
         }
     }
 
-    // Hapus siswa beserta user terkait
-    public function delete(int $id): void
-    {
-        $siswa = Siswa::with('user')->findOrFail($id);
+        // Hapus siswa beserta user terkait
+        public function delete(int $id): void
+        {
+            $siswa = Siswa::with('user')->findOrFail($id); // Ambil data siswa beserta relasi user
 
-        DB::transaction(function () use ($siswa) {
-            if ($siswa->foto) {
-                Storage::disk('public')->delete($siswa->foto);
-            }
+            DB::transaction(function () use ($siswa) { // Jalankan dalam transaksi database
+                if ($siswa->foto) {
+                    Storage::disk('public')->delete($siswa->foto); // Hapus file foto dari storage
+                }
 
-            if ($siswa->user) {
-                $siswa->user->delete();
-            } else {
-                $siswa->delete();
-            }
-        });
+                if ($siswa->user) {
+                    $siswa->user->delete(); // Hapus data user terlebih dahulu
+                } else {
+                    $siswa->delete(); // Hapus data siswa
+                }
+            });
 
-        session()->flash('message', 'Data siswa berhasil dihapus.');
-        $this->resetForm();
-    }
+            session()->flash('message', 'Data siswa berhasil dihapus.');
+            $this->resetForm();
+        } // Hapus siswa beserta user terkait
 
     #[Computed]
     public function kelasOptions()
@@ -334,43 +334,43 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
         return Jurusan::orderBy('nama_jurusan')->get();
     }
 
-    #[Computed]
-    public function listSiswa() // Data untuk tabel dengan pagination
-    {
-        [$sortField, $sortDirection] = $this->resolveSort();
+        #[Computed]
+        public function listSiswa() // Data untuk tabel dengan pagination
+        {
+            [$sortField, $sortDirection] = $this->resolveSort(); // Ambil field dan arah sorting
 
-        $query = Siswa::query()
-            ->with(['user', 'kelas', 'jurusan'])
-            ->when($this->search !== '', function ($query) {
-                $searchTerm = '%' . $this->search . '%';
+            $query = Siswa::query()
+                ->with(['user', 'kelas', 'jurusan']) // Muat relasi user, kelas, dan jurusan
+                ->when($this->search !== '', function ($query) {
+                    $searchTerm = '%' . $this->search . '%';
 
-                $query->where(function ($query) use ($searchTerm) {
-                    $query->where('nisn', 'like', $searchTerm)
-                        ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
-                            $userQuery->where('nama_user', 'like', $searchTerm);
-                        })
-                        ->orWhereHas('kelas', function ($kelasQuery) use ($searchTerm) {
-                            $kelasQuery->where('nama_kelas', 'like', $searchTerm);
-                        })
-                        ->orWhereHas('jurusan', function ($jurusanQuery) use ($searchTerm) {
-                            $jurusanQuery->where('nama_jurusan', 'like', $searchTerm);
-                        });
+                    $query->where(function ($query) use ($searchTerm) { // Cari berdasarkan berbagai field
+                        $query->where('nisn', 'like', $searchTerm)
+                            ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                                $userQuery->where('nama_user', 'like', $searchTerm); // Cari berdasarkan nama user
+                            })
+                            ->orWhereHas('kelas', function ($kelasQuery) use ($searchTerm) {
+                                $kelasQuery->where('nama_kelas', 'like', $searchTerm); // Cari berdasarkan nama kelas
+                            })
+                            ->orWhereHas('jurusan', function ($jurusanQuery) use ($searchTerm) {
+                                $jurusanQuery->where('nama_jurusan', 'like', $searchTerm); // Cari berdasarkan nama jurusan
+                            });
+                    });
+                })
+                ->when($this->genderFilter !== 'all', function ($query) {
+                    $query->where('jenis_kelamin', $this->genderFilter); // Filter berdasarkan jenis kelamin
                 });
-            })
-            ->when($this->genderFilter !== 'all', function ($query) {
-                $query->where('jenis_kelamin', $this->genderFilter);
-            });
 
-        if ($sortField === 'users.nama_user') {
-            $query->leftJoin('users', 'users.id', '=', 'siswa.user_id')
-                ->select('siswa.*')
-                ->orderBy('users.nama_user', $sortDirection);
-        } else {
-            $query->orderBy($sortField, $sortDirection);
-        }
+            if ($sortField === 'users.nama_user') { // Jika sorting berdasarkan nama user
+                $query->leftJoin('users', 'users.id', '=', 'siswa.user_id')
+                    ->select('siswa.*')
+                    ->orderBy('users.nama_user', $sortDirection);
+            } else {
+                $query->orderBy($sortField, $sortDirection); // Sorting biasa
+            }
 
-        return $query->paginate($this->perPage);
-    }
+            return $query->paginate($this->perPage); // Kembalikan hasil dengan pagination
+        } // Ambil data siswa dengan pencarian, filter, dan pagination
 
     public function render() // Render view Livewire
     {
@@ -404,31 +404,31 @@ class ManajemenSiswa extends Component // Komponen Livewire utama untuk CRUD sis
         return in_array($value, $this->perPageOptions, true) ? $value : $this->perPageOptions[0];
     }
 
-    // Membersihkan seluruh state form ke nilai awal
-    private function resetForm(): void
-    {
-        $this->reset([
-            'siswa_id', // Reset ID siswa
-            'user_id', // Reset ID user
-            'nama', // Kosongkan nama
-            'email', // Kosongkan email
-            'phone_number', // Kosongkan telepon
-            'password', // Kosongkan password
-            'password_confirmation', // Kosongkan konfirmasi password
-            'alamat', // Kosongkan alamat
-            'jenis_kelamin', // Akan di-set ulang di bawah
-            'nisn', // Kosongkan NISN
-            'nis', // Kosongkan NIS
-            'kelas_id', // Kosongkan kelas
-            'jurusan_id', // Kosongkan jurusan
-            'foto', // Reset file upload
-            'existingFoto', // Hapus referensi foto lama
-        ]);
+        // Membersihkan seluruh state form ke nilai awal
+        private function resetForm(): void
+        {
+            $this->reset([
+                'siswa_id', // Reset ID siswa
+                'user_id', // Reset ID user
+                'nama', // Kosongkan nama
+                'email', // Kosongkan email
+                'phone_number', // Kosongkan telepon
+                'password', // Kosongkan password
+                'password_confirmation', // Kosongkan konfirmasi password
+                'alamat', // Kosongkan alamat
+                'jenis_kelamin', // Akan di-set ulang di bawah
+                'nisn', // Kosongkan NISN
+                'nis', // Kosongkan NIS
+                'kelas_id', // Kosongkan kelas
+                'jurusan_id', // Kosongkan jurusan
+                'foto', // Reset file upload
+                'existingFoto', // Hapus referensi foto lama
+            ]);
 
-        $this->jenis_kelamin = 'laki-laki'; // Default pilihan gender
-        $this->kelas_id = null;
-        $this->jurusan_id = null;
-        $this->resetErrorBag(); // Hapus pesan kesalahan sebelumnya
-        $this->resetValidation(); // Bersihkan status validasi
-    }
+            $this->jenis_kelamin = 'laki-laki'; // Default pilihan gender
+            $this->kelas_id = null;
+            $this->jurusan_id = null;
+            $this->resetErrorBag(); // Hapus pesan kesalahan sebelumnya
+            $this->resetValidation(); // Bersihkan status validasi
+        } // Membersihkan seluruh state form ke nilai awal
 }

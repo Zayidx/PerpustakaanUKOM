@@ -51,115 +51,115 @@ class PenerbitBuku extends Component
     {
         return [
             'nama_penerbit' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('penerbit', 'nama_penerbit')->ignore($this->penerbitId),
+                'required', // Nama penerbit wajib diisi
+                'string', // Harus berupa teks
+                'max:255', // Maksimal 255 karakter
+                Rule::unique('penerbit', 'nama_penerbit')->ignore($this->penerbitId), // Harus unik, abaikan saat edit
             ],
-            'deskripsi' => ['required', 'string'],
-            'tahun_hakcipta' => ['required', 'integer'],
+            'deskripsi' => ['required', 'string'], // Deskripsi wajib dan harus berupa string
+            'tahun_hakcipta' => ['required', 'integer'], // Tahun hak cipta wajib dan harus integer
             'logo' => $this->editMode
-                ? ['nullable', 'image', 'max:2048']
-                : ['required', 'image', 'max:2048'],
+                ? ['nullable', 'image', 'max:2048'] // Logo opsional saat edit, harus gambar maks 2MB
+                : ['required', 'image', 'max:2048'], // Logo wajib saat create, harus gambar maks 2MB
         ];
-    }
+    } // Aturan validasi untuk form penerbit
 
     public function updatedPerPage(): void
     {
-        $this->resetPage();
-    }
+        $this->resetPage(); // Reset pagination ke halaman pertama saat jumlah item per halaman berubah
+    } // Reset pagination saat jumlah item per halaman berubah
 
     public function create(): void
     {
-        $this->resetForm();
-        $this->editMode = false;
-        $this->resetValidation();
-    }
+        $this->resetForm(); // Reset form ke kondisi awal
+        $this->editMode = false; // Nonaktifkan mode edit
+        $this->resetValidation(); // Hapus pesan validasi sebelumnya
+    } // Reset form untuk membuat penerbit baru
 
     public function store(): void
     {
-        $this->validate();
+        $this->validate(); // Jalankan validasi pada input
 
-        $logoPath = $this->existingLogo;
-        if ($this->logo instanceof TemporaryUploadedFile) {
-            Storage::disk('public')->makeDirectory('admin/logo-penerbit');
-            if ($logoPath) {
+        $logoPath = $this->existingLogo; // Gunakan logo lama sebagai default
+        if ($this->logo instanceof TemporaryUploadedFile) { // Jika ada upload logo baru
+            Storage::disk('public')->makeDirectory('admin/logo-penerbit'); // Buat direktori jika belum ada
+            if ($logoPath) { // Hapus logo lama jika ada
                 Storage::disk('public')->delete($logoPath);
             }
-            $logoPath = $this->logo->store('admin/logo-penerbit', 'public');
+            $logoPath = $this->logo->store('admin/logo-penerbit', 'public'); // Simpan logo baru
         }
 
         $payload = [
-            'nama_penerbit' => trim($this->nama_penerbit),
-            'deskripsi' => trim($this->deskripsi),
-            'tahun_hakcipta' => (int) $this->tahun_hakcipta,
-            'logo' => $logoPath,
+            'nama_penerbit' => trim($this->nama_penerbit), // Normalisasi nama penerbit
+            'deskripsi' => trim($this->deskripsi), // Normalisasi deskripsi
+            'tahun_hakcipta' => (int) $this->tahun_hakcipta, // Konversi tahun hak cipta ke integer
+            'logo' => $logoPath, // Path logo yang akan disimpan
         ];
 
-        DB::transaction(function () use ($payload) {
-            if ($this->penerbitId) {
-                $penerbit = Penerbit::findOrFail($this->penerbitId);
-                $penerbit->update($payload);
-            } else {
-                $penerbit = Penerbit::create($payload);
-                $this->penerbitId = $penerbit->id;
+        DB::transaction(function () use ($payload) { // Jalankan dalam transaksi database
+            if ($this->penerbitId) { // Jika dalam mode edit
+                $penerbit = Penerbit::findOrFail($this->penerbitId); // Ambil penerbit yang akan diupdate
+                $penerbit->update($payload); // Update data penerbit
+            } else { // Jika dalam mode create
+                $penerbit = Penerbit::create($payload); // Buat penerbit baru
+                $this->penerbitId = $penerbit->id; // Simpan ID penerbit baru
             }
         });
 
         session()->flash(
             'message',
-            $this->editMode ? 'Penerbit berhasil diperbarui.' : 'Penerbit berhasil ditambahkan.'
+            $this->editMode ? 'Penerbit berhasil diperbarui.' : 'Penerbit berhasil ditambahkan.' // Tampilkan pesan sukses
         );
 
-        $this->dispatch('close-modal', id: 'modal-form');
-        $this->resetForm();
-    }
+        $this->dispatch('close-modal', id: 'modal-form'); // Kirim event untuk menutup modal
+        $this->resetForm(); // Reset form setelah disimpan
+    } // Simpan data penerbit baru atau perbarui yang sudah ada
 
     public function edit(int $id): void
     {
-        $this->resetValidation();
-        $penerbit = Penerbit::findOrFail($id);
+        $this->resetValidation(); // Hapus pesan validasi sebelumnya
+        $penerbit = Penerbit::findOrFail($id); // Ambil data penerbit berdasarkan ID
 
-        $this->editMode = true;
-        $this->penerbitId = $penerbit->id;
-        $this->nama_penerbit = $penerbit->nama_penerbit;
-        $this->deskripsi = $penerbit->deskripsi;
-        $this->tahun_hakcipta = $penerbit->tahun_hakcipta;
-        $this->existingLogo = $penerbit->logo;
-        $this->logo = null;
-    }
+        $this->editMode = true; // Aktifkan mode edit
+        $this->penerbitId = $penerbit->id; // Set ID penerbit yang akan diedit
+        $this->nama_penerbit = $penerbit->nama_penerbit; // Muat nama penerbit
+        $this->deskripsi = $penerbit->deskripsi; // Muat deskripsi penerbit
+        $this->tahun_hakcipta = $penerbit->tahun_hakcipta; // Muat tahun hak cipta
+        $this->existingLogo = $penerbit->logo; // Muat path logo penerbit
+        $this->logo = null; // Reset upload logo
+    } // Muat data penerbit untuk mode edit
 
     public function delete(int $id): void
     {
-        $penerbit = Penerbit::findOrFail($id);
+        $penerbit = Penerbit::findOrFail($id); // Ambil data penerbit berdasarkan ID
 
-        if ($penerbit->logo) {
-            Storage::disk('public')->delete($penerbit->logo);
+        if ($penerbit->logo) { // Jika penerbit memiliki logo
+            Storage::disk('public')->delete($penerbit->logo); // Hapus file logo dari storage
         }
 
-        $penerbit->delete();
+        $penerbit->delete(); // Hapus data penerbit dari database
 
-        session()->flash('message', 'Penerbit berhasil dihapus.');
-        $this->resetForm();
-    }
+        session()->flash('message', 'Penerbit berhasil dihapus.'); // Tampilkan pesan sukses
+        $this->resetForm(); // Reset form setelah penghapusan
+    } // Hapus data penerbit
 
     public function updatedLogo(): void
     {
-        if ($this->logo instanceof TemporaryUploadedFile) {
-            $this->validateOnly('logo');
+        if ($this->logo instanceof TemporaryUploadedFile) { // Jika ada file logo yang diupload
+            $this->validateOnly('logo'); // Validasi hanya field logo
         }
-    }
+    } // Validasi file logo saat diupload
 
     #[Computed]
     public function listPenerbit()
     {
-        return Penerbit::orderBy('nama_penerbit', 'asc')->paginate($this->perPage);
-    }
+        return Penerbit::orderBy('nama_penerbit', 'asc')->paginate($this->perPage); // Ambil data penerbit dan urutkan berdasarkan nama
+    } // Ambil daftar penerbit dengan pagination
 
     public function render()
     {
         return view('livewire.admin.penerbit');
-    }
+    } // Render tampilan komponen
 
     private function resetForm(): void
     {
@@ -171,8 +171,8 @@ class PenerbitBuku extends Component
             'tahun_hakcipta',
             'existingLogo',
             'editMode',
-        ]);
-        $this->resetErrorBag();
-        $this->resetValidation();
-    }
+        ]); // Reset semua properti form ke nilai awal
+        $this->resetErrorBag(); // Hapus pesan error
+        $this->resetValidation(); // Hapus status validasi
+    } // Reset form ke kondisi awal
 }
