@@ -4,6 +4,7 @@ namespace App\Livewire\Guru;
 
 use App\Models\Buku;
 use App\Models\Peminjaman;
+use App\Models\PeminjamanPenalty;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -205,7 +206,7 @@ class ScanPengembalian extends Component
     private function completeReturn(Peminjaman $loan, array $lateInfo, ?string $payload = null): void
     {
         try {
-            DB::transaction(function () use ($loan) {
+            DB::transaction(function () use ($loan, $lateInfo) {
                 $items = $loan->items()->with('buku')->get();
                 $bookIds = $items->pluck('buku_id')->all();
 
@@ -227,6 +228,16 @@ class ScanPengembalian extends Component
                     'status' => 'returned',
                     'returned_at' => now(),
                 ]);
+
+                if ($lateInfo['late_fee'] > 0) {
+                    PeminjamanPenalty::create([
+                        'peminjaman_id' => $loan->id,
+                        'guru_id' => Auth::user()?->guru?->id,
+                        'late_days' => $lateInfo['late_days'],
+                        'amount' => $lateInfo['late_fee'],
+                        'paid_at' => now(),
+                    ]);
+                }
             });
 
             $loan->refresh();

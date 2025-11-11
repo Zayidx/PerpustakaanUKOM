@@ -68,6 +68,20 @@
                                 Silakan informasikan ke siswa sebelum menyelesaikan pengembalian.
                             </div>
                         @endif
+                        @if (($pendingReturn['loan_id'] ?? null) === ($loan['id'] ?? null))
+                            <div class="alert alert-info">
+                                Konfirmasi pembayaran denda sebesar
+                                <strong>Rp{{ number_format($pendingReturn['late_fee'] ?? 0, 0, ',', '.') }}</strong>.
+                                <div class="d-flex gap-2 mt-2">
+                                    <button type="button" class="btn btn-success btn-sm" wire:click="confirmLateFee">
+                                        Sudah dibayar
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" wire:click="cancelLateFee">
+                                        Belum dibayar
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
                         <dl class="row mb-0">
                             <dt class="col-sm-4">Kode</dt>
                             <dd class="col-sm-8">{{ $loan['kode'] }}</dd>

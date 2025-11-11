@@ -574,6 +574,11 @@ class LoanFlowTest extends TestCase
         $component->call('confirmLateFee')
             ->assertSet('loan.status', 'returned');
 
+        $this->assertDatabaseHas('peminjaman_penalties', [
+            'peminjaman_id' => $loan->id,
+            'amount' => 2000,
+        ]);
+
         $loan->refresh();
         $book->refresh();
 
@@ -665,6 +670,11 @@ class LoanFlowTest extends TestCase
 
         $component->call('confirmLateFee')
             ->assertSet('loan.status', 'returned');
+
+        $this->assertDatabaseHas('peminjaman_penalties', [
+            'peminjaman_id' => $loan->id,
+            'amount' => 1000,
+        ]);
 
         $loan->refresh();
         $book->refresh();

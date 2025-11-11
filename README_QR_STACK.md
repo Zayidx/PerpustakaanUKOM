@@ -1,23 +1,26 @@
-## QR Stack Overview
+## QR Stack Overview (Step by Step)
 
-Fitur peminjaman memanfaatkan dua komponen berbeda:
+Fitur peminjaman & pengembalian berbasis QR memanfaatkan dua lapisan:
 
-1. **Backend QR generator** – paket [`simplesoftwareio/simple-qrcode`](https://github.com/SimpleSoftwareIO/simple-qrcode) digunakan untuk membuat QR code yang ditampilkan ke siswa.
-2. **Frontend QR scanner** – library JavaScript [`html5-qrcode`](https://github.com/mebjas/html5-qrcode) memanfaatkan kamera perangkat guru untuk membaca QR atau input manual sebagai cadangan.
+1. **Generator backend (`simplesoftwareio/simple-qrcode`)** – membuat QR di sisi siswa, baik untuk permintaan pinjam maupun tiket pengembalian.
+2. **Scanner frontend (`html5-qrcode`)** – memanfaatkan kamera perangkat guru untuk membaca QR, dengan fallback input PIN enam digit.
 
-Dokumen ini menjelaskan cara kerja keduanya dan referensi kode terkait.
+Dokumen ini merinci peran masing‑masing, lokasi kode, dan alur integrasinya.
 
 ---
 
-### 1. simple-qrcode (backend)
+### Langkah 1 – Generator QR (simple-qrcode)
 
-**Lokasi utama**: `app/Livewire/Siswa/KodePinjaman.php`
+| Tujuan | Membuat QR code beserta PIN cadangan untuk siswa |
+|--------|--------------------------------------------------|
+| Lokasi utama | `app/Livewire/Siswa/KodePinjaman.php` <br> `app/Livewire/Siswa/ListPeminjaman.php` (tiket pengembalian) |
+| Paket | [`simplesoftwareio/simple-qrcode`](https://github.com/SimpleSoftwareIO/simple-qrcode) |
+
+Contoh pembuatan QR permintaan pinjam:
 
 ```php
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
-
 $payload = [
-    'code' => $loan->kode,
+    'code' => $loan->kode,          // PIN enam digit
     'loan_id' => $loan->id,
     'student_id' => $loan->siswa_id,
     'books' => $loan->items->map(fn ($item) => [
@@ -33,38 +36,34 @@ $this->qrSvg = QrCode::format('svg')
     ->generate(json_encode($payload, JSON_THROW_ON_ERROR));
 ```
 
-**Alur kerja**:
+Untuk tiket pengembalian (`ListPeminjaman`), payload ditambah flag `action => 'return'` dan informasi keterlambatan. Semua QR langsung disisipkan sebagai SVG di Blade tanpa file fisik.
 
-1. Komponen Livewire siswa (`KodePinjaman`) memuat data peminjaman dan menyiapkan payload JSON berisi kode 6 digit, ID peminjaman, ID siswa, dan daftar buku.
-2. `QrCode::format('svg')` menghasilkan gambar SVG secara dinamis (tanpa menyimpan file) yang langsung disisipkan di Blade (`resources/views/livewire/siswa/kode-pinjaman.blade.php`).
-3. Guru dapat memindai QR tersebut; payload JSON akan dibaca oleh scanner (lihat bagian html5-qrcode).
-
-**Konfigurasi**:
-
-- Paket sudah terdaftar melalui `composer.json` (`"simplesoftwareio/simple-qrcode": "^4.2"`).
-- Tidak memerlukan service provider tambahan karena Laravel auto-discover.
-- Opsional: ukuran, warna, logo dapat diubah dengan chaining method `color()`, `backgroundColor()`, dsb.
+**Catatan konfigurasi**
+- Paket sudah terdaftar di `composer.json`; tidak perlu registrasi manual.
+- Ukuran/warna dapat diatur via chaining (`size()`, `color()`, dll).
+- PIN enam digit tetap dicetak sebagai teks di bawah QR agar guru bisa mengetik manual.
 
 ---
 
-### 2. html5-qrcode (frontend scanner)
+### Langkah 2 – Scanner QR (html5-qrcode)
 
-**Lokasi utama**: `resources/views/livewire/guru/scan-peminjaman.blade.php`
+| Tujuan | Membaca QR via kamera guru + fallback PIN manual |
+|--------|--------------------------------------------------|
+| Lokasi utama | `resources/views/livewire/guru/scan-peminjaman.blade.php` <br> `resources/views/livewire/guru/scan-pengembalian.blade.php` |
+| Library | [`html5-qrcode`](https://github.com/mebjas/html5-qrcode) – disimpan lokal pada `public/assets/js/html5-qrcode.min.js` |
+
+Ringkasan implementasi:
 
 ```html
 @push('scripts')
     <script src="{{ asset('assets/js/html5-qrcode.min.js') }}"></script>
     <script>
-        const dispatchLivewireEvent = (eventName, ...payload) => {
-            window.dispatchEvent(new CustomEvent(eventName, { detail: payload }));
-        };
-
         const loanScanner = {
             instance: null,
             containerId: 'qr-reader',
             initOnce() {
                 const container = document.getElementById(this.containerId);
-                // ... validasi elemen & library
+                // validasi elemen & load library
 
                 this.instance = new Html5Qrcode(this.containerId, { verbose: false });
                 const config = { fps: 10, qrbox: { width: 250, height: 250 } };
@@ -72,10 +71,14 @@ $this->qrSvg = QrCode::format('svg')
                 this.instance.start(
                     { facingMode: 'environment' },
                     config,
-                    (decodedText) => dispatchLivewireEvent('qr-scanned', decodedText),
+                    (decodedText) => window.dispatchEvent(
+                        new CustomEvent('qr-scanned', { detail: [decodedText] })
+                    ),
                     () => {}
                 ).catch((error) => {
-                    dispatchLivewireEvent('qr-scanner-error', error?.message ?? String(error));
+                    window.dispatchEvent(
+                        new CustomEvent('qr-scanner-error', { detail: [error?.message ?? String(error)] })
+                    );
                 });
             },
         };
@@ -83,33 +86,32 @@ $this->qrSvg = QrCode::format('svg')
 @endpush
 ```
 
-**Alur kerja**:
+**Alur kerja scanner**
+1. Saat halaman guru dibuka, skrip lokal dimuat (tidak tergantung CDN).
+2. `Html5Qrcode.start()` meminta izin kamera (wajib `https://` atau `http://localhost` sebagaimana dijelaskan di `README_NGINX_CAMERA.md`).
+3. Setiap QR yang terbaca mengirim event `qr-scanned`. Komponen Livewire `ScanPeminjaman` / `ScanPengembalian` mendengar event tersebut via `#[On('qr-scanned')]`.
+4. Payload QR di-`json_decode`, diverifikasi, lalu diproses (update stok, ubah status, catat denda, dll).
+5. Bila kamera gagal, guru dapat mengetik PIN enam digit. Method `processManualCode()` memvalidasi `digits:6` dan memanggil alur yang sama (`processLoanData`).
 
-1. Saat halaman guru dimuat, script lokal `public/assets/js/html5-qrcode.min.js` di-load sehingga tidak tergantung CDN.
-2. `Html5Qrcode.start()` meminta izin kamera. Jika sukses, setiap QR yang terbaca diparsing ke callback `(decodedText) => ...`.
-3. Callback mengirim event `qr-scanned` melalui `CustomEvent`. Livewire component `App\Livewire\Guru\ScanPeminjaman` mendengarkan event tersebut via attribute `#[On('qr-scanned')]`.
-4. `ScanPeminjaman::handleScan()` mem-`json_decode` payload, mencari data peminjaman berdasarkan `code`, dan jika status `pending` akan mengurangi stok buku + mengubah status menjadi `accepted`.
-5. Jika kamera tidak tersedia, guru bisa memasukkan **kode 6 angka** lewat form manual. Metode `processManualCode()` memvalidasi `digits:6` dan memanggil helper yang sama (`processLoanData`) untuk mengeksekusi alur konfirmasi.
-
-**Catatan penting**:
-
-- Browser hanya mengizinkan kamera pada `https://` atau `http://localhost`. Gunakan konfigurasi Nginx HTTPS (lihat `README_NGINX_CAMERA.md`) agar perangkat lain dapat memakai kamera.
-- Pesan error dari scanner diteruskan ke Livewire lewat event `qr-scanner-error`. Komponen menampilkan alert ketika kamera tidak tersedia.
-- Library `html5-qrcode` mendukung fallback file input; jika diperlukan, bisa menambahkan tombol `Html5QrcodeScanner` bawaan.
+**Catatan tambahan**
+- Event `qr-scanner-error` mengisi alert UI ketika kamera ditolak / tidak ada.
+- `ScanPengembalian` menahan proses jika ada denda: modal + tombol “Sudah/Belum dibayar” harus ditekan sebelum stok dikembalikan dan penalty dicatat.
+- Scanner juga dapat diganti dengan input file (fitur bawaan html5-qrcode) bila ingin menambahkan fallback lain.
 
 ---
 
-### 3. Ikhtisar Flow
+### Langkah 3 – Alur lengkap
 
-1. **Siswa** memilih buku → `ListBuku` membuat peminjaman `pending` + kode numeric 6 digit (`generateUniqueCode()`).
-2. **Siswa** membuka halaman kode → `simple-qrcode` membentuk QR + menampilkan kode manual.
-3. **Guru** membuka halaman scan:
-   - Kamera aktif via `html5-qrcode`. QR dipindai → payload JSON dikirim ke Livewire.
-   - Jika kamera gagal, guru memasukkan kode 6 digit secara manual.
-4. **ScanPeminjaman** memproses permintaan:
-   - Validasi stok → decrement stok buku → set status `accepted`, `accepted_at`, `due_at`, `guru_id`.
-   - Menampilkan detail peminjaman di panel kanan.
-5. Guru dapat memonitor seluruh peminjaman di halaman `Manajemen Peminjaman`.
+1. **Siswa memilih buku** di `ListBuku`. Metode `generateLoanCode()` membuat peminjaman `pending` dan PIN 6 digit.
+2. **QR ditampilkan** di:
+   - `KodePinjaman` (permintaan pinjam).
+   - `ListPeminjaman` → tombol “Tampilkan” (tiket pengembalian). QR menyertakan `action => 'return'` dan info keterlambatan.
+3. **Guru memproses** di dashboard:
+   - `ScanPeminjaman`: memindai QR atau memasukkan PIN → stok otomatis dicek dan status berubah ke `accepted`.
+   - `ScanPengembalian`: memindai QR/pin; jika telat, guru wajib menekan tombol “Sudah/Belum dibayar” sebelum `completeReturn()` mengembalikan stok & mencatat denda.
+4. **Riwayat terlihat** di:
+   - Panel detail `ScanPengembalian` (status + info denda).
+   - Panel detail `Manajemen Peminjaman` (ringkasan peminjaman + list penalty yang pernah dicatat).
+5. **Monitoring lanjutan** dilakukan di halaman `Manajemen Peminjaman` (filter, detail, denda, status).
 
-Dengan kombinasi simple-qrcode (generator) dan html5-qrcode (scanner), alur peminjaman menjadi end-to-end: siswa tinggal menunjukkan QR/kode angka, guru memprosesnya melalui kamera atau input manual.
-
+Dengan pemisahan generator–scanner ini, siswa cukup menunjukkan QR/PIN, sementara guru memiliki dua cara (scan atau input) untuk memproses pinjam/pengembalian tanpa mengetik data lain. Helper tambahan (perhitungan keterlambatan, pencatatan penalty, dsb.) memastikan pengalaman tetap konsisten di kedua jenis transaksi.

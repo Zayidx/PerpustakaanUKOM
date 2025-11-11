@@ -290,6 +290,25 @@
                                 </li>
                             @endforeach
                         </ul>
+                        @if (!empty($selectedLoan['penalties']))
+                            <hr>
+                            <h6 class="mb-2">Riwayat Denda</h6>
+                            <ul class="list-group list-group-flush small">
+                                @foreach ($selectedLoan['penalties'] as $penalty)
+                                    <li class="list-group-item px-0 d-flex justify-content-between">
+                                        <div>
+                                            Rp{{ number_format($penalty['amount'], 0, ',', '.') }} ({{ $penalty['late_days'] }} hari)
+                                            <div class="text-muted">
+                                                Dibayar {{ optional($penalty['paid_at'])->translatedFormat('d F Y H:i') }}
+                                                @if ($penalty['guru'])
+                                                    • Oleh {{ $penalty['guru'] }}
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
                     @else
                         <p class="text-muted mb-0">
                             Pilih salah satu peminjaman di tabel untuk melihat detailnya.

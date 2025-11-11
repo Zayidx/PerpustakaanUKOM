@@ -235,7 +235,7 @@ class ManajemenPeminjaman extends Component
             return;
         }
 
-        $loan = Peminjaman::with(['items.buku', 'siswa.user', 'siswa.kelas', 'guru.user'])
+        $loan = Peminjaman::with(['items.buku', 'siswa.user', 'siswa.kelas', 'guru.user', 'penalties.guru.user'])
             ->find($this->selectedLoanId);
 
         if (! $loan) {
@@ -291,6 +291,15 @@ class ManajemenPeminjaman extends Component
             'late_fee' => $lateDays * 1000,
             'can_mark_returned' => $loan->status === 'accepted',
             'can_cancel' => $loan->status === 'pending',
+            'penalties' => $loan->penalties->map(function ($penalty) {
+                return [
+                    'id' => $penalty->id,
+                    'amount' => $penalty->amount,
+                    'late_days' => $penalty->late_days,
+                    'paid_at' => $penalty->paid_at,
+                    'guru' => $penalty->guru?->user?->nama_user,
+                ];
+            })->values()->all(),
         ];
     }
 
