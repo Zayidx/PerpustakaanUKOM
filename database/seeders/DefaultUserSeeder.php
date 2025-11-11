@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Guru;
 use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\RoleData;
@@ -53,13 +54,24 @@ class DefaultUserSeeder extends Seeder
             ]
         );
 
-        User::updateOrCreate(
+        $guruUser = User::updateOrCreate(
             ['email_user' => 'guru@gmail.com'],
             [
                 'nama_user' => 'Guru Konseling',
                 'phone_number' => $faker->numerify('08##########'),
                 'password' => 'guru123',
                 'role_id' => $roleGuru->id,
+            ]
+        );
+
+        Guru::updateOrCreate(
+            ['user_id' => $guruUser->id],
+            [
+                'nip' => '1987654321',
+                'mata_pelajaran' => 'Bimbingan Konseling',
+                'jenis_kelamin' => 'perempuan',
+                'alamat' => $faker->address(),
+                'foto' => null,
             ]
         );
 

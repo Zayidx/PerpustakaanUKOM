@@ -153,14 +153,19 @@ class ListBuku extends Component
                         'buku_id' => $book->id, // ID buku
                         'quantity' => 1, // Jumlah yang dipinjam
                     ]);
-
-                    $book->decrement('stok'); // Kurangi stok buku
                 }
 
                 return $loan; // Kembalikan data peminjaman
             });
         } catch (ValidationException $exception) { // Tangani error validasi
-            $this->setErrorBag($exception->validator->errors()); // Set error ke bag komponen
+            $this->resetErrorBag(); // Bersihkan error sebelumnya
+
+            foreach ($exception->errors() as $field => $messages) { // Tambahkan setiap pesan error
+                foreach ((array) $messages as $message) {
+                    $this->addError($field, $message);
+                }
+            }
+
             return null;
         }
 
@@ -236,7 +241,7 @@ class ListBuku extends Component
     private function generateUniqueCode(): string
     {
         do {
-            $code = 'PINJ-'.Str::upper(Str::random(8)); // Generate kode dalam format PINJ-XXXXXX
+            $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT); // Generate kode numerik 6 digit
         } while (Peminjaman::where('kode', $code)->exists()); // Ulangi hingga menemukan kode yang unik
 
         return $code; // Kembalikan kode unik

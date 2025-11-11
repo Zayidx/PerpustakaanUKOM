@@ -55,6 +55,18 @@
                         <span>Scan Peminjaman</span>
                     </a>
                 </li>
+                <li class="sidebar-item {{ Request::routeIs('guru.scan-pengembalian') ? 'active' : '' }} ">
+                    <a href="{{ route('guru.scan-pengembalian') }}" class='sidebar-link'>
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        <span>Scan Pengembalian</span>
+                    </a>
+                </li>
+                <li class="sidebar-item {{ Request::routeIs('guru.peminjaman') ? 'active' : '' }} ">
+                    <a href="{{ route('guru.peminjaman') }}" class='sidebar-link'>
+                        <i class="bi bi-journal-text"></i>
+                        <span>Manajemen Peminjaman</span>
+                    </a>
+                </li>
                 <li class="sidebar-title mt-4">Akun</li>
                 <li class="sidebar-item">
                     <form method="POST" action="{{ route('logout') }}">

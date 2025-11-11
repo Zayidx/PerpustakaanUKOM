@@ -12,12 +12,18 @@
                                 Status: {{ ucfirst($loan['status']) }}
                             </span>
                         </div>
+                        <p class="text-muted small mb-1">
+                            Kode peminjaman Anda:
+                        </p>
+                        <div class="fs-3 fw-bold mb-3">
+                            {{ $loan['kode'] }}
+                        </div>
                         @if ($qrSvg)
                             <div class="d-flex justify-content-center">
                                 {!! $qrSvg !!}
                             </div>
                             <p class="text-muted mt-3 mb-0">
-                                Tunjukkan QR code ini kepada guru untuk memproses peminjaman.
+                                Tunjukkan QR code atau bacakan kode 6 angka ini kepada guru untuk diproses.
                             </p>
                         @else
                             <p class="text-danger mb-0">Gagal membuat QR code.</p>

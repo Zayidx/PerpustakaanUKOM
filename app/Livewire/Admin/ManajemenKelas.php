@@ -176,11 +176,6 @@ class ManajemenKelas extends Component
         $this->resetValidation(); // Hapus status validasi
     } // Reset form ke kondisi awal
 
-    public function render()
-    {
-        return view('livewire.admin.manajemen-kelas');
-    }
-
     protected function rules(): array
     {
         return [
@@ -194,61 +189,4 @@ class ManajemenKelas extends Component
         ];
     } // Aturan validasi untuk form kelas
 
-    public function updatedPerPage($value): void
-    {
-        $this->perPage = $this->normalizePerPage($value); // Pastikan nilai perPage valid sesuai opsi
-        $this->resetPage(); // Reset pagination ke halaman pertama saat jumlah per halaman berubah
-    } // Atur jumlah item per halaman dan reset pagination
-
-    public function updatedSearch(): void
-    {
-        $this->search = trim((string) $this->search); // Hapus spasi di awal/akhir kata kunci pencarian
-        $this->resetPage(); // Reset pagination ke halaman pertama saat pencarian berubah
-    } // Hapus spasi pada input pencarian dan reset pagination
-
-    public function updatedSort($value): void
-    {
-        $this->sort = $this->normalizeSort($value); // Pastikan nilai sort valid
-        $this->resetPage(); // Reset pagination ke halaman pertama saat sorting berubah
-    } // Atur opsi sorting dan reset pagination
-
-    public function create(): void
-    {
-        $this->resetForm(); // Reset form ke kondisi awal
-        $this->resetValidation(); // Hapus pesan validasi sebelumnya
-    } // Reset form untuk membuat kelas baru
-
-    private function normalizeSort(string $value): string
-    {
-        return array_key_exists($value, $this->sortOptions) ? $value : 'nama_kelas_asc';
-    }
-
-    private function resolveSort(): array
-    {
-        return match ($this->sort) {
-            'nama_kelas_desc' => ['nama_kelas', 'desc'],
-            'created_at_desc' => ['created_at', 'desc'],
-            'created_at_asc' => ['created_at', 'asc'],
-            default => ['nama_kelas', 'asc'],
-        };
-    }
-
-    private function normalizePerPage($value): int
-    {
-        $value = (int) $value;
-
-        return in_array($value, $this->perPageOptions, true) ? $value : $this->perPageOptions[0];
-    }
-
-    private function resetForm(): void
-    {
-        $this->reset([
-            'kelas_id',
-            'nama_kelas',
-            'tingkat',
-        ]);
-
-        $this->resetErrorBag();
-        $this->resetValidation();
-    }
 }

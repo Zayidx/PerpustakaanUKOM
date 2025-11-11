@@ -2,13 +2,15 @@
 
 namespace App\Livewire\Guru;
 
-use App\Models\Peminjaman;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use App\Models\Buku;
+use App\Models\Peminjaman;
 
 class ScanPeminjaman extends Component
 {
@@ -19,6 +21,13 @@ class ScanPeminjaman extends Component
     public ?string $lastPayload = null;
 
     public ?string $errorMessage = null;
+
+    public string $manualCode = '';
+    
+    protected array $messages = [
+        'manualCode.required' => 'Kode peminjaman wajib diisi.',
+        'manualCode.digits' => 'Kode peminjaman harus terdiri dari 6 angka.',
+    ];
 
     #[On('qr-scanned')]
     public function handleScan(mixed $event): void
@@ -33,6 +42,39 @@ class ScanPeminjaman extends Component
             return;
         }
 
+        $this->processLoanData($data, $payload); // Proses data peminjaman
+    } // Tangani event scan QR code untuk peminjaman
+
+    #[On('qr-scanner-error')]
+    public function handleScannerError(mixed $event = null): void
+    {
+        $message = null;
+
+        if (is_string($event)) {
+            $message = $event;
+        } elseif (is_array($event)) {
+            $message = $event['message'] ?? ($event[0] ?? null);
+        }
+
+        $this->errorMessage = $message ?: null; // Tetapkan pesan error atau null jika tidak ada
+    } // Tangani event error scanner QR
+
+    public function processManualCode(): void
+    {
+        $this->reset(['errorMessage', 'loan', 'lastPayload']); // Reset state sebelum memproses form
+        $this->resetErrorBag();
+
+        $validated = $this->validate([
+            'manualCode' => ['required', 'digits:6'],
+        ]);
+
+        $code = trim($validated['manualCode']);
+
+        $this->processLoanData(['code' => $code]); // Proses kode manual
+    } // Proses kode peminjaman secara manual
+
+    private function processLoanData(array $data, ?string $payload = null): void
+    {
         $user = Auth::user(); // Ambil user yang sedang login
         $guru = $user?->guru; // Ambil data guru terkait
 
@@ -41,12 +83,12 @@ class ScanPeminjaman extends Component
             return;
         }
 
-        $loan = Peminjaman::query() // Cari peminjaman berdasarkan kode QR
-            ->with(['items.buku', 'siswa.user', 'siswa.kelas']) // Muat relasi untuk detail
-            ->where('kode', $data['code']) // Cari berdasarkan kode
+        $loan = Peminjaman::query() // Cari peminjaman berdasarkan kode
+            ->with(['items.buku', 'siswa.user', 'siswa.kelas'])
+            ->where('kode', $data['code'])
             ->first();
 
-        if (! $loan) { // Cek apakah peminjaman ditemukan
+        if (! $loan) {
             $this->errorMessage = 'Data peminjaman tidak ditemukan.';
             return;
         }
@@ -57,42 +99,81 @@ class ScanPeminjaman extends Component
         }
 
         if ($loan->status === 'pending') { // Jika status masih pending, update ke accepted
-            DB::transaction(function () use ($loan, $guru) { // Jalankan dalam transaksi database
-                $loan->update([ // Update status peminjaman
-                    'status' => 'accepted', // Ganti status ke accepted
-                    'guru_id' => $guru->id, // Tetapkan ID guru yang menyetujui
-                    'accepted_at' => now(), // Tandai waktu penerimaan
-                    'due_at' => now()->addWeek(), // Tetapkan tanggal jatuh tempo (1 minggu dari sekarang)
-                ]);
-            });
+            try {
+                DB::transaction(function () use ($loan, $guru) { // Jalankan dalam transaksi database
+                    $items = $loan->items()->with('buku')->get(); // Ambil item peminjaman terbaru
+                    $bookIds = $items->pluck('buku_id')->all(); // Kumpulkan ID buku
 
-            $loan->refresh(); // Refresh data dari database
+                    $books = Buku::query()
+                        ->whereIn('id', $bookIds)
+                        ->lockForUpdate()
+                        ->get()
+                        ->keyBy('id'); // Kunci buku terkait untuk mencegah race condition
+
+                    $insufficientStock = []; // Daftar buku yang stoknya tidak cukup
+
+                    foreach ($items as $item) { // Validasi stok buku yang dipinjam
+                        $book = $books->get($item->buku_id);
+
+                        if (! $book || $book->stok < $item->quantity) {
+                            $insufficientStock[] = $item->buku?->nama_buku ?? 'ID '.$item->buku_id;
+                        }
+                    }
+
+                    if (! empty($insufficientStock)) { // Jika ada stok yang tidak cukup, batalkan
+                        throw ValidationException::withMessages([
+                            'stock' => 'Stok buku berikut tidak mencukupi: '.implode(', ', $insufficientStock),
+                        ]);
+                    }
+
+                    foreach ($items as $item) { // Kurangi stok buku yang dipinjam
+                        $book = $books->get($item->buku_id);
+
+                        if ($book) {
+                            $book->decrement('stok', $item->quantity);
+                        }
+                    }
+
+                    $loan->update([ // Update status peminjaman
+                        'status' => 'accepted',
+                        'guru_id' => $guru->id,
+                        'accepted_at' => now(),
+                        'due_at' => now()->addWeek(),
+                    ]);
+                });
+
+                $loan->refresh(); // Refresh data dari database
+            } catch (ValidationException $exception) {
+                $this->errorMessage = $exception->errors()['stock'][0] ?? 'Stok buku tidak mencukupi untuk memproses peminjaman.';
+                $this->loan = $this->formatLoan($loan); // Tampilkan data peminjaman saat ini
+                $this->lastPayload = $payload; // Simpan payload terakhir
+                return;
+            }
         }
 
-        $this->loan = [ // Format data peminjaman untuk ditampilkan
+        $this->loan = $this->formatLoan($loan); // Format data peminjaman untuk ditampilkan
+        $this->lastPayload = $payload; // Simpan payload terakhir untuk referensi
+    }
+
+    private function formatLoan(Peminjaman $loan): array
+    {
+        $loan->loadMissing(['items.buku', 'siswa.user', 'siswa.kelas']); // Pastikan relasi yang dibutuhkan dimuat
+
+        return [
             'id' => $loan->id,
             'kode' => $loan->kode,
             'status' => $loan->status,
             'accepted_at' => $loan->accepted_at,
             'due_at' => $loan->due_at,
             'returned_at' => $loan->returned_at,
-            'student_name' => $loan->siswa?->user?->nama_user, // Nama siswa
-            'student_class' => optional($loan->siswa?->kelas)->nama_kelas ?? '-', // Kelas siswa
-            'books' => $loan->items->map(fn ($item) => [ // Daftar buku yang dipinjam
-                'id' => $item->buku_id, // ID buku
-                'title' => $item->buku->nama_buku, // Judul buku
-            ])->values()->all(), // Kumpulkan semua buku
+            'student_name' => $loan->siswa?->user?->nama_user,
+            'student_class' => optional($loan->siswa?->kelas)->nama_kelas ?? '-',
+            'books' => $loan->items->map(fn ($item) => [
+                'id' => $item->buku_id,
+                'title' => $item->buku->nama_buku,
+            ])->values()->all(),
         ];
-
-        $this->lastPayload = $payload; // Simpan payload terakhir untuk referensi
-    } // Tangani event scan QR code untuk peminjaman
-
-    #[On('qr-scanner-error')]
-    public function handleScannerError(mixed $event = null): void
-    {
-        $message = is_string($event) ? $event : ($event['message'] ?? null); // Ambil pesan error dari event
-        $this->errorMessage = $message ?: null; // Tetapkan pesan error atau null jika tidak ada
-    } // Tangani event error scanner QR
+    } // Format data peminjaman untuk ditampilkan
 
     public function render()
     {
