@@ -3,7 +3,7 @@
         <div class="sidebar-header position-relative">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="logo">
-                    <a href="{{ route('siswa.dashboard') }}"><img src="{{ asset('assets/compiled/svg/logo.svg') }}"
+                    <a wire:navigate href="{{ route('siswa.dashboard') }}"><img src="{{ asset('assets/compiled/svg/logo.svg') }}"
                             alt="Logo" srcset=""></a>
                 </div>
                 <div class="theme-toggle d-flex gap-2  align-items-center mt-2">
@@ -44,20 +44,20 @@
             <ul class="menu">
                 <li class="sidebar-title">Menu</li>
                 <li class="sidebar-item {{ Request::routeIs('siswa.dashboard') ? 'active' : '' }} ">
-                    <a href="{{ route('siswa.dashboard') }}" class='sidebar-link'>
+                    <a wire:navigate href="{{ route('siswa.dashboard') }}" class='sidebar-link'>
                         <i class="bi bi-grid-fill"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
                 <li class="sidebar-title mt-4">Perpustakaan</li>
                 <li class="sidebar-item {{ Request::routeIs('siswa.buku') ? 'active' : '' }} ">
-                    <a href="{{ route('siswa.buku') }}" class='sidebar-link'>
+                    <a wire:navigate href="{{ route('siswa.buku') }}" class='sidebar-link'>
                         <i class="bi bi-book-half"></i>
                         <span>Daftar Buku</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('siswa.peminjaman*') ? 'active' : '' }} ">
-                    <a href="{{ route('siswa.peminjaman') }}" class='sidebar-link'>
+                    <a wire:navigate href="{{ route('siswa.peminjaman') }}" class='sidebar-link'>
                         <i class="bi bi-journal-bookmark-fill"></i>
                         <span>Peminjaman Saya</span>
                     </a>
