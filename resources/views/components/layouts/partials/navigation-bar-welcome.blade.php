@@ -16,7 +16,22 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}#services">Layanan</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}#contact">Kontak</a></li>
                 </ul>
-                <a class="btn btn-primary ms-lg-3 mt-3 mt-lg-0 d-inline-flex align-items-center justify-content-center px-4" href="{{ route('login') }}">Masuk</a>
+                @php
+                    $dashboardRoute = null;
+                    if (auth()->check()) {
+                        $roleName = auth()->user()->role?->nama_role;
+                        $dashboardRoute = match ($roleName) {
+                            'Administrator' => route('admin.dashboard'),
+                            'Guru' => route('guru.dashboard'),
+                            'Siswa' => route('siswa.dashboard'),
+                            default => null,
+                        };
+                    }
+                @endphp
+                <a class="btn btn-primary ms-lg-3 mt-3 mt-lg-0 d-inline-flex align-items-center justify-content-center px-4"
+                    href="{{ $dashboardRoute ?? route('login') }}">
+                    {{ $dashboardRoute ? 'Dashboard' : 'Masuk' }}
+                </a>
             </div>
         </div>
     </nav>

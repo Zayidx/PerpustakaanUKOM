@@ -32,9 +32,8 @@
              @error('password')<div class="invalid-feedback"><i class="bx bx-radio-circle"></i> {{ $message }}</div>@enderror
         </div>
 
-        <button type="submit" class="mt-3 shadow-lg btn btn-primary btn-block btn-lg" wire:loading.attr="disabled">
-            <span wire:loading.remove wire:target='attemptLogin'>Log in</span> 
-            <span wire:loading wire:target='attemptLogin' class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <button type="submit" class="mt-3 shadow-lg btn btn-primary btn-block btn-lg">
+            Log in
         </button>
         
         
