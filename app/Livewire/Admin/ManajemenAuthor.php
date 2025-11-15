@@ -26,6 +26,14 @@ class ManajemenAuthor extends Component
     #[Url(except: "")]
     #[Layout('components.layouts.dashboard-layouts')]
     public $perPage = 5;
+    public string $search = '';
+    public string $sort = 'created_at_desc';
+    public array $sortOptions = [
+        'created_at_desc' => 'Terbaru',
+        'created_at_asc' => 'Terlama',
+        'nama_author_asc' => 'Nama A-Z',
+        'nama_author_desc' => 'Nama Z-A',
+    ];
 
     public $authorId;
     public $nama_author = '';
@@ -60,10 +68,28 @@ class ManajemenAuthor extends Component
         ];
     } // Aturan validasi untuk form author
 
+    public function mount(): void
+    {
+        $this->sort = $this->normalizeSort($this->sort);
+        $this->search = trim((string) $this->search);
+    }
+
     public function updatedPerPage(): void
     {
         $this->resetPage(); // Reset pagination ke halaman pertama saat jumlah item per halaman berubah
     } // Reset pagination saat jumlah item per halaman berubah
+
+    public function updatedSearch(): void
+    {
+        $this->search = trim((string) $this->search);
+        $this->resetPage();
+    }
+
+    public function updatedSort($value): void
+    {
+        $this->sort = $this->normalizeSort($value);
+        $this->resetPage();
+    }
 
     public function create(): void
     {
@@ -154,7 +180,20 @@ class ManajemenAuthor extends Component
     #[Computed]
     public function getListAuthorProperty()
     {
-        return Author::orderByDesc('created_at')->paginate($this->perPage); // Ambil data author dan urutkan terbaru dulu
+        [$sortField, $sortDirection] = $this->resolveSort();
+
+        return Author::query()
+            ->when($this->search !== '', function ($query) {
+                $term = '%'.$this->search.'%';
+
+                $query->where(function ($subQuery) use ($term) {
+                    $subQuery->where('nama_author', 'like', $term)
+                        ->orWhere('email_author', 'like', $term)
+                        ->orWhere('no_telp', 'like', $term);
+                });
+            })
+            ->orderBy($sortField, $sortDirection)
+            ->paginate($this->perPage); // Ambil data author dan urutkan sesuai pilihan
     } // Ambil daftar author dengan pagination
 
     public function render()
@@ -163,6 +202,21 @@ class ManajemenAuthor extends Component
             'listAuthor' => $this->listAuthor, // Kirim daftar author ke view
         ]);
     } // Render tampilan komponen dengan data author
+
+    private function normalizeSort($value): string
+    {
+        return array_key_exists($value, $this->sortOptions) ? $value : 'created_at_desc';
+    }
+
+    private function resolveSort(): array
+    {
+        return match ($this->sort) {
+            'created_at_asc' => ['created_at', 'asc'],
+            'nama_author_asc' => ['nama_author', 'asc'],
+            'nama_author_desc' => ['nama_author', 'desc'],
+            default => ['created_at', 'desc'],
+        };
+    }
 
     private function resetForm(): void
     {

@@ -49,10 +49,7 @@
 
                 <div class="col-12 col-md-auto">
                     <div class="d-grid d-md-flex justify-content-md-end gap-2">
-                        <a href="{{ route('admin.kategori-pengumuman') }}" class="btn btn-outline-primary btn-sm w-100 w-md-auto">
-                            <i class="bi bi-tags"></i>
-                            <span class="ms-1">Kategori</span>
-                        </a>
+                       
                         <button wire:click="create"
                                 type="button"
                                 class="btn btn-primary btn-sm w-100 w-md-auto"

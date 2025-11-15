@@ -26,6 +26,14 @@ class PenerbitBuku extends Component
     #[Url(except: "")]
     #[Layout('components.layouts.dashboard-layouts')]
     public $perPage = 5;
+    public string $search = '';
+    public string $sort = 'created_at_desc';
+    public array $sortOptions = [
+        'created_at_desc' => 'Terbaru',
+        'created_at_asc' => 'Terlama',
+        'nama_penerbit_asc' => 'Nama A-Z',
+        'nama_penerbit_desc' => 'Nama Z-A',
+    ];
 
     public $penerbitId;
     public $nama_penerbit = '';
@@ -64,10 +72,28 @@ class PenerbitBuku extends Component
         ];
     } // Aturan validasi untuk form penerbit
 
+    public function mount(): void
+    {
+        $this->sort = $this->normalizeSort($this->sort);
+        $this->search = trim((string) $this->search);
+    }
+
     public function updatedPerPage(): void
     {
         $this->resetPage(); // Reset pagination ke halaman pertama saat jumlah item per halaman berubah
     } // Reset pagination saat jumlah item per halaman berubah
+
+    public function updatedSearch(): void
+    {
+        $this->search = trim((string) $this->search);
+        $this->resetPage();
+    }
+
+    public function updatedSort($value): void
+    {
+        $this->sort = $this->normalizeSort($value);
+        $this->resetPage();
+    }
 
     public function create(): void
     {
@@ -153,7 +179,20 @@ class PenerbitBuku extends Component
     #[Computed]
     public function listPenerbit()
     {
-        return Penerbit::orderBy('nama_penerbit', 'asc')->paginate($this->perPage); // Ambil data penerbit dan urutkan berdasarkan nama
+        [$sortField, $sortDirection] = $this->resolveSort();
+
+        return Penerbit::query()
+            ->when($this->search !== '', function ($query) {
+                $term = '%'.$this->search.'%';
+
+                $query->where(function ($subQuery) use ($term) {
+                    $subQuery->where('nama_penerbit', 'like', $term)
+                        ->orWhere('deskripsi', 'like', $term)
+                        ->orWhere('tahun_hakcipta', 'like', $term);
+                });
+            })
+            ->orderBy($sortField, $sortDirection)
+            ->paginate($this->perPage); // Ambil data penerbit sesuai pilihan sort
     } // Ambil daftar penerbit dengan pagination
 
     public function render()
@@ -175,4 +214,19 @@ class PenerbitBuku extends Component
         $this->resetErrorBag(); // Hapus pesan error
         $this->resetValidation(); // Hapus status validasi
     } // Reset form ke kondisi awal
+
+    private function normalizeSort($value): string
+    {
+        return array_key_exists($value, $this->sortOptions) ? $value : 'created_at_desc';
+    }
+
+    private function resolveSort(): array
+    {
+        return match ($this->sort) {
+            'created_at_asc' => ['created_at', 'asc'],
+            'nama_penerbit_asc' => ['nama_penerbit', 'asc'],
+            'nama_penerbit_desc' => ['nama_penerbit', 'desc'],
+            default => ['created_at', 'desc'],
+        };
+    }
 }

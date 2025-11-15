@@ -30,6 +30,14 @@ class ManajemenBuku extends Component
     #[Url(except: "")]
     #[Layout('components.layouts.dashboard-layouts')]
     public $perPage = 5;
+    public string $search = '';
+    public string $sort = 'created_at_desc';
+    public array $sortOptions = [
+        'created_at_desc' => 'Terbaru',
+        'created_at_asc' => 'Terlama',
+        'nama_buku_asc' => 'Judul A-Z',
+        'nama_buku_desc' => 'Judul Z-A',
+    ];
 
     public $bukuId;
     public $nama_buku = '';
@@ -85,10 +93,28 @@ class ManajemenBuku extends Component
         ];
     } // Aturan validasi untuk form buku
 
+    public function mount(): void
+    {
+        $this->sort = $this->normalizeSort($this->sort);
+        $this->search = trim((string) $this->search);
+    }
+
     public function updatedPerPage(): void
     {
         $this->resetPage(); // Reset pagination ke halaman pertama saat jumlah item per halaman berubah
     } // Reset pagination saat jumlah item per halaman berubah
+
+    public function updatedSearch(): void
+    {
+        $this->search = trim((string) $this->search);
+        $this->resetPage();
+    }
+
+    public function updatedSort($value): void
+    {
+        $this->sort = $this->normalizeSort($value);
+        $this->resetPage();
+    }
 
     public function create(): void
     {
@@ -215,8 +241,27 @@ class ManajemenBuku extends Component
     #[Computed]
     public function listBuku()
     {
+        [$sortField, $sortDirection] = $this->resolveSort();
+
         return BukuModel::with(['author', 'kategori', 'penerbit']) // Muat relasi author, kategori, dan penerbit
-            ->orderBy('nama_buku', 'asc') // Urutkan berdasarkan nama buku
+            ->when($this->search !== '', function ($query) {
+                $term = '%'.$this->search.'%';
+
+                $query->where(function ($subQuery) use ($term) {
+                    $subQuery->where('nama_buku', 'like', $term)
+                        ->orWhere('deskripsi', 'like', $term)
+                        ->orWhereHas('author', function ($authorQuery) use ($term) {
+                            $authorQuery->where('nama_author', 'like', $term);
+                        })
+                        ->orWhereHas('kategori', function ($kategoriQuery) use ($term) {
+                            $kategoriQuery->where('nama_kategori_buku', 'like', $term);
+                        })
+                        ->orWhereHas('penerbit', function ($penerbitQuery) use ($term) {
+                            $penerbitQuery->where('nama_penerbit', 'like', $term);
+                        });
+                });
+            })
+            ->orderBy($sortField, $sortDirection) // Urutkan berdasarkan pilihan
             ->paginate($this->perPage); // Terapkan pagination
     } // Ambil daftar buku dengan pagination
 
@@ -292,4 +337,19 @@ class ManajemenBuku extends Component
 
         return ! Str::startsWith($normalized, 'assets/'); // Jangan hapus file yang ada di direktori assets/
     } // Cek apakah file perlu dihapus dari storage
+
+    private function normalizeSort($value): string
+    {
+        return array_key_exists($value, $this->sortOptions) ? $value : 'created_at_desc';
+    }
+
+    private function resolveSort(): array
+    {
+        return match ($this->sort) {
+            'created_at_asc' => ['created_at', 'asc'],
+            'nama_buku_asc' => ['nama_buku', 'asc'],
+            'nama_buku_desc' => ['nama_buku', 'desc'],
+            default => ['created_at', 'desc'],
+        };
+    }
 }

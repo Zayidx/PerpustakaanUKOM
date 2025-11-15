@@ -12,13 +12,41 @@
     {{-- ✅ Kartu utama --}}
     <div class="card">
         <div class="card-body">
-            {{-- Tombol tambah --}}
-            <div class="d-flex justify-content-end gap-2 mb-3">
-                <button wire:click="create" type="button" class="btn btn-primary" data-bs-toggle="modal"
-                        data-bs-target="#modal-form">
-                    <i class="bi bi-plus"></i>
-                    <span class="ms-1">Tambah Kategori Buku</span>
-                </button>
+            <div class="row align-items-center g-2 g-md-3 mb-3">
+                <div class="col-12 col-md">
+                    <div class="d-flex flex-wrap align-items-stretch gap-2">
+                        <div style="flex: 0 1 220px;">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Cari kategori/deskripsi"
+                                    wire:model.live.debounce.500ms="search"
+                                >
+                            </div>
+                        </div>
+                        <div style="flex: 0 1 160px;">
+                            <select
+                                class="form-select form-select-sm"
+                                wire:model.live="sort"
+                            >
+                                @foreach ($sortOptions as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-auto">
+                    <div class="d-grid d-md-flex justify-content-md-end">
+                        <button wire:click="create" type="button" class="btn btn-primary btn-sm w-100 w-md-auto" data-bs-toggle="modal"
+                                data-bs-target="#modal-form">
+                            <i class="bi bi-plus"></i>
+                            <span class="ms-1">Tambah Kategori Buku</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {{-- ✅ Modal Form --}}

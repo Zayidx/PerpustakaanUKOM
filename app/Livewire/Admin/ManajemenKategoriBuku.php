@@ -23,6 +23,14 @@ class ManajemenKategoriBuku extends Component
     #[Layout('components.layouts.dashboard-layouts')]
 
     public $perPage = 5;
+    public string $search = '';
+    public string $sort = 'created_at_desc';
+    public array $sortOptions = [
+        'created_at_desc' => 'Terbaru',
+        'created_at_asc' => 'Terlama',
+        'nama_kategori_buku_asc' => 'Nama A-Z',
+        'nama_kategori_buku_desc' => 'Nama Z-A',
+    ];
 
     public $kategori_id;
     public $nama_kategori_buku;
@@ -49,10 +57,28 @@ class ManajemenKategoriBuku extends Component
         ];
     } // Aturan validasi untuk form kategori buku
 
+    public function mount(): void
+    {
+        $this->sort = $this->normalizeSort($this->sort);
+        $this->search = trim((string) $this->search);
+    }
+
     public function updatedPerPage()
     {
         $this->resetPage();
     } // Reset pagination ke halaman pertama saat jumlah item per halaman berubah
+
+    public function updatedSearch(): void
+    {
+        $this->search = trim((string) $this->search);
+        $this->resetPage();
+    }
+
+    public function updatedSort($value): void
+    {
+        $this->sort = $this->normalizeSort($value);
+        $this->resetPage();
+    }
 
     public function create()
     {
@@ -111,7 +137,19 @@ class ManajemenKategoriBuku extends Component
     #[Computed]
     public function listKategoriBuku()
     {
-        return KategoriBuku::orderBy('nama_kategori_buku', 'asc')->paginate($this->perPage); // Ambil data kategori dan urutkan berdasarkan nama
+        [$sortField, $sortDirection] = $this->resolveSort();
+
+        return KategoriBuku::query()
+            ->when($this->search !== '', function ($query) {
+                $term = '%'.$this->search.'%';
+
+                $query->where(function ($subQuery) use ($term) {
+                    $subQuery->where('nama_kategori_buku', 'like', $term)
+                        ->orWhere('deskripsi_kategori_buku', 'like', $term);
+                });
+            })
+            ->orderBy($sortField, $sortDirection)
+            ->paginate($this->perPage); // Ambil data kategori sesuai sort
     } // Kembalikan daftar kategori buku yang telah diurutkan dan dipaginasi
 
         public function render()
@@ -136,4 +174,19 @@ class ManajemenKategoriBuku extends Component
         $this->resetErrorBag(); // Hapus pesan error yang mungkin ada
         $this->resetValidation(); // Reset status validasi
     } // Reset semua properti form ke nilai awal
+
+    private function normalizeSort($value): string
+    {
+        return array_key_exists($value, $this->sortOptions) ? $value : 'created_at_desc';
+    }
+
+    private function resolveSort(): array
+    {
+        return match ($this->sort) {
+            'created_at_asc' => ['created_at', 'asc'],
+            'nama_kategori_buku_asc' => ['nama_kategori_buku', 'asc'],
+            'nama_kategori_buku_desc' => ['nama_kategori_buku', 'desc'],
+            default => ['created_at', 'desc'],
+        };
+    }
 }
