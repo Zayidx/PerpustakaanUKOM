@@ -23,6 +23,8 @@ class ScanPeminjaman extends Component
     public ?string $errorMessage = null;
 
     public string $manualCode = '';
+
+    public ?array $scanNotification = null;
     
     protected array $messages = [
         'manualCode.required' => 'Kode peminjaman wajib diisi.',
@@ -33,12 +35,14 @@ class ScanPeminjaman extends Component
     public function handleScan(mixed $event): void
     {
         $this->reset(['errorMessage', 'loan', 'lastPayload']); // Reset state sebelum memproses scan baru
+        $this->clearScanNotification();
 
         $payload = is_string($event) ? $event : ($event['payload'] ?? null); // Ambil payload dari event
         $data = $payload ? json_decode($payload, true) : null; // Decode payload JSON
 
         if (! is_array($data) || empty($data['code'])) { // Validasi format data QR
             $this->errorMessage = 'QR code tidak valid.';
+            $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
 
@@ -57,11 +61,15 @@ class ScanPeminjaman extends Component
         }
 
         $this->errorMessage = $message ?: null; // Tetapkan pesan error atau null jika tidak ada
+        if ($this->errorMessage) {
+            $this->notifyScanResult('error', $this->errorMessage);
+        }
     } // Tangani event error scanner QR
 
     public function processManualCode(): void
     {
         $this->reset(['errorMessage', 'loan', 'lastPayload']); // Reset state sebelum memproses form
+        $this->clearScanNotification();
         $this->resetErrorBag();
 
         $validated = $this->validate([
@@ -80,6 +88,7 @@ class ScanPeminjaman extends Component
 
         if (! $guru) { // Cek apakah user memiliki data guru
             $this->errorMessage = 'Akun guru belum memiliki data guru.';
+            $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
 
@@ -90,13 +99,17 @@ class ScanPeminjaman extends Component
 
         if (! $loan) {
             $this->errorMessage = 'Data peminjaman tidak ditemukan.';
+            $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
 
         if (isset($data['loan_id']) && (int) $data['loan_id'] !== $loan->id) { // Validasi id peminjaman cocok
             $this->errorMessage = 'Kode peminjaman tidak cocok.';
+            $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
+
+        $initialStatus = $loan->status;
 
         if ($loan->status === 'pending') { // Jika status masih pending, update ke accepted
             try {
@@ -147,12 +160,19 @@ class ScanPeminjaman extends Component
                 $this->errorMessage = $exception->errors()['stock'][0] ?? 'Stok buku tidak mencukupi untuk memproses peminjaman.';
                 $this->loan = $this->formatLoan($loan); // Tampilkan data peminjaman saat ini
                 $this->lastPayload = $payload; // Simpan payload terakhir
+                $this->notifyScanResult('error', $this->errorMessage);
                 return;
             }
         }
 
         $this->loan = $this->formatLoan($loan); // Format data peminjaman untuk ditampilkan
         $this->lastPayload = $payload; // Simpan payload terakhir untuk referensi
+
+        $message = $initialStatus === 'pending'
+            ? 'Peminjaman berhasil dikonfirmasi dan stok buku diperbarui.'
+            : 'Data peminjaman berhasil ditampilkan.';
+
+        $this->notifyScanResult('success', $message);
     }
 
     private function formatLoan(Peminjaman $loan): array
@@ -179,4 +199,24 @@ class ScanPeminjaman extends Component
     {
         return view('livewire.guru.scan-peminjaman');
     } // Render tampilan komponen
+
+    #[On('loan-clear-scan-notification')]
+    public function clearScanNotification(): void
+    {
+        $this->scanNotification = null;
+    }
+
+    private function notifyScanResult(string $type, ?string $message): void
+    {
+        if (! $message) {
+            return;
+        }
+
+        $this->scanNotification = [
+            'type' => $type,
+            'message' => $message,
+        ];
+
+        $this->dispatch('loan-show-scan-modal');
+    }
 }

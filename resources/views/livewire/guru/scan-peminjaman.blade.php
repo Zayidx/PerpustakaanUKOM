@@ -49,12 +49,6 @@
         </div>
 
         <div class="col-lg-6">
-            @if ($errorMessage)
-                <div class="alert alert-danger">
-                    {{ $errorMessage }}
-                </div>
-            @endif
-
             @if ($loan)
                 <div class="card shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -98,6 +92,50 @@
                     Belum ada data peminjaman yang dipindai.
                 </div>
             @endif
+        </div>
+    </div>
+
+    @php
+        $notificationType = $scanNotification['type'] ?? 'info';
+        $notificationTitles = [
+            'success' => 'Berhasil',
+            'error' => 'Terjadi Kesalahan',
+            'warning' => 'Perhatian',
+            'info' => 'Informasi',
+        ];
+        $notificationClasses = [
+            'success' => 'bg-success text-white',
+            'error' => 'bg-danger text-white',
+            'warning' => 'bg-warning text-dark',
+            'info' => 'bg-primary text-white',
+        ];
+    @endphp
+
+    <div
+        wire:ignore.self
+        class="modal fade"
+        id="loanScanResultModal"
+        tabindex="-1"
+        aria-labelledby="loanScanResultModalLabel"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header {{ $notificationClasses[$notificationType] ?? $notificationClasses['info'] }}">
+                    <h5 class="modal-title" id="loanScanResultModalLabel">
+                        {{ $notificationTitles[$notificationType] ?? $notificationTitles['success'] }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ $scanNotification['message'] ?? 'Tidak ada informasi terbaru.' }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        Tutup
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -168,19 +206,56 @@
                 },
             };
 
-            document.addEventListener('livewire:load', () => loanScanner.initOnce());
             document.addEventListener('livewire:navigated', () => {
                 const container = document.getElementById(loanScanner.containerId);
                 if (container) {
                     delete container.dataset.initialized;
                 }
                 loanScanner.initOnce();
+                setupLoanScanModal();
             });
+
+            const setupLoanScanModal = () => {
+                if (window.__loanScanModalInitialized) {
+                    return;
+                }
+
+                if (!window.bootstrap) {
+                    setTimeout(setupLoanScanModal, 150);
+                    return;
+                }
+
+                window.addEventListener('loan-show-scan-modal', () => {
+                    const modalElement = document.getElementById('loanScanResultModal');
+
+                    if (!modalElement) {
+                        return;
+                    }
+
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                    modalInstance.show();
+                });
+
+                document.addEventListener('hidden.bs.modal', (event) => {
+                    if (event.target && event.target.id === 'loanScanResultModal') {
+                        dispatchLivewireEvent('loan-clear-scan-notification');
+                    }
+                });
+
+                window.__loanScanModalInitialized = true;
+            };
+
+            const initLoanScanFeatures = () => {
+                loanScanner.initOnce();
+                setupLoanScanModal();
+            };
 
             // Fallback for initial render if Livewire already loaded
             if (window.Livewire) {
-                loanScanner.initOnce();
+                initLoanScanFeatures();
             }
+
+            document.addEventListener('livewire:load', initLoanScanFeatures);
         </script>
     @endpush
 </div>

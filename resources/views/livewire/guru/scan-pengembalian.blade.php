@@ -49,12 +49,6 @@
         </div>
 
         <div class="col-lg-6">
-            @if ($errorMessage)
-                <div class="alert alert-danger">
-                    {{ $errorMessage }}
-                </div>
-            @endif
-
             @if ($loan)
                 <div class="card shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -111,6 +105,50 @@
                     Belum ada data pengembalian yang dipindai.
                 </div>
             @endif
+        </div>
+    </div>
+
+    @php
+        $returnNotificationType = $scanNotification['type'] ?? 'info';
+        $returnNotificationTitles = [
+            'success' => 'Berhasil',
+            'error' => 'Terjadi Kesalahan',
+            'warning' => 'Perhatian',
+            'info' => 'Informasi',
+        ];
+        $returnNotificationClasses = [
+            'success' => 'bg-success text-white',
+            'error' => 'bg-danger text-white',
+            'warning' => 'bg-warning text-dark',
+            'info' => 'bg-primary text-white',
+        ];
+    @endphp
+
+    <div
+        wire:ignore.self
+        class="modal fade"
+        id="returnScanResultModal"
+        tabindex="-1"
+        aria-labelledby="returnScanResultModalLabel"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header {{ $returnNotificationClasses[$returnNotificationType] ?? $returnNotificationClasses['info'] }}">
+                    <h5 class="modal-title" id="returnScanResultModalLabel">
+                        {{ $returnNotificationTitles[$returnNotificationType] ?? $returnNotificationTitles['success'] }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ $scanNotification['message'] ?? 'Tidak ada informasi terbaru.' }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                        Tutup
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -179,40 +217,93 @@
                 },
             };
 
-            document.addEventListener('livewire:load', () => returnScanner.initOnce());
             document.addEventListener('livewire:navigated', () => {
                 const container = document.getElementById(returnScanner.containerId);
                 if (container) {
                     delete container.dataset.initialized;
                 }
                 returnScanner.initOnce();
+                setupLateModalListeners();
+                setupReturnScanModal();
             });
 
             const setupLateModalListeners = () => {
-                const modalElement = document.getElementById('lateFeeModal');
-                if (!modalElement || !window.bootstrap) {
+                if (window.__lateFeeModalInitialized) {
                     return;
                 }
 
-                const modalInstance = new bootstrap.Modal(modalElement);
+                if (!window.bootstrap) {
+                    setTimeout(setupLateModalListeners, 150);
+                    return;
+                }
+
+                const resolveInstance = () => {
+                    const modalElement = document.getElementById('lateFeeModal');
+
+                    if (!modalElement) {
+                        return null;
+                    }
+
+                    return bootstrap.Modal.getOrCreateInstance(modalElement);
+                };
 
                 window.addEventListener('show-late-modal', () => {
-                    modalInstance.show();
+                    const instance = resolveInstance();
+                    if (instance) {
+                        instance.show();
+                    }
                 });
 
                 window.addEventListener('hide-late-modal', () => {
-                    modalInstance.hide();
+                    const instance = resolveInstance();
+                    if (instance) {
+                        instance.hide();
+                    }
                 });
+
+                window.__lateFeeModalInitialized = true;
             };
 
-            document.addEventListener('livewire:load', () => {
+            const setupReturnScanModal = () => {
+                if (window.__returnScanModalInitialized) {
+                    return;
+                }
+
+                if (!window.bootstrap) {
+                    setTimeout(setupReturnScanModal, 150);
+                    return;
+                }
+
+                window.addEventListener('return-show-scan-modal', () => {
+                    const modalElement = document.getElementById('returnScanResultModal');
+
+                    if (!modalElement) {
+                        return;
+                    }
+
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                    modalInstance.show();
+                });
+
+                document.addEventListener('hidden.bs.modal', (event) => {
+                    if (event.target && event.target.id === 'returnScanResultModal') {
+                        dispatchLivewireEvent('return-clear-scan-notification');
+                    }
+                });
+
+                window.__returnScanModalInitialized = true;
+            };
+
+            const initReturnScanFeatures = () => {
                 returnScanner.initOnce();
                 setupLateModalListeners();
-            });
+                setupReturnScanModal();
+            };
+
+            document.addEventListener('livewire:load', initReturnScanFeatures);
 
             if (window.Livewire) {
-                returnScanner.initOnce();
-                setupLateModalListeners();
+                initReturnScanFeatures();
             }
         </script>
     @endpush

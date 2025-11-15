@@ -30,6 +30,8 @@ class ScanPengembalian extends Component
 
     public ?array $pendingReturn = null;
 
+    public ?array $scanNotification = null;
+
     protected array $messages = [
         'manualCode.required' => 'Kode pengembalian wajib diisi.',
         'manualCode.digits' => 'Kode pengembalian harus terdiri dari 6 angka.',
@@ -38,18 +40,21 @@ class ScanPengembalian extends Component
     #[On('qr-scanned')]
     public function handleScan(mixed $event): void
     {
-        $this->reset(['errorMessage', 'loan', 'lastPayload']);
+        $this->reset(['errorMessage', 'loan', 'lastPayload', 'lateInfo', 'pendingReturn']);
+        $this->clearScanNotification();
 
         $payload = is_string($event) ? $event : ($event['payload'] ?? null);
         $data = $payload ? json_decode($payload, true) : null;
 
         if (! is_array($data) || empty($data['code'])) {
             $this->errorMessage = 'QR code tidak valid.';
+            $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
 
         if (isset($data['action']) && $data['action'] !== 'return') {
             $this->errorMessage = 'QR ini bukan untuk pengembalian.';
+            $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
 
@@ -68,11 +73,15 @@ class ScanPengembalian extends Component
         }
 
         $this->errorMessage = $message ?: null;
+        if ($this->errorMessage) {
+            $this->notifyScanResult('error', $this->errorMessage);
+        }
     }
 
     public function processManualCode(): void
     {
-        $this->reset(['errorMessage', 'loan', 'lastPayload']);
+        $this->reset(['errorMessage', 'loan', 'lastPayload', 'lateInfo', 'pendingReturn']);
+        $this->clearScanNotification();
         $this->resetErrorBag();
 
         $validated = $this->validate([
@@ -94,6 +103,7 @@ class ScanPengembalian extends Component
 
         if (! $guru) {
             $this->errorMessage = 'Akun guru belum memiliki data guru.';
+            $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
 
@@ -104,11 +114,13 @@ class ScanPengembalian extends Component
 
         if (! $loan) {
             $this->errorMessage = 'Data peminjaman tidak ditemukan.';
+            $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
 
         if ($loan->status !== 'accepted') {
             $this->errorMessage = 'Peminjaman ini tidak dalam status dipinjam.';
+            $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
 
@@ -125,6 +137,10 @@ class ScanPengembalian extends Component
 
             $this->loan = $this->formatLoan($loan, $lateInfo);
             $this->dispatch('show-late-modal');
+            $this->notifyScanResult(
+                'warning',
+                'Konfirmasi pembayaran denda sebelum menyelesaikan pengembalian.'
+            );
             return;
         }
 
@@ -187,6 +203,7 @@ class ScanPengembalian extends Component
         if (! $loan) {
             $this->cancelLateFee();
             $this->errorMessage = 'Data peminjaman tidak ditemukan.';
+            $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
 
@@ -201,6 +218,7 @@ class ScanPengembalian extends Component
         $this->pendingReturn = null;
         $this->dispatch('hide-late-modal');
         $this->errorMessage = 'Pengembalian dibatalkan. Pastikan denda dibayar terlebih dahulu.';
+        $this->notifyScanResult('error', $this->errorMessage);
     }
 
     private function completeReturn(Peminjaman $loan, array $lateInfo, ?string $payload = null): void
@@ -244,6 +262,7 @@ class ScanPengembalian extends Component
         } catch (\Throwable $exception) {
             report($exception);
             $this->errorMessage = 'Terjadi kesalahan saat memproses pengembalian.';
+            $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
 
@@ -253,5 +272,26 @@ class ScanPengembalian extends Component
         $this->pendingReturn = null;
         $this->errorMessage = null;
         $this->pendingReturn = null;
+        $this->notifyScanResult('success', 'Pengembalian berhasil diselesaikan.');
+    }
+
+    #[On('return-clear-scan-notification')]
+    public function clearScanNotification(): void
+    {
+        $this->scanNotification = null;
+    }
+
+    private function notifyScanResult(string $type, ?string $message): void
+    {
+        if (! $message) {
+            return;
+        }
+
+        $this->scanNotification = [
+            'type' => $type,
+            'message' => $message,
+        ];
+
+        $this->dispatch('return-show-scan-modal');
     }
 }
