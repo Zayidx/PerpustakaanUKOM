@@ -11,8 +11,8 @@ The application has multiple user roles (Administrator/Guru/Siswa) and includes 
 - **Laravel Framework 12**: The core PHP framework
 - **Livewire 3.6**: For building dynamic, reactive UI components
 - **PHP 8.2+**: Required PHP version
-- **Tailwind CSS 4**: For styling and responsive design
-- **Vite**: For asset building and development server
+- **Bootstrap 5 + custom CSS**: Styling via CDN plus `public/css/app.css`
+- **Static assets in `public/`**: CSS/JS served directly without a bundler
 - **SQLite**: Default database (configurable)
 - **Simple QR Code**: For generating QR codes
 
@@ -21,7 +21,7 @@ The application has multiple user roles (Administrator/Guru/Siswa) and includes 
 The application follows Laravel's standard directory structure:
 - `app/`: Contains core application code including models, controllers, and Livewire components
 - `routes/`: Contains route definitions (admin.php, guru.php, siswa.php, web.php, console.php)
-- `resources/`: Contains views, CSS, and JavaScript assets
+- `resources/`: Contains Blade views (frontend assets live in `public/`)
 - `database/`: Contains migrations, factories, and seeders
 - `config/`: Laravel configuration files
 - `public/`: Web-accessible files and assets
@@ -35,7 +35,6 @@ The application implements role-based access control with routes separated by us
 1. **Install dependencies**:
    ```bash
    composer install
-   npm install
    ```
 
 2. **Set up environment**:
@@ -58,20 +57,13 @@ The application implements role-based access control with routes separated by us
 
 - **Run the application in development mode**:
   ```bash
-  npm run dev
-  # In another terminal
-  php artisan serve
-  ```
-
-- **Run the application with the custom dev script**:
-  ```bash
   composer run dev
+  # or run php artisan serve manually
   ```
-  This command runs the server, queue, logs, and Vite simultaneously using `concurrently`.
-
-- **Build assets for production**:
+  Start queue workers or log viewers in separate terminals if needed:
   ```bash
-  npm run build
+  php artisan queue:listen --tries=1
+  php artisan pail --timeout=0
   ```
 
 ### Testing
@@ -90,16 +82,15 @@ The application provides a convenient setup script:
 composer run setup
 ```
 This command:
-- Installs dependencies
+- Installs Composer dependencies
 - Creates .env file if it doesn't exist
 - Generates application key
 - Runs migrations
-- Installs and builds npm packages
 
 ## Development Conventions
 
 - The project uses Livewire for building dynamic user interfaces with minimal JavaScript
-- Tailwind CSS is used for styling following modern CSS practices
+- Custom styling lives in `public/css/app.css`; edit the static file directly
 - Database migrations and seeders are used for schema management and test data
 - The application supports dark/light mode with JavaScript components to manage theme switching
 - File uploads are handled through Livewire's WithFileUploads trait
@@ -122,5 +113,5 @@ This command:
 - `routes/admin.php`, `routes/guru.php`, `routes/siswa.php`: Role-specific routing
 - `database/migrations/`: Database schema definitions
 - `database/seeders/`: Data seeding logic
-- `vite.config.js`: Frontend asset building configuration
+- `public/css/app.css`, `public/assets/**`: Frontend styles/scripts served without Vite
 - `documentation.md`: Detailed documentation of the student management module in Indonesian

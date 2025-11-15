@@ -2,8 +2,8 @@
 
 ## Build, Lint & Test Commands
 - Setup: `composer setup` (first time only)
-- Development server: `composer dev` or `php artisan serve` + `npm run dev`
-- Production build: `npm run build`
+- Development server: `composer dev` or `php artisan serve`
+- Production build: `php artisan optimize` (cache config/routes sebelum deploy)
 - Run all tests: `composer test` or `php artisan test`
 - Run single test: `php artisan test --filter=TestName`
 - Run specific test file: `php artisan test tests/Feature/SpecificTest.php`
@@ -13,8 +13,8 @@
 - PHP: PSR-12 with 4-space indentation, auto-fix with `./vendor/bin/pint`
 - Livewire classes: PascalCase (`Login.php`) with matching kebab-case Blade templates (`login.blade.php`)
 - Controller methods: Imperative verbs (`index`, `store`, `update`, `destroy`)
-- JavaScript: ES modules with camelCase functions/variables
-- CSS: Tailwind CSS 4 in `resources/css`
+- JavaScript: Vanilla scripts in `public/assets` with camelCase functions/variables
+- CSS: Static stylesheets in `public/css` (tidak memakai Tailwind pipeline)
 - Imports: Group and sort in order: PHP built-in, external libraries, internal/relative
 - Error handling: Use try-catch blocks and Laravel's exception handling features
 - Naming: Descriptive variable names, consistent terminology across the codebase

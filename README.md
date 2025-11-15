@@ -7,6 +7,30 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Paket yang Digunakan
+
+### Dependensi PHP
+
+- `php` (^8.2): Versi minimal PHP agar seluruh fitur Laravel 12 dan ekstensi yang dibutuhkan dapat berjalan.
+- `laravel/framework`: Kerangka kerja utama yang menyediakan routing, ORM, queue, job, dan seluruh fondasi aplikasi.
+- `laravel/tinker`: Konsol interaktif untuk mengeksekusi kode Laravel/PHP secara cepat saat debugging.
+- `livewire/livewire`: Membuat komponen UI reaktif tanpa menulis JavaScript manual, cocok untuk dashboard dan form dinamis.
+- `simplesoftwareio/simple-qrcode`: Utilitas pembuat QR code di sisi server, sering dipakai untuk kartu anggota atau tiket.
+
+### Dependensi PHP (Pengembangan)
+
+- `fakerphp/faker`: Generator data palsu untuk seed database dan pengujian.
+- `laravel/pail`: Konsol log real-time sehingga event atau error dapat dipantau saat dev server berjalan.
+- `laravel/pint`: Formatter kode otomatis mengikuti gaya PSR-12.
+- `laravel/sail`: Lingkungan pengembangan berbasis Docker yang siap pakai untuk Laravel.
+- `mockery/mockery`: Framework mocking ketika menulis unit test yang kompleks.
+- `nunomaduro/collision`: Menambah tampilan error yang kaya informasi di CLI sehingga debugging lebih cepat.
+- `phpunit/phpunit`: Kerangka utama untuk menjalankan test unit maupun feature di Laravel.
+
+### Asset Frontend
+
+Aplikasi tidak lagi menggunakan pipeline Vite maupun npm. Seluruh stylesheet dan script disajikan sebagai berkas statis di dalam `public/` (misalnya `public/css/app.css` dan `public/assets/**`). Untuk memperbarui tampilan, edit langsung berkas statis tersebut atau tambahkan file baru sesuai kebutuhan.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
