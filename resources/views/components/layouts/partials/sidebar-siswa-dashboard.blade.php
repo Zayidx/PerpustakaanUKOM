@@ -3,7 +3,7 @@
         <div class="sidebar-header position-relative">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="logo">
-                    <a href="{{ route('admin.dashboard') }}"><img src="{{ asset('assets/compiled/svg/logo.svg') }}"
+                    <a href="{{ route('siswa.dashboard') }}"><img src="{{ asset('assets/compiled/svg/logo.svg') }}"
                             alt="Logo" srcset=""></a>
                 </div>
                 <div class="theme-toggle d-flex gap-2  align-items-center mt-2">
@@ -49,6 +49,7 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
+                <li class="sidebar-title mt-4">Perpustakaan</li>
                 <li class="sidebar-item {{ Request::routeIs('siswa.buku') ? 'active' : '' }} ">
                     <a href="{{ route('siswa.buku') }}" class='sidebar-link'>
                         <i class="bi bi-book-half"></i>

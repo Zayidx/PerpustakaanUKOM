@@ -50,69 +50,70 @@
                     </a>
                 </li>
 
-                <li class="sidebar-title">CRUD</li>
+                <li class="sidebar-title">Pengguna &amp; Akademik</li>
                 <li class="sidebar-item {{ Request::routeIs('admin.manajemen-siswa') ? 'active' : '' }} ">
                     <a href="{{ route('admin.manajemen-siswa') }}" class='sidebar-link'>
-                        <i class="bi bi-person-vcard"></i>
-                        <span>Manajemen Siswa</span>
+                        <i class="bi bi-people-fill"></i>
+                        <span>Kelola Siswa</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('admin.manajemen-kelas') ? 'active' : '' }} ">
                     <a href="{{ route('admin.manajemen-kelas') }}" class='sidebar-link'>
                         <i class="bi bi-collection-fill"></i>
-                        <span>Manajemen Kelas</span>
+                        <span>Kelola Kelas</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('admin.manajemen-jurusan') ? 'active' : '' }} ">
                     <a href="{{ route('admin.manajemen-jurusan') }}" class='sidebar-link'>
-                        <i class="bi bi-diagram-3-fill"></i>
-                        <span>Manajemen Jurusan</span>
+                        <i class="bi bi-mortarboard-fill"></i>
+                        <span>Kelola Jurusan</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('admin.manajemen-admin') ? 'active' : '' }} ">
                     <a href="{{ route('admin.manajemen-admin') }}" class='sidebar-link'>
-                        <i class="bi bi-diagram-3-fill"></i>
-                        <span>Manajemen Admin</span>
+                        <i class="bi bi-person-gear"></i>
+                        <span>Manajemen Petugas</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('admin.manajemen-guru') ? 'active' : '' }} ">
                     <a href="{{ route('admin.manajemen-guru') }}" class='sidebar-link'>
-                        <i class="bi bi-diagram-3-fill"></i>
+                        <i class="bi bi-person-badge-fill"></i>
                         <span>Manajemen Guru</span>
                     </a>
                 </li>
 
+                <li class="sidebar-title mt-4">Perpustakaan</li>
                 <li class="sidebar-item {{ Request::routeIs('admin.manajemen-author') ? 'active' : '' }} ">
                     <a href="{{ route('admin.manajemen-author') }}" class='sidebar-link'>
-                        <i class="bi bi-diagram-3-fill"></i>
+                        <i class="bi bi-pencil-square"></i>
                         <span>Manajemen Author</span>
                     </a>
                 </li>
 
                 <li class="sidebar-item {{ Request::routeIs('admin.kategori-buku') ? 'active' : '' }} ">
                     <a href="{{ route('admin.kategori-buku') }}" class='sidebar-link'>
-                        <i class="bi bi-diagram-3-fill"></i>
+                        <i class="bi bi-tags-fill"></i>
                         <span>Kategori Buku</span>
                     </a>
                 </li>
 
                 <li class="sidebar-item {{ Request::routeIs('admin.penerbit-buku') ? 'active' : '' }} ">
                     <a href="{{ route('admin.penerbit-buku') }}" class='sidebar-link'>
-                        <i class="bi bi-diagram-3-fill"></i>
+                        <i class="bi bi-building"></i>
                         <span>Penerbit Buku</span>
                     </a>
                 </li>
 
                 <li class="sidebar-item {{ Request::routeIs('admin.buku') ? 'active' : '' }} ">
                     <a href="{{ route('admin.buku') }}" class='sidebar-link'>
-                        <i class="bi bi-diagram-3-fill"></i>
-                        <span>Buku</span>
+                        <i class="bi bi-book-half"></i>
+                        <span>Manajemen Buku</span>
                     </a>
                 </li>
 <li class="sidebar-title mt-4">Acara</li>
                 <li class="sidebar-item {{ Request::routeIs('admin.manajemen-acara') ? 'active' : '' }} ">
                     <a href="{{ route('admin.manajemen-acara') }}" class='sidebar-link'>
-                        <i class="bi bi-calendar-event"></i>
+                        <i class="bi bi-calendar3"></i>
                         <span>Manajemen Acara</span>
                     </a>
                 </li>

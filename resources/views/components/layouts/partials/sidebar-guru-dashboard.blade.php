@@ -3,7 +3,7 @@
         <div class="sidebar-header position-relative">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="logo">
-                    <a href="{{ route('admin.dashboard') }}"><img src="{{ asset('assets/compiled/svg/logo.svg') }}"
+                    <a href="{{ route('guru.dashboard') }}"><img src="{{ asset('assets/compiled/svg/logo.svg') }}"
                             alt="Logo" srcset=""></a>
                 </div>
                 <div class="theme-toggle d-flex gap-2  align-items-center mt-2">
@@ -49,6 +49,7 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
+                <li class="sidebar-title mt-4">Transaksi</li>
                 <li class="sidebar-item {{ Request::routeIs('guru.scan-peminjaman') ? 'active' : '' }} ">
                     <a href="{{ route('guru.scan-peminjaman') }}" class='sidebar-link'>
                         <i class="bi bi-qr-code-scan"></i>
@@ -64,7 +65,7 @@
                 <li class="sidebar-item {{ Request::routeIs('guru.peminjaman') ? 'active' : '' }} ">
                     <a href="{{ route('guru.peminjaman') }}" class='sidebar-link'>
                         <i class="bi bi-journal-text"></i>
-                        <span>Manajemen Peminjaman</span>
+                        <span>Kelola Peminjaman</span>
                     </a>
                 </li>
                 <li class="sidebar-title mt-4">Akun</li>
