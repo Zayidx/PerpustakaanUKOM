@@ -7,7 +7,6 @@ use App\Models\Peminjaman;
 use App\Models\PeminjamanItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -178,7 +177,7 @@ class ListBuku extends Component
 
     public function render()
     {
-        $books = Buku::query() 
+        $books = Buku::query()
             ->with(['author', 'kategori', 'penerbit']) 
             ->when($this->search !== '', function ($query) { 
                 $query->where(function ($inner) { 
@@ -197,20 +196,24 @@ class ListBuku extends Component
             ->orderBy('nama_buku') 
             ->paginate(12); 
 
-        $books->setCollection( 
-            $books->getCollection()->map(function (Buku $book) { 
-                return $book->append(['cover_depan_url', 'cover_belakang_url']); 
+        $books->setCollection(
+            $books->getCollection()->map(function (Buku $book) {
+                $book->append(['cover_depan_url', 'cover_belakang_url']);
+
+                return $book;
             })
         );
 
-        $selectedBooks = Buku::query() 
+        $selectedBooks = Buku::query()
             ->with(['author', 'kategori']) 
             ->whereIn('id', $this->selectedBooks) 
             ->get() 
             ->sortBy(fn ($book) => array_search($book->id, $this->selectedBooks, true) ?? PHP_INT_MAX); 
 
         $selectedBooks = $selectedBooks->map(function (Buku $book) { 
-            return $book->append(['cover_depan_url', 'cover_belakang_url']); 
+            $book->append(['cover_depan_url', 'cover_belakang_url']);
+
+            return $book;
         })->values(); 
 
         $missingSelection = array_diff($this->selectedBooks, $selectedBooks->pluck('id')->all()); 
@@ -227,7 +230,7 @@ class ListBuku extends Component
             if (! $detailBook) { 
                 $this->clearDetail(); 
             } else {
-                $detailBook->append(['cover_depan_url', 'cover_belakang_url']); 
+                $detailBook->append(['cover_depan_url', 'cover_belakang_url']);
             }
         }
 
@@ -245,5 +248,5 @@ class ListBuku extends Component
         } while (Peminjaman::where('kode', $code)->exists()); 
 
         return $code; 
-    } 
+    }
 }

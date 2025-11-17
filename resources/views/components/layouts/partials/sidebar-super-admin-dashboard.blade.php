@@ -3,7 +3,7 @@
         <div class="sidebar-header position-relative">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="logo">
-                    <a wire:navigate href="{{ route('superadmin.dashboard') }}"><img src="{{ asset('assets/compiled/svg/logo.svg') }}"
+                    <a wire:navigate href="{{ route('welcome') }}" wire:navigate><img src="{{ asset('assets/logo.png') }}"
                             alt="Logo" srcset=""></a>
                 </div>
                 <div class="theme-toggle d-flex gap-2  align-items-center mt-2">

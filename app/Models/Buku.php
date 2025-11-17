@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Buku extends Model
@@ -80,6 +81,20 @@ class Buku extends Model
             return asset($normalized);
         }
 
-        return asset('storage/'.$normalized);
+        $publicPath = public_path($normalized);
+        if (is_file($publicPath)) {
+            return asset($normalized);
+        }
+
+        $storagePath = storage_path('app/public/'.$normalized);
+        if (is_file($storagePath)) {
+            return asset('storage/'.$normalized);
+        }
+
+        if (Storage::disk('public')->exists($normalized)) {
+            return Storage::url($normalized);
+        }
+
+        return null;
     }
 }

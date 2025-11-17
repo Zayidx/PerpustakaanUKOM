@@ -49,24 +49,25 @@
                 @forelse ($books as $book)
                     <div class="col-md-6">
                         <div class="card h-100 border-{{ in_array($book->id, $selectedBooks ?? [], true) ? 'primary' : 'light' }} overflow-hidden">
-                            <div class="position-relative">
-                                <div
-                                    class="ratio ratio-3x4 bg-light"
-                                    style="
-                                        @if ($book->cover_depan_url)
-                                            background-image: url('{{ $book->cover_depan_url }}');
-                                            background-size: cover;
-                                            background-position: center;
-                                        @endif
-                                    "
-                                >
-                                    @unless ($book->cover_depan_url)
+                                <div class="position-relative">
+                                    <button
+                                        type="button"
+                                        class="ratio ratio-3x4 bg-light overflow-hidden border-0 p-0 w-100"
+                                        @if($book->stok < 1) disabled @endif
+                                        wire:click="toggleSelection({{ $book->id }})"
+                                    >
+                                    @if ($book->cover_depan_url)
+                                        <img src="{{ $book->cover_depan_url }}"
+                                             alt="Cover {{ $book->nama_buku }}"
+                                             class="w-100 h-100 object-fit-cover"
+                                             onerror="console.error('Cover gagal dimuat:', this.src); this.classList.add('d-none'); this.insertAdjacentHTML('afterend', '<div class=\'d-flex flex-column justify-content-center align-items-center h-100 text-muted small px-3 text-center\'><i class=\'bi bi-book fs-3 mb-2\'></i><span>Cover belum tersedia</span></div>');">
+                                    @else
                                         <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted small px-3 text-center">
                                             <i class="bi bi-book fs-3 mb-2"></i>
                                             <span>Cover belum tersedia</span>
                                         </div>
-                                    @endunless
-                                </div>
+                                    @endif
+                                    </button>
                                 <span class="badge {{ $book->stok > 0 ? 'bg-success' : 'bg-danger' }} position-absolute top-0 start-0 m-2">
                                     {{ $book->stok > 0 ? 'Stok: '.$book->stok : 'Habis' }}
                                 </span>
@@ -82,18 +83,6 @@
                                         wire:click="showDetail({{ $book->id }})"
                                     >
                                         Detail
-                                    </button>
-                                    <button
-                                        type="button"
-                                        class="btn {{ in_array($book->id, $selectedBooks ?? [], true) ? 'btn-danger' : 'btn-primary' }}"
-                                        @if($book->stok < 1) disabled @endif
-                                        wire:click="toggleSelection({{ $book->id }})"
-                                    >
-                                        @if ($book->stok < 1)
-                                            Habis
-                                        @else
-                                            {{ in_array($book->id, $selectedBooks ?? [], true) ? 'Hapus' : 'Pilih' }}
-                                        @endif
                                     </button>
                                 </div>
                             </div>
@@ -147,39 +136,25 @@
                             <div class="col-md-5">
                                 <div class="row g-2">
                                     <div class="col-6 col-md-12">
-                                        <div
-                                            class="ratio ratio-3x4 border rounded"
-                                            style="
-                                                @if ($detailCoverDepan)
-                                                    background-image: url('{{ $detailCoverDepan }}');
-                                                    background-size: cover;
-                                                    background-position: center;
-                                                @endif
-                                            "
-                                        >
-                                            @unless ($detailCoverDepan)
+                                        <div class="ratio ratio-3x4 border rounded overflow-hidden">
+                                            @if ($detailCoverDepan)
+                                                <img src="{{ $detailCoverDepan }}" alt="Cover depan {{ $detailBook->nama_buku }}" class="w-100 h-100 object-fit-cover">
+                                            @else
                                                 <span class="text-muted small d-flex align-items-center justify-content-center h-100 w-100">
                                                     Cover depan belum tersedia
                                                 </span>
-                                            @endunless
+                                            @endif
                                         </div>
                                     </div>
                                     <div class="col-6 col-md-12">
-                                        <div
-                                            class="ratio ratio-3x4 border rounded"
-                                            style="
-                                                @if ($detailCoverBelakang)
-                                                    background-image: url('{{ $detailCoverBelakang }}');
-                                                    background-size: cover;
-                                                    background-position: center;
-                                                @endif
-                                            "
-                                        >
-                                            @unless ($detailCoverBelakang)
+                                        <div class="ratio ratio-3x4 border rounded overflow-hidden">
+                                            @if ($detailCoverBelakang)
+                                                <img src="{{ $detailCoverBelakang }}" alt="Cover belakang {{ $detailBook->nama_buku }}" class="w-100 h-100 object-fit-cover">
+                                            @else
                                                 <span class="text-muted small d-flex align-items-center justify-content-center h-100 w-100">
                                                     Cover belakang belum tersedia
                                                 </span>
-                                            @endunless
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -262,22 +237,14 @@
                             @foreach ($selectedBooksInfo as $item)
                                 <li class="list-group-item d-flex justify-content-between flex-column flex-md-row gap-2">
                                     <div class="d-flex align-items-start gap-3">
-                                        <div
-                                            class="ratio ratio-1x1 rounded overflow-hidden"
-                                            style="
-                                                width: 60px;
-                                                @if ($item->cover_depan_url)
-                                                    background-image: url('{{ $item->cover_depan_url }}');
-                                                    background-size: cover;
-                                                    background-position: center;
-                                                @endif
-                                            "
-                                        >
-                                            @unless ($item->cover_depan_url)
+                                        <div class="ratio ratio-1x1 rounded overflow-hidden" style="width: 60px;">
+                                            @if ($item->cover_depan_url)
+                                                <img src="{{ $item->cover_depan_url }}" alt="Cover {{ $item->nama_buku }}" class="w-100 h-100 object-fit-cover">
+                                            @else
                                                 <div class="d-flex align-items-center justify-content-center bg-light text-muted small h-100 w-100">
                                                     <i class="bi bi-book"></i>
                                                 </div>
-                                            @endunless
+                                            @endif
                                         </div>
                                         <div>
                                             <div class="fw-semibold text-truncate">{{ $item->nama_buku }}</div>
