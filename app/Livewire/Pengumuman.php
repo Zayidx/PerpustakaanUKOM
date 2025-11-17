@@ -28,51 +28,51 @@ class Pengumuman extends Component
 
     public function updatedPerPage($value): void
     {
-        $this->perPage = $this->normalizePerPage($value); // Pastikan nilai perPage valid sesuai opsi
-        $this->resetPage(); // Reset pagination ke halaman pertama saat jumlah per halaman berubah
-    } // Atur jumlah item per halaman dan reset pagination
+        $this->perPage = $this->normalizePerPage($value); 
+        $this->resetPage(); 
+    } 
 
     public function updatedCategoryId($value): void
     {
-        $this->categoryId = $value ? (int) $value : null; // Konversi ID kategori ke integer atau null jika kosong
-        $this->resetPage(); // Reset pagination ke halaman pertama saat filter kategori berubah
-    } // Atur ID kategori filter dan reset pagination
+        $this->categoryId = $value ? (int) $value : null; 
+        $this->resetPage(); 
+    } 
 
     public function updatedSearch(): void
     {
-        $this->search = trim((string) $this->search); // Hapus spasi di awal/akhir kata kunci pencarian
-        $this->resetPage(); // Reset pagination ke halaman pertama saat pencarian berubah
-    } // Hapus spasi pada input pencarian dan reset pagination
+        $this->search = trim((string) $this->search); 
+        $this->resetPage(); 
+    } 
 
     public function render()
     {
-        $announcements = PengumumanModel::query() // Query pengumuman yang dipublikasikan
-            ->with(['kategori', 'admin']) // Muat relasi kategori dan admin
-            ->where('status', 'published') // Filter hanya pengumuman yang dipublikasikan
-            ->when($this->search !== '', function ($query) { // Jika ada kata kunci pencarian
-                $term = '%' . $this->search . '%'; // Format untuk pencarian like
+        $announcements = PengumumanModel::query() 
+            ->with(['kategori', 'admin']) 
+            ->where('status', 'published') 
+            ->when($this->search !== '', function ($query) { 
+                $term = '%' . $this->search . '%'; 
 
-                $query->where(function ($inner) use ($term) { // Cari berdasarkan judul atau konten
-                    $inner->where('judul', 'like', $term) // Cari di judul
-                        ->orWhere('konten', 'like', $term); // Atau cari di konten
+                $query->where(function ($inner) use ($term) { 
+                    $inner->where('judul', 'like', $term) 
+                        ->orWhere('konten', 'like', $term); 
                 });
             })
-            ->when($this->categoryId, function ($query) { // Jika ada filter kategori
-                $query->where('kategori_pengumuman_id', $this->categoryId); // Filter berdasarkan ID kategori
+            ->when($this->categoryId, function ($query) { 
+                $query->where('kategori_pengumuman_id', $this->categoryId); 
             })
-            ->latest('published_at') // Urutkan berdasarkan tanggal publikasi terbaru
-            ->paginate($this->perPage); // Terapkan pagination
+            ->latest('published_at') 
+            ->paginate($this->perPage); 
 
-        return view('livewire.pengumuman', [ // Render view dengan data
-            'announcements' => $announcements, // Daftar pengumuman
-            'categories' => KategoriPengumuman::orderBy('nama')->get(), // Daftar kategori pengumuman
+        return view('livewire.pengumuman', [ 
+            'announcements' => $announcements, 
+            'categories' => KategoriPengumuman::orderBy('nama')->get(), 
         ]);
-    } // Render tampilan komponen dengan daftar pengumuman
+    } 
 
     private function normalizePerPage($value): int
     {
-        $value = (int) $value; // Konversi nilai ke integer
+        $value = (int) $value; 
 
-        return in_array($value, $this->perPageOptions, true) ? $value : $this->perPageOptions[0]; // Kembalikan nilai valid atau default
-    } // Pastikan nilai perPage valid sesuai opsi yang tersedia
+        return in_array($value, $this->perPageOptions, true) ? $value : $this->perPageOptions[0]; 
+    } 
 }

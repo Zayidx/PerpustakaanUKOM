@@ -9,7 +9,7 @@ class PeminjamanPenalty extends Model
 {
     protected $fillable = [
         'peminjaman_id',
-        'guru_id',
+        'admin_perpus_id',
         'late_days',
         'amount',
         'paid_at',
@@ -24,8 +24,8 @@ class PeminjamanPenalty extends Model
         return $this->belongsTo(Peminjaman::class);
     }
 
-    public function guru(): BelongsTo
+    public function adminPerpus(): BelongsTo
     {
-        return $this->belongsTo(Guru::class);
+        return $this->belongsTo(AdminPerpus::class);
     }
 }

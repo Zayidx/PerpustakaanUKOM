@@ -4,7 +4,7 @@
 
 This is a Laravel 12 web application named "perpustakaan" (Indonesian for "library"), which appears to be a school management system with a focus on student management. The application uses Laravel with Livewire for dynamic user interfaces and follows modern PHP development practices.
 
-The application has multiple user roles (Administrator/Guru/Siswa) and includes features for managing students, with a specific CRUD module for student management as documented in the project documentation. The application uses SQLite as the default database and implements Tailwind CSS for styling.
+The application has multiple user roles (SuperAdmin/AdminPerpus/Siswa) and includes features for managing students, with a specific CRUD module for student management as documented in the project documentation. The application uses SQLite as the default database and implements Tailwind CSS for styling.
 
 ## Key Technologies and Dependencies
 
@@ -20,13 +20,13 @@ The application has multiple user roles (Administrator/Guru/Siswa) and includes 
 
 The application follows Laravel's standard directory structure:
 - `app/`: Contains core application code including models, controllers, and Livewire components
-- `routes/`: Contains route definitions (admin.php, guru.php, siswa.php, web.php, console.php)
+- `routes/`: Contains route definitions (superadmin.php, adminperpus.php, siswa.php, web.php, console.php)
 - `resources/`: Contains Blade views (frontend assets live in `public/`)
 - `database/`: Contains migrations, factories, and seeders
 - `config/`: Laravel configuration files
 - `public/`: Web-accessible files and assets
 
-The application implements role-based access control with routes separated by user roles (admin, guru, siswa).
+The application implements role-based access control with routes separated by user roles (Super Admin, Admin Perpus, siswa).
 
 ## Building and Running
 
@@ -100,7 +100,7 @@ This command:
 ## Special Features
 
 - **Student Management**: Complete CRUD functionality for managing students with file upload support
-- **Role-Based Access**: Different route files for admin, teacher (guru), and student access
+- **Role-Based Access**: Different route files for Super Admin, Admin Perpus, and student access
 - **File Uploads**: Support for uploading student photos with preview functionality
 - **QR Code Generation**: Using the simplesoftwareio/simple-qrcode package
 - **Dark/Light Mode**: Dynamic theme switching with JavaScript support
@@ -110,7 +110,7 @@ This command:
 
 - `app/Livewire/Admin/ManajemenSiswa.php`: Core Livewire component for student management
 - `resources/views/livewire/admin/manajemen-siswa.blade.php`: View for the student management interface
-- `routes/admin.php`, `routes/guru.php`, `routes/siswa.php`: Role-specific routing
+- `routes/superadmin.php`, `routes/adminperpus.php`, `routes/siswa.php`: Role-specific routing
 - `database/migrations/`: Database schema definitions
 - `database/seeders/`: Data seeding logic
 - `public/css/app.css`, `public/assets/**`: Frontend styles/scripts served without Vite

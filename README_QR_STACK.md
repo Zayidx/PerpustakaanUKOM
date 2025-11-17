@@ -3,7 +3,7 @@
 Fitur peminjaman & pengembalian berbasis QR memanfaatkan dua lapisan:
 
 1. **Generator backend (`simplesoftwareio/simple-qrcode`)** – membuat QR di sisi siswa, baik untuk permintaan pinjam maupun tiket pengembalian.
-2. **Scanner frontend (`html5-qrcode`)** – memanfaatkan kamera perangkat guru untuk membaca QR, dengan fallback input PIN enam digit.
+2. **Scanner frontend (`html5-qrcode`)** – memanfaatkan kamera perangkat Admin Perpus untuk membaca QR, dengan fallback input PIN enam digit.
 
 Dokumen ini merinci peran masing‑masing, lokasi kode, dan alur integrasinya.
 
@@ -41,15 +41,15 @@ Untuk tiket pengembalian (`ListPeminjaman`), payload ditambah flag `action => 'r
 **Catatan konfigurasi**
 - Paket sudah terdaftar di `composer.json`; tidak perlu registrasi manual.
 - Ukuran/warna dapat diatur via chaining (`size()`, `color()`, dll).
-- PIN enam digit tetap dicetak sebagai teks di bawah QR agar guru bisa mengetik manual.
+- PIN enam digit tetap dicetak sebagai teks di bawah QR agar Admin Perpus bisa mengetik manual.
 
 ---
 
 ### Langkah 2 – Scanner QR (html5-qrcode)
 
-| Tujuan | Membaca QR via kamera guru + fallback PIN manual |
+| Tujuan | Membaca QR via kamera Admin Perpus + fallback PIN manual |
 |--------|--------------------------------------------------|
-| Lokasi utama | `resources/views/livewire/guru/scan-peminjaman.blade.php` <br> `resources/views/livewire/guru/scan-pengembalian.blade.php` |
+| Lokasi utama | `resources/views/livewire/admin-perpus/scan-peminjaman.blade.php` <br> `resources/views/livewire/admin-perpus/scan-pengembalian.blade.php` |
 | Library | [`html5-qrcode`](https://github.com/mebjas/html5-qrcode) – disimpan lokal pada `public/assets/js/html5-qrcode.min.js` |
 
 Ringkasan implementasi:
@@ -87,11 +87,11 @@ Ringkasan implementasi:
 ```
 
 **Alur kerja scanner**
-1. Saat halaman guru dibuka, skrip lokal dimuat (tidak tergantung CDN).
+1. Saat halaman Admin Perpus dibuka, skrip lokal dimuat (tidak tergantung CDN).
 2. `Html5Qrcode.start()` meminta izin kamera (wajib `https://` atau `http://localhost` sebagaimana dijelaskan di `README_NGINX_CAMERA.md`).
 3. Setiap QR yang terbaca mengirim event `qr-scanned`. Komponen Livewire `ScanPeminjaman` / `ScanPengembalian` mendengar event tersebut via `#[On('qr-scanned')]`.
 4. Payload QR di-`json_decode`, diverifikasi, lalu diproses (update stok, ubah status, catat denda, dll).
-5. Bila kamera gagal, guru dapat mengetik PIN enam digit. Method `processManualCode()` memvalidasi `digits:6` dan memanggil alur yang sama (`processLoanData`).
+5. Bila kamera gagal, Admin Perpus dapat mengetik PIN enam digit. Method `processManualCode()` memvalidasi `digits:6` dan memanggil alur yang sama (`processLoanData`).
 
 **Catatan tambahan**
 - Event `qr-scanner-error` mengisi alert UI ketika kamera ditolak / tidak ada.
@@ -106,12 +106,12 @@ Ringkasan implementasi:
 2. **QR ditampilkan** di:
    - `KodePinjaman` (permintaan pinjam).
    - `ListPeminjaman` → tombol “Tampilkan” (tiket pengembalian). QR menyertakan `action => 'return'` dan info keterlambatan.
-3. **Guru memproses** di dashboard:
+3. **Admin Perpus memproses** di dashboard:
    - `ScanPeminjaman`: memindai QR atau memasukkan PIN → stok otomatis dicek dan status berubah ke `accepted`.
-   - `ScanPengembalian`: memindai QR/pin; jika telat, guru wajib menekan tombol “Sudah/Belum dibayar” sebelum `completeReturn()` mengembalikan stok & mencatat denda.
+   - `ScanPengembalian`: memindai QR/pin; jika telat, Admin Perpus wajib menekan tombol “Sudah/Belum dibayar” sebelum `completeReturn()` mengembalikan stok & mencatat denda.
 4. **Riwayat terlihat** di:
    - Panel detail `ScanPengembalian` (status + info denda).
    - Panel detail `Manajemen Peminjaman` (ringkasan peminjaman + list penalty yang pernah dicatat).
 5. **Monitoring lanjutan** dilakukan di halaman `Manajemen Peminjaman` (filter, detail, denda, status).
 
-Dengan pemisahan generator–scanner ini, siswa cukup menunjukkan QR/PIN, sementara guru memiliki dua cara (scan atau input) untuk memproses pinjam/pengembalian tanpa mengetik data lain. Helper tambahan (perhitungan keterlambatan, pencatatan penalty, dsb.) memastikan pengalaman tetap konsisten di kedua jenis transaksi.
+Dengan pemisahan generator–scanner ini, siswa cukup menunjukkan QR/PIN, sementara Admin Perpus memiliki dua cara (scan atau input) untuk memproses pinjam/pengembalian tanpa mengetik data lain. Helper tambahan (perhitungan keterlambatan, pencatatan penalty, dsb.) memastikan pengalaman tetap konsisten di kedua jenis transaksi.

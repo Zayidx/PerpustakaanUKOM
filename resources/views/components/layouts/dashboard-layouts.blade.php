@@ -18,12 +18,12 @@
 <body>
     <script src="{{ asset('assets/static/js/initTheme.js') }}"></script>
     <div id="app">
-        @if (Request::routeIs('admin.*'))
-            @include('components.layouts.partials.sidebar-admin-dashboard')
+        @if (Request::routeIs('superadmin.*'))
+            @include('components.layouts.partials.sidebar-super-admin-dashboard')
         @elseif (Request::routeIs('siswa.*'))
             @include('components.layouts.partials.sidebar-siswa-dashboard')
-        @elseif (Request::routeIs('guru.*'))
-            @include('components.layouts.partials.sidebar-guru-dashboard')
+        @elseif (Request::routeIs('adminperpus.*'))
+            @include('components.layouts.partials.sidebar-admin-perpus-dashboard')
         @endif
        
         <div id="main">

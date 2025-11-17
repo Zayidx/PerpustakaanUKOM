@@ -30,12 +30,12 @@ class PengumumanSeeder extends Seeder
         });
 
         $adminUsers = User::query()
-            ->whereHas('role', fn ($query) => $query->whereIn('nama_role', ['Admin', 'Administrator']))
+            ->whereHas('role', fn ($query) => $query->whereIn('nama_role', ['SuperAdmin']))
             ->take(15)
             ->get();
 
         if ($adminUsers->isEmpty()) {
-            $this->command?->warn('PengumumanSeeder: tidak menemukan pengguna dengan role Admin/Administrator. Melewatkan seeder pengumuman.');
+            $this->command?->warn('PengumumanSeeder: tidak menemukan pengguna dengan role SuperAdmin. Melewatkan seeder pengumuman.');
             return;
         }
 
@@ -82,7 +82,7 @@ Perpustakaan akan menyelenggarakan *Workshop Literasi Informasi* pada **Sabtu, 2
 2. Cara menggunakan basis data jurnal akademik.
 3. Strategi menyusun sitasi dengan aplikasi pengelola referensi.
 
-Kuota peserta terbatas untuk 30 orang. Daftarkan diri Anda melalui tautan pendaftaran yang tersedia di meja layanan atau hubungi petugas perpustakaan.
+Kuota peserta terbatas untuk 30 orang. Daftarkan diri Anda melalui tautan pendaftaran yang tersedia di meja layanan atau hubungi Admin Perpus.
 MD,
                 'published_at' => now()->subDays(4)->setTime(14, 0),
             ],
@@ -175,7 +175,7 @@ MD,
                 'kategori' => 'Kebijakan & Regulasi',
                 'thumbnail_caption' => 'Prosedur baru pengembalian buku saat renovasi area utama.',
                 'konten' => <<<'MD'
-Selama renovasi area pengembalian, anggota diminta menaruh buku di drop-box sementara yang terletak di pintu masuk barat. Petugas akan memproses pengembalian setiap jam dan mengirimkan notifikasi email setelah selesai.
+Selama renovasi area pengembalian, anggota diminta menaruh buku di drop-box sementara yang terletak di pintu masuk barat. Admin Perpus akan memproses pengembalian setiap jam dan mengirimkan notifikasi email setelah selesai.
 MD,
                 'published_at' => now()->subDays(17)->setTime(12, 0),
             ],

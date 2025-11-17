@@ -56,5 +56,5 @@ class Dashboard extends Component
             'currentLoans' => $currentLoans,
             'recentHistory' => $recentHistory,
         ]);
-    } // Render tampilan komponen dashboard siswa
+    } 
 }

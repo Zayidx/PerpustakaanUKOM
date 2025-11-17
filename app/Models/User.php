@@ -38,8 +38,8 @@ class User extends Authenticatable
         return $this->hasOne(Siswa::class);
     }
 
-    public function guru()
+    public function adminPerpus()
     {
-        return $this->hasOne(Guru::class);
+        return $this->hasOne(AdminPerpus::class);
     }
 }

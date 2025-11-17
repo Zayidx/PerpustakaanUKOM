@@ -17,11 +17,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $roles = [
-            'Administrator' => [
+            'SuperAdmin' => [
                 'deskripsi_role' => 'Hak akses penuh untuk mengelola sistem perpustakaan.',
                 'icon_role' => 'bi-person-gear',
             ],
-            'Guru' => [
+            'AdminPerpus' => [
                 'deskripsi_role' => 'Mengelola informasi akademik dan data perpustakaan.',
                 'icon_role' => 'bi-person-workspace',
             ],
@@ -48,14 +48,14 @@ class DatabaseSeeder extends Seeder
             $index++;
         }
 
-        $this->command->warn('[Seeder] Membuat pengguna administrator awal...');
+        $this->command->warn('[Seeder] Membuat pengguna super admin awal...');
         User::updateOrCreate(
             ['email_user' => 'test@example.com'],
             [
                 'nama_user' => 'Test User',
                 'phone_number' => '081234567890',
                 'password' => 'password',
-                'role_id' => $roleIds['Administrator'] ?? null,
+                'role_id' => $roleIds['SuperAdmin'] ?? null,
             ],
         );
 
@@ -63,8 +63,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             KelasSeeder::class,
             JurusanSeeder::class,
-            PetugasSeeder::class,
-            GuruSeeder::class,
+            SuperAdminSeeder::class,
+            AdminPerpusSeeder::class,
             PengumumanSeeder::class,
             AcaraSeeder::class,
         ]);

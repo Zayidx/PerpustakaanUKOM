@@ -23,7 +23,7 @@
                                 {!! $qrSvg !!}
                             </div>
                             <p class="text-muted mt-3 mb-0">
-                                Tunjukkan QR code atau bacakan kode 6 angka ini kepada guru untuk diproses.
+                                Tunjukkan QR code atau bacakan kode 6 angka ini kepada Admin Perpus untuk diproses.
                             </p>
                         @else
                             <p class="text-danger mb-0">Gagal membuat QR code.</p>
@@ -57,8 +57,8 @@
                                 {{ $loan['due_at'] ? optional($loan['due_at'])->translatedFormat('d F Y') : '-' }}
                             </dd>
 
-                            <dt class="col-sm-4">Guru Penerima</dt>
-                            <dd class="col-sm-8">{{ $loan['guru'] ?? '-' }}</dd>
+                            <dt class="col-sm-4">Admin Perpus Penerima</dt>
+                            <dd class="col-sm-8">{{ $loan['admin_perpus'] ?? '-' }}</dd>
                         </dl>
                     </div>
                 </div>

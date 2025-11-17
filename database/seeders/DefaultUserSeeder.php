@@ -2,11 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Guru;
+use App\Models\AdminPerpus;
 use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\RoleData;
 use App\Models\Siswa;
+use App\Models\SuperAdmin;
 use App\Models\User;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
@@ -20,18 +21,18 @@ class DefaultUserSeeder extends Seeder
     {
         $faker = Faker::create('id_ID');
 
-        $roleAdmin = RoleData::firstOrCreate(
-            ['nama_role' => 'Administrator'],
+        $roleSuperAdmin = RoleData::firstOrCreate(
+            ['nama_role' => 'SuperAdmin'],
             [
                 'deskripsi_role' => 'Hak akses penuh untuk mengelola sistem perpustakaan.',
                 'icon_role' => 'bi-person-gear',
             ],
         );
 
-        $roleGuru = RoleData::firstOrCreate(
-            ['nama_role' => 'Guru'],
+        $roleAdminPerpus = RoleData::firstOrCreate(
+            ['nama_role' => 'AdminPerpus'],
             [
-                'deskripsi_role' => 'Mengelola informasi akademik dan data perpustakaan.',
+                'deskripsi_role' => 'Mengelola transaksi peminjaman perpustakaan.',
                 'icon_role' => 'bi-person-workspace',
             ],
         );
@@ -44,33 +45,43 @@ class DefaultUserSeeder extends Seeder
             ],
         );
 
-        User::updateOrCreate(
-            ['email_user' => 'admin@gmail.com'],
+        $superAdminUser = User::updateOrCreate(
+            ['email_user' => 'superadmin@gmail.com'],
             [
-                'nama_user' => 'Admin Perpustakaan',
+                'nama_user' => 'Super Admin Perpustakaan',
                 'phone_number' => $faker->numerify('08##########'),
-                'password' => 'admin123',
-                'role_id' => $roleAdmin->id,
+                'password' => 'superadmin123',
+                'role_id' => $roleSuperAdmin->id,
             ]
         );
 
-        $guruUser = User::updateOrCreate(
-            ['email_user' => 'guru@gmail.com'],
+        $adminPerpusUser = User::updateOrCreate(
+            ['email_user' => 'adminperpus@gmail.com'],
             [
-                'nama_user' => 'Guru Konseling',
+                'nama_user' => 'Admin Perpus Utama',
                 'phone_number' => $faker->numerify('08##########'),
-                'password' => 'guru123',
-                'role_id' => $roleGuru->id,
+                'password' => 'adminperpus123',
+                'role_id' => $roleAdminPerpus->id,
             ]
         );
 
-        Guru::updateOrCreate(
-            ['user_id' => $guruUser->id],
+        AdminPerpus::updateOrCreate(
+            ['user_id' => $adminPerpusUser->id],
             [
                 'nip' => '1987654321',
-                'mata_pelajaran' => 'Bimbingan Konseling',
+                'mata_pelajaran' => 'Operasional Perpustakaan',
                 'jenis_kelamin' => 'perempuan',
                 'alamat' => $faker->address(),
+                'foto' => null,
+            ]
+        );
+
+        SuperAdmin::updateOrCreate(
+            ['user_id' => $superAdminUser->id],
+            [
+                'nip' => $faker->unique()->numerify('7777######'),
+                'alamat' => $faker->address(),
+                'jenis_kelamin' => 'laki-laki',
                 'foto' => null,
             ]
         );

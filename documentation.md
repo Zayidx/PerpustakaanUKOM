@@ -9,7 +9,7 @@ Panduan ini menjelaskan bagaimana modul CRUD *Manajemen Siswa* dibangun mengguna
    - `user_id` (FK ke `users`),
    - `nisn`, `nis` (unik), `nip` (opsional),
    - `alamat`, `jenis_kelamin`, `foto`.
-3. **Seeder** – `DatabaseSeeder` membuat peran *Administrator/Guru/Siswa*, user admin, dan memanggil `SiswaSeeder` (50 siswa fiktif menggunakan faker bahasa Indonesia).
+3. **Seeder** – `DatabaseSeeder` membuat peran *SuperAdmin/AdminPerpus/Siswa*, user Super Admin, dan memanggil `SiswaSeeder` (50 siswa fiktif menggunakan faker bahasa Indonesia).
 
 Jalankan:
 ```bash
@@ -44,7 +44,7 @@ File: `resources/views/livewire/admin/manajemen-siswa.blade.php`
 
 Tambahkan pada `routes/admin.php`:
 ```php
-Route::get('/admin/manajemen-siswa', \App\Livewire\Admin\ManajemenSiswa::class)
+Route::get('/admin/manajemen-siswa', \App\Livewire\SuperAdmin\ManajemenSiswa::class)
     ->name('admin.manajemen-siswa');
 ```
 

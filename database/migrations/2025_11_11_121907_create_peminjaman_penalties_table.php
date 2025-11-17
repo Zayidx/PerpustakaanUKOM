@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('peminjaman_penalties', function (Blueprint $table) {
             $table->id();
             $table->foreignId('peminjaman_id')->constrained('peminjaman_data')->cascadeOnDelete();
-            $table->foreignId('guru_id')->nullable()->constrained('guru')->nullOnDelete();
+            $table->foreignId('admin_perpus_id')->nullable()->constrained('admin_perpus')->nullOnDelete();
             $table->unsignedInteger('late_days');
             $table->unsignedInteger('amount');
             $table->timestamp('paid_at');

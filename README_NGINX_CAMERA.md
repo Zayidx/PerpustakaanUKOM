@@ -1,6 +1,6 @@
 ## Menjalankan Laravel + Kamera di Perangkat Lain (Nginx + HTTPS)
 
-Halaman **Scan Peminjaman** membutuhkan akses kamera. Browser hanya mengizinkan `getUserMedia` jika aplikasi diakses melalui *secure origin* (HTTPS atau `http://localhost`). Dokumen ini menjelaskan cara men-deploy proyek ini ke Nginx dengan HTTPS lokal supaya perangkat lain (HP/laptop guru) bisa memindai QR code.
+Halaman **Scan Peminjaman** membutuhkan akses kamera. Browser hanya mengizinkan `getUserMedia` jika aplikasi diakses melalui *secure origin* (HTTPS atau `http://localhost`). Dokumen ini menjelaskan cara men-deploy proyek ini ke Nginx dengan HTTPS lokal supaya perangkat lain (HP/laptop Admin Perpus) bisa memindai QR code.
 
 ### 1. Siapkan dependensi
 
@@ -123,4 +123,3 @@ Tanpa import ini browser akan menganggap sertifikat tidak valid dan tetap memblo
 - Untuk domain publik, ganti `mkcert` dengan sertifikat resmi (Let’s Encrypt) dan update `ssl_certificate` serta `hosts`.
 
 Dengan konfigurasi ini, semua perangkat pada jaringan dapat mengakses aplikasi melalui HTTPS sehingga fitur kamera bekerja sesuai harapan.
-

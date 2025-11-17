@@ -14,12 +14,12 @@ class AcaraSeeder extends Seeder
     public function run(): void
     {
         $adminUsers = User::query()
-            ->whereHas('role', fn ($query) => $query->whereIn('nama_role', ['Admin', 'Administrator']))
+            ->whereHas('role', fn ($query) => $query->whereIn('nama_role', ['SuperAdmin']))
             ->take(15)
             ->get();
 
         if ($adminUsers->isEmpty()) {
-            $this->command?->warn('AcaraSeeder: tidak ditemukan pengguna dengan role Admin/Administrator. Melewatkan seeder acara.');
+            $this->command?->warn('AcaraSeeder: tidak ditemukan pengguna dengan role SuperAdmin. Melewatkan seeder acara.');
             return;
         }
 
@@ -117,8 +117,8 @@ class AcaraSeeder extends Seeder
                 'end' => [11, 30],
             ],
             [
-                'judul' => 'Pelatihan Pengelolaan Referensi untuk Guru',
-                'lokasi' => 'Ruang Rapat Guru',
+                'judul' => 'Pelatihan Pengelolaan Referensi untuk Admin Perpus',
+                'lokasi' => 'Ruang Rapat Admin Perpus',
                 'kategori' => 'Pelatihan',
                 'deskripsi' => 'Fokus pada pemanfaatan fitur kolaborasi di Mendeley dan Zotero serta cara membagikan pustaka digital.',
                 'days' => 12,
@@ -183,7 +183,7 @@ class AcaraSeeder extends Seeder
                 'judul' => 'Pelatihan Penataan Koleksi Digital Sekolah',
                 'lokasi' => 'Lab Komputer',
                 'kategori' => 'Pelatihan',
-                'deskripsi' => 'Pelatihan internal untuk petugas perpustakaan tentang tagging dan kurasi koleksi digital.',
+                'deskripsi' => 'Pelatihan internal untuk Admin Perpus tentang tagging dan kurasi koleksi digital.',
                 'days' => 19,
                 'start' => [13, 0],
                 'end' => [16, 0],

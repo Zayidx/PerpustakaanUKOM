@@ -8,7 +8,7 @@
         Login menggunakan email & password yang benar 👋
     </p>
     
-    {{-- Form login utama --}}
+    
     <form wire:submit.prevent='attemptLogin' novalidate>
         @if ($errors->has('credentials'))
             <div class="mb-3 alert alert-danger">{{ $errors->first('credentials') }}</div>

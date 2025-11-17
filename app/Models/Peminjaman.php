@@ -17,7 +17,7 @@ class Peminjaman extends Model
     protected $fillable = [
         'kode',
         'siswa_id',
-        'guru_id',
+        'admin_perpus_id',
         'status',
         'accepted_at',
         'due_at',
@@ -37,9 +37,9 @@ class Peminjaman extends Model
         return $this->belongsTo(Siswa::class);
     }
 
-    public function guru(): BelongsTo
+    public function adminPerpus(): BelongsTo
     {
-        return $this->belongsTo(Guru::class);
+        return $this->belongsTo(AdminPerpus::class);
     }
 
     public function items(): HasMany

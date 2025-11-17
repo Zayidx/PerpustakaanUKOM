@@ -17,9 +17,9 @@ return new class extends Migration
             $table->foreignId('siswa_id')
                 ->constrained('siswa')
                 ->cascadeOnDelete();
-            $table->foreignId('guru_id')
+            $table->foreignId('admin_perpus_id')
                 ->nullable()
-                ->constrained('guru')
+                ->constrained('admin_perpus')
                 ->nullOnDelete();
             $table->enum('status', ['pending', 'accepted', 'returned', 'cancelled'])
                 ->default('pending');

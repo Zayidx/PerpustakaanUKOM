@@ -21,8 +21,8 @@
                     if (auth()->check()) {
                         $roleName = auth()->user()->role?->nama_role;
                         $dashboardRoute = match ($roleName) {
-                            'Administrator' => route('admin.dashboard'),
-                            'Guru' => route('guru.dashboard'),
+                            'SuperAdmin' => route('superadmin.dashboard'),
+                            'AdminPerpus' => route('adminperpus.dashboard'),
                             'Siswa' => route('siswa.dashboard'),
                             default => null,
                         };

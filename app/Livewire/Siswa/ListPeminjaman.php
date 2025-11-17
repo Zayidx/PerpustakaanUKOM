@@ -29,8 +29,8 @@ class ListPeminjaman extends Component
 
     public function updatingStatusFilter(): void
     {
-        $this->resetPage(); // Reset pagination ke halaman pertama saat filter status berubah
-    } // Reset pagination saat filter status peminjaman diubah
+        $this->resetPage(); 
+    } 
 
     public function showReturnTicket(int $loanId): void
     {
@@ -93,24 +93,24 @@ class ListPeminjaman extends Component
 
     public function render()
     {
-        $user = Auth::user(); // Ambil user yang sedang login
-        $siswaId = $user?->siswa?->id; // Ambil ID siswa terkait
+        $user = Auth::user(); 
+        $siswaId = $user?->siswa?->id; 
 
-        abort_if(! $siswaId, 403, 'Akun tidak memiliki data siswa.'); // Hentikan jika tidak ada data siswa
+        abort_if(! $siswaId, 403, 'Akun tidak memiliki data siswa.'); 
 
-        $loans = Peminjaman::query() // Query data peminjaman
-            ->with(['items.buku']) // Muat relasi item dan buku
-            ->where('siswa_id', $siswaId) // Filter berdasarkan ID siswa
-            ->when($this->statusFilter !== 'all', function ($query) { // Jika filter status bukan 'all'
-                $query->where('status', $this->statusFilter); // Filter berdasarkan status peminjaman
+        $loans = Peminjaman::query() 
+            ->with(['items.buku']) 
+            ->where('siswa_id', $siswaId) 
+            ->when($this->statusFilter !== 'all', function ($query) { 
+                $query->where('status', $this->statusFilter); 
             })
-            ->latest('created_at') // Urutkan berdasarkan created_at terbaru
-            ->paginate(10); // Pagination 10 peminjaman per halaman
+            ->latest('created_at') 
+            ->paginate(10); 
 
-        return view('livewire.siswa.list-peminjaman', [ // Render view dengan data
-            'loans' => $loans, // Daftar peminjaman
+        return view('livewire.siswa.list-peminjaman', [ 
+            'loans' => $loans, 
         ]);
-    } // Render tampilan komponen dengan daftar peminjaman
+    } 
 
     private function calculateLateInfo(Peminjaman $loan): array
     {

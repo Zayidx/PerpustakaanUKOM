@@ -35,10 +35,11 @@ Route::get('/', function () {
     ]);
 })->name('welcome');
 
-// Route Role Admin
-require __DIR__.'/admin.php';
+// Route Super Admin
+require __DIR__.'/superadmin.php';
 
-require __DIR__.'/guru.php';
+// Route Admin Perpus
+require __DIR__.'/adminperpus.php';
 
 require __DIR__.'/siswa.php';
 

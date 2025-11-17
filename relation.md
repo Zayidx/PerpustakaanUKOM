@@ -8,8 +8,8 @@ Dokumen ini menjelaskan semua hubungan database dalam sistem manajemen perpustak
 - **role_data** (Tabel data peran)
 - **users** (Tabel pengguna dengan asosiasi peran)
 - **siswa** (Tabel siswa dengan asosiasi pengguna)
-- **guru** (Tabel guru dengan asosiasi pengguna)
-- **petugas** (Tabel staf perpustakaan dengan asosiasi pengguna)
+- **admin_perpus** (Tabel Admin Perpus dengan asosiasi pengguna)
+- **super_admins** (Tabel Super Admin dengan asosiasi pengguna)
 
 ### Manajemen Perpustakaan
 - **kategori_buku** (Kategori buku)
@@ -30,7 +30,7 @@ Dokumen ini menjelaskan semua hubungan database dalam sistem manajemen perpustak
 ## Hubungan Terperinci
 
 ### 1. Data Peran (role_data)
-**Deskripsi Tabel**: Menyimpan informasi peran pengguna (Admin, Guru, Siswa, dll.)
+**Deskripsi Tabel**: Menyimpan informasi peran pengguna (SuperAdmin, Admin Perpus, Siswa, dll.)
 
 **Kolom**:
 - `id` (Kunci Utama)
@@ -63,10 +63,10 @@ Dokumen ini menjelaskan semua hubungan database dalam sistem manajemen perpustak
   - Kunci Asing: `users.role_id` → `role_data.id` (onDelete: cascade)
 - **Satu-ke-Satu**: `users` → `siswa` (Satu pengguna dapat menjadi satu siswa)
   - Kunci Asing: `users.id` → `siswa.user_id` (onDelete: cascade)
-- **Satu-ke-Satu**: `users` → `guru` (Satu pengguna dapat menjadi satu guru)
-  - Kunci Asing: `users.id` → `guru.user_id` (onDelete: cascade)
-- **Satu-ke-Satu**: `users` → `petugas` (Satu pengguna dapat menjadi satu staf)
-  - Kunci Asing: `users.id` → `petugas.user_id` (onDelete: cascade)
+- **Satu-ke-Satu**: `users` → `admin_perpus` (Satu pengguna dapat menjadi satu Admin Perpus)
+  - Kunci Asing: `users.id` → `admin_perpus.user_id` (onDelete: cascade)
+- **Satu-ke-Satu**: `users` → `super_admins` (Satu pengguna dapat menjadi satu Super Admin)
+  - Kunci Asing: `users.id` → `super_admins.user_id` (onDelete: cascade)
 - **Satu-ke-Banyak**: `users` → `pengumuman` (Satu pengguna dapat membuat banyak pengumuman)
   - Kunci Asing: `users.id` → `pengumuman.admin_id` (onDelete: cascade)
 - **Satu-ke-Banyak**: `users` → `acara` (Satu pengguna dapat membuat banyak acara)
@@ -101,13 +101,13 @@ Dokumen ini menjelaskan semua hubungan database dalam sistem manajemen perpustak
 
 ---
 
-### 4. Guru (guru)
-**Deskripsi Tabel**: Informasi spesifik guru
+### 4. Admin Perpus (admin_perpus)
+**Deskripsi Tabel**: Informasi spesifik Admin Perpus
 
 **Kolom**:
 - `id` (Kunci Utama)
 - `user_id` (Kunci asing ke users)
-- `nip` (Nomor ID guru)
+- `nip` (Nomor ID Admin Perpus)
 - `mata_pelajaran` (Mata pelajaran yang diajar)
 - `jenis_kelamin` (Jenis kelamin: Laki-laki|Perempuan)
 - `alamat` (Alamat)
@@ -115,14 +115,14 @@ Dokumen ini menjelaskan semua hubungan database dalam sistem manajemen perpustak
 - `timestamps`
 
 **Hubungan**:
-- **Banyak-ke-Satu**: `guru` → `users` (Banyak guru termasuk dalam satu pengguna)
-  - Kunci Asing: `guru.user_id` → `users.id` (onDelete: cascade)
-- **Satu-ke-Banyak**: `guru` → `peminjaman_data` (Satu guru dapat menyetujui banyak peminjaman)
-  - Kunci Asing: `guru.id` → `peminjaman_data.guru_id` (onDelete: null)
+- **Banyak-ke-Satu**: `admin_perpus` → `users` (Banyak Admin Perpus termasuk dalam satu pengguna)
+  - Kunci Asing: `admin_perpus.user_id` → `users.id` (onDelete: cascade)
+- **Satu-ke-Banyak**: `admin_perpus` → `peminjaman_data` (Satu Admin Perpus dapat menyetujui banyak peminjaman)
+  - Kunci Asing: `admin_perpus.id` → `peminjaman_data.admin_perpus_id` (onDelete: null)
 
 ---
 
-### 5. Staf Perpustakaan (petugas)
+### 5. Super Admin (super_admins)
 **Deskripsi Tabel**: Informasi staf perpustakaan
 
 **Kolom**:
@@ -135,8 +135,8 @@ Dokumen ini menjelaskan semua hubungan database dalam sistem manajemen perpustak
 - `timestamps`
 
 **Hubungan**:
-- **Banyak-ke-Satu**: `petugas` → `users` (Banyak staf termasuk dalam satu pengguna)
-  - Kunci Asing: `petugas.user_id` → `users.id` (onDelete: cascade)
+- **Banyak-ke-Satu**: `super_admins` → `users` (Banyak Super Admin termasuk dalam satu pengguna)
+  - Kunci Asing: `super_admins.user_id` → `users.id` (onDelete: cascade)
 
 ---
 
@@ -255,7 +255,7 @@ Dokumen ini menjelaskan semua hubungan database dalam sistem manajemen perpustak
 - `id` (Kunci Utama)
 - `kode` (Kode peminjaman unik)
 - `siswa_id` (Kunci asing ke siswa)
-- `guru_id` (Kunci asing ke guru - boleh kosong)
+- `admin_perpus_id` (Kunci asing ke Admin Perpus - boleh kosong)
 - `status` (Status: pending|accepted|returned|cancelled)
 - `accepted_at` (Timestamp penerimaan)
 - `due_at` (Tanggal jatuh tempo)
@@ -266,8 +266,8 @@ Dokumen ini menjelaskan semua hubungan database dalam sistem manajemen perpustak
 **Hubungan**:
 - **Banyak-ke-Satu**: `peminjaman_data` → `siswa` (Banyak peminjaman termasuk dalam satu siswa)
   - Kunci Asing: `peminjaman_data.siswa_id` → `siswa.id` (onDelete: cascade)
-- **Banyak-ke-Satu**: `peminjaman_data` → `guru` (Banyak peminjaman disetujui oleh satu guru)
-  - Kunci Asing: `peminjaman_data.guru_id` → `guru.id` (onDelete: null)
+- **Banyak-ke-Satu**: `peminjaman_data` → `admin_perpus` (Banyak peminjaman disetujui oleh satu Admin Perpus)
+  - Kunci Asing: `peminjaman_data.admin_perpus_id` → `admin_perpus.id` (onDelete: null)
 - **Satu-ke-Banyak**: `peminjaman_data` → `peminjaman_items` (Satu peminjaman dapat memiliki banyak item)
   - Kunci Asing: `peminjaman_data.id` → `peminjaman_items.peminjaman_id` (onDelete: cascade)
 
@@ -375,12 +375,12 @@ Dokumen ini menjelaskan semua hubungan database dalam sistem manajemen perpustak
 
 ### Hirarki Peran Pengguna
 - Pengguna memiliki peran (role_data)
-- Pengguna dapat menjadi siswa, guru, atau staf
+- Pengguna dapat menjadi siswa, Admin Perpus, atau Super Admin
 - Setiap jenis pengguna memiliki hubungan satu-ke-satu dengan tabel users
 
 ### Hubungan Manajemen Perpustakaan
 - Buku memiliki penulis, kategori, dan penerbit
-- Peminjaman diinisiasi oleh siswa dan disetujui oleh guru
+- Peminjaman diinisiasi oleh siswa dan disetujui oleh Admin Perpus
 - Item peminjaman menghubungkan buku tertentu ke transaksi peminjaman tertentu
 - Manajemen stok dipelihara pada tingkat buku
 

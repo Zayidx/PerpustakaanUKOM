@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Guru\ManajemenPeminjaman;
-use App\Livewire\Guru\ScanPeminjaman;
-use App\Livewire\Guru\ScanPengembalian;
+use App\Livewire\AdminPerpus\ManajemenPeminjaman;
+use App\Livewire\AdminPerpus\ScanPeminjaman;
+use App\Livewire\AdminPerpus\ScanPengembalian;
 use App\Livewire\Siswa\ListBuku;
 use App\Models\Author;
 use App\Models\Buku;
-use App\Models\Guru;
+use App\Models\AdminPerpus;
 use App\Models\KategoriBuku;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanItem;
@@ -101,7 +101,7 @@ class LoanFlowTest extends TestCase
         $this->assertSame(2, $bookTwo->stok);
     }
 
-    public function test_guru_scan_accepts_pending_loan(): void
+    public function test_admin_perpus_scan_accepts_pending_loan(): void
     {
         Carbon::setTestNow('2024-10-01 08:00:00');
 
@@ -111,14 +111,14 @@ class LoanFlowTest extends TestCase
             'icon_role' => 'user',
         ]);
 
-        $guruRole = RoleData::create([
-            'nama_role' => 'Guru',
-            'deskripsi_role' => 'Role guru',
+        $adminPerpusRole = RoleData::create([
+            'nama_role' => 'AdminPerpus',
+            'deskripsi_role' => 'Role Admin Perpus',
             'icon_role' => 'chalkboard',
         ]);
 
         $siswaUser = User::factory()->create(['role_id' => $siswaRole->id]);
-        $guruUser = User::factory()->create(['role_id' => $guruRole->id]);
+        $adminPerpusUser = User::factory()->create(['role_id' => $adminPerpusRole->id]);
 
         $siswa = Siswa::create([
             'user_id' => $siswaUser->id,
@@ -162,14 +162,14 @@ class LoanFlowTest extends TestCase
             'quantity' => 1,
         ]);
 
-        Guru::create([
-            'user_id' => $guruUser->id,
+        AdminPerpus::create([
+            'user_id' => $adminPerpusUser->id,
             'nip' => '1987654321',
             'mata_pelajaran' => 'Matematika',
             'jenis_kelamin' => 'Laki-laki',
         ]);
 
-        $this->actingAs($guruUser);
+        $this->actingAs($adminPerpusUser);
 
         $payload = json_encode([
             'code' => $loan->kode,
@@ -194,7 +194,7 @@ class LoanFlowTest extends TestCase
         Carbon::setTestNow();
     }
 
-    public function test_guru_can_process_manual_code_when_scanner_not_available(): void
+    public function test_admin_perpus_can_process_manual_code_when_scanner_not_available(): void
     {
         Carbon::setTestNow('2024-10-02 10:00:00');
 
@@ -204,14 +204,14 @@ class LoanFlowTest extends TestCase
             'icon_role' => 'user',
         ]);
 
-        $guruRole = RoleData::create([
-            'nama_role' => 'Guru',
-            'deskripsi_role' => 'Role guru',
+        $adminPerpusRole = RoleData::create([
+            'nama_role' => 'AdminPerpus',
+            'deskripsi_role' => 'Role Admin Perpus',
             'icon_role' => 'chalkboard',
         ]);
 
         $siswaUser = User::factory()->create(['role_id' => $siswaRole->id]);
-        $guruUser = User::factory()->create(['role_id' => $guruRole->id]);
+        $adminPerpusUser = User::factory()->create(['role_id' => $adminPerpusRole->id]);
 
         $siswa = Siswa::create([
             'user_id' => $siswaUser->id,
@@ -221,8 +221,8 @@ class LoanFlowTest extends TestCase
             'jenis_kelamin' => 'perempuan',
         ]);
 
-        Guru::create([
-            'user_id' => $guruUser->id,
+        AdminPerpus::create([
+            'user_id' => $adminPerpusUser->id,
             'nip' => '1111222233',
             'mata_pelajaran' => 'Kimia',
             'jenis_kelamin' => 'Perempuan',
@@ -262,7 +262,7 @@ class LoanFlowTest extends TestCase
             'quantity' => 1,
         ]);
 
-        $this->actingAs($guruUser);
+        $this->actingAs($adminPerpusUser);
 
         Livewire::test(ScanPeminjaman::class)
             ->set('manualCode', '123456')
@@ -330,7 +330,7 @@ class LoanFlowTest extends TestCase
             ->assertHasErrors(['selection']);
     }
 
-    public function test_guru_can_mark_loan_as_returned_via_management(): void
+    public function test_admin_perpus_can_mark_loan_as_returned_via_management(): void
     {
         Carbon::setTestNow('2024-10-05 09:00:00');
 
@@ -340,14 +340,14 @@ class LoanFlowTest extends TestCase
             'icon_role' => 'user',
         ]);
 
-        $guruRole = RoleData::create([
-            'nama_role' => 'Guru',
-            'deskripsi_role' => 'Role guru',
+        $adminPerpusRole = RoleData::create([
+            'nama_role' => 'AdminPerpus',
+            'deskripsi_role' => 'Role Admin Perpus',
             'icon_role' => 'chalkboard',
         ]);
 
         $siswaUser = User::factory()->create(['role_id' => $siswaRole->id]);
-        $guruUser = User::factory()->create(['role_id' => $guruRole->id]);
+        $adminPerpusUser = User::factory()->create(['role_id' => $adminPerpusRole->id]);
 
         $siswa = Siswa::create([
             'user_id' => $siswaUser->id,
@@ -357,8 +357,8 @@ class LoanFlowTest extends TestCase
             'jenis_kelamin' => 'perempuan',
         ]);
 
-        $guru = Guru::create([
-            'user_id' => $guruUser->id,
+        $adminPerpus = AdminPerpus::create([
+            'user_id' => $adminPerpusUser->id,
             'nip' => '1977000001',
             'mata_pelajaran' => 'Bahasa Indonesia',
             'jenis_kelamin' => 'Perempuan',
@@ -389,7 +389,7 @@ class LoanFlowTest extends TestCase
         $loan = Peminjaman::create([
             'kode' => '234567',
             'siswa_id' => $siswa->id,
-            'guru_id' => $guru->id,
+            'admin_perpus_id' => $adminPerpus->id,
             'status' => 'accepted',
             'accepted_at' => now(),
             'due_at' => now()->addDays(3),
@@ -401,7 +401,7 @@ class LoanFlowTest extends TestCase
             'quantity' => 1,
         ]);
 
-        $this->actingAs($guruUser);
+        $this->actingAs($adminPerpusUser);
 
         Livewire::test(ManajemenPeminjaman::class)
             ->call('markAsReturned', $loan->id)
@@ -417,7 +417,7 @@ class LoanFlowTest extends TestCase
         Carbon::setTestNow();
     }
 
-    public function test_guru_can_cancel_pending_loan_via_management(): void
+    public function test_admin_perpus_can_cancel_pending_loan_via_management(): void
     {
         $siswaRole = RoleData::create([
             'nama_role' => 'Siswa',
@@ -425,14 +425,14 @@ class LoanFlowTest extends TestCase
             'icon_role' => 'user',
         ]);
 
-        $guruRole = RoleData::create([
-            'nama_role' => 'Guru',
-            'deskripsi_role' => 'Role guru',
+        $adminPerpusRole = RoleData::create([
+            'nama_role' => 'AdminPerpus',
+            'deskripsi_role' => 'Role Admin Perpus',
             'icon_role' => 'chalkboard',
         ]);
 
         $siswaUser = User::factory()->create(['role_id' => $siswaRole->id]);
-        $guruUser = User::factory()->create(['role_id' => $guruRole->id]);
+        $adminPerpusUser = User::factory()->create(['role_id' => $adminPerpusRole->id]);
 
         $siswa = Siswa::create([
             'user_id' => $siswaUser->id,
@@ -442,8 +442,8 @@ class LoanFlowTest extends TestCase
             'jenis_kelamin' => 'laki-laki',
         ]);
 
-        Guru::create([
-            'user_id' => $guruUser->id,
+        AdminPerpus::create([
+            'user_id' => $adminPerpusUser->id,
             'nip' => '1977000002',
             'mata_pelajaran' => 'IPA',
             'jenis_kelamin' => 'Laki-laki',
@@ -483,7 +483,7 @@ class LoanFlowTest extends TestCase
             'quantity' => 1,
         ]);
 
-        $this->actingAs($guruUser);
+        $this->actingAs($adminPerpusUser);
 
         Livewire::test(ManajemenPeminjaman::class)
             ->call('cancelLoan', $loan->id)
@@ -496,7 +496,7 @@ class LoanFlowTest extends TestCase
         $this->assertSame(3, $book->stok);
     }
 
-    public function test_guru_can_process_return_via_manual_component(): void
+    public function test_admin_perpus_can_process_return_via_manual_component(): void
     {
         $siswaRole = RoleData::create([
             'nama_role' => 'Siswa',
@@ -504,14 +504,14 @@ class LoanFlowTest extends TestCase
             'icon_role' => 'user',
         ]);
 
-        $guruRole = RoleData::create([
-            'nama_role' => 'Guru',
-            'deskripsi_role' => 'Role guru',
+        $adminPerpusRole = RoleData::create([
+            'nama_role' => 'AdminPerpus',
+            'deskripsi_role' => 'Role Admin Perpus',
             'icon_role' => 'chalkboard',
         ]);
 
         $siswaUser = User::factory()->create(['role_id' => $siswaRole->id]);
-        $guruUser = User::factory()->create(['role_id' => $guruRole->id]);
+        $adminPerpusUser = User::factory()->create(['role_id' => $adminPerpusRole->id]);
 
         $siswa = Siswa::create([
             'user_id' => $siswaUser->id,
@@ -521,8 +521,8 @@ class LoanFlowTest extends TestCase
             'jenis_kelamin' => 'perempuan',
         ]);
 
-        Guru::create([
-            'user_id' => $guruUser->id,
+        AdminPerpus::create([
+            'user_id' => $adminPerpusUser->id,
             'nip' => '1977000003',
             'mata_pelajaran' => 'Sejarah',
             'jenis_kelamin' => 'Perempuan',
@@ -563,7 +563,7 @@ class LoanFlowTest extends TestCase
             'quantity' => 1,
         ]);
 
-        $this->actingAs($guruUser);
+        $this->actingAs($adminPerpusUser);
 
         $component = Livewire::test(ScanPengembalian::class)
             ->set('manualCode', '456789')
@@ -587,7 +587,7 @@ class LoanFlowTest extends TestCase
         $this->assertNotNull($loan->returned_at);
     }
 
-    public function test_guru_can_process_return_via_scan_payload(): void
+    public function test_admin_perpus_can_process_return_via_scan_payload(): void
     {
         $siswaRole = RoleData::create([
             'nama_role' => 'Siswa',
@@ -595,14 +595,14 @@ class LoanFlowTest extends TestCase
             'icon_role' => 'user',
         ]);
 
-        $guruRole = RoleData::create([
-            'nama_role' => 'Guru',
-            'deskripsi_role' => 'Role guru',
+        $adminPerpusRole = RoleData::create([
+            'nama_role' => 'AdminPerpus',
+            'deskripsi_role' => 'Role Admin Perpus',
             'icon_role' => 'chalkboard',
         ]);
 
         $siswaUser = User::factory()->create(['role_id' => $siswaRole->id]);
-        $guruUser = User::factory()->create(['role_id' => $guruRole->id]);
+        $adminPerpusUser = User::factory()->create(['role_id' => $adminPerpusRole->id]);
 
         $siswa = Siswa::create([
             'user_id' => $siswaUser->id,
@@ -612,8 +612,8 @@ class LoanFlowTest extends TestCase
             'jenis_kelamin' => 'laki-laki',
         ]);
 
-        Guru::create([
-            'user_id' => $guruUser->id,
+        AdminPerpus::create([
+            'user_id' => $adminPerpusUser->id,
             'nip' => '1977000004',
             'mata_pelajaran' => 'Fisika',
             'jenis_kelamin' => 'Laki-laki',
@@ -654,7 +654,7 @@ class LoanFlowTest extends TestCase
             'quantity' => 1,
         ]);
 
-        $this->actingAs($guruUser);
+        $this->actingAs($adminPerpusUser);
 
         $payload = json_encode([
             'code' => $loan->kode,
