@@ -67,15 +67,15 @@
                 <div class="col-12 col-lg-6 text-center text-lg-start" data-aos="fade-right" data-aos-delay="100">
                     <h1 class="display-4 fw-bold mb-4">Selamat Datang di Pusat Belajar Anda</h1>
                     <p class="lead mb-4">Jelajahi ribuan buku, sumber belajar, dan program yang dirancang untuk menginspirasi perjalanan belajar Anda.</p>
-                    <form class="input-group input-group-lg mb-4 mx-auto mx-lg-0 shadow-sm" style="max-width: 420px;" role="search">
+                    <form class="input-group input-group-lg mb-4 mx-auto mx-lg-0 shadow-sm" style="max-width: 420px;" role="search" method="GET" action="{{ route('landing.book-search') }}">
                         <label for="search-books" class="visually-hidden">Cari buku atau penulis</label>
-                        <input id="search-books" type="search" class="form-control" placeholder="Cari buku, penulis..." aria-label="Cari buku atau penulis">
+                        <input id="search-books" type="search" name="q" class="form-control" placeholder="Cari buku, penulis..." aria-label="Cari buku atau penulis" value="{{ old('q') }}">
                         <button class="btn btn-primary" type="submit" aria-label="Cari">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
                     </form>
                     <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center justify-content-lg-start">
-                        <a href="#books" class="btn btn-primary btn-lg px-4">Jelajahi Sekarang</a>
+                        <a href="{{ route('landing.book-search') }}" class="btn btn-primary btn-lg px-4">Jelajahi Sekarang</a>
                         <a href="#services" class="btn btn-outline-primary btn-lg px-4">Pelajari Lebih Lanjut</a>
                     </div>
                 </div>

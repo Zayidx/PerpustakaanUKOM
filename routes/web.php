@@ -3,6 +3,8 @@
 use App\Livewire\Auth\Login;
 use App\Models\Pengumuman as PengumumanModel;
 use App\Models\Acara;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -47,6 +49,33 @@ Route::get('/login', Login::class)->middleware('redirect.authenticated')->name('
 
 Route::get('/pengumuman', \App\Livewire\Pengumuman::class)->name('landing.pengumuman');
 Route::get('/pengumuman/{slug}', \App\Livewire\DetailPengumuman::class)->name('landing.pengumuman.detail');
+
+Route::get('/cari-buku', function (Request $request) {
+    $search = trim((string) $request->query('q', ''));
+    $params = $search !== '' ? ['search' => $search] : [];
+    $target = route('siswa.buku', $params);
+
+    if (! Auth::check()) {
+        $request->session()->put('url.intended', $target);
+
+        return redirect()->route('login');
+    }
+
+    $user = Auth::user()->loadMissing('role');
+    $roleName = optional($user->role)->nama_role;
+
+    if ($roleName !== 'Siswa') {
+        $dashboard = match ($roleName) {
+            'SuperAdmin' => route('superadmin.dashboard'),
+            'AdminPerpus' => route('adminperpus.dashboard'),
+            default => route('welcome'),
+        };
+
+        return redirect()->to($dashboard)->with('error', 'Fitur pencarian buku hanya tersedia untuk akun siswa.');
+    }
+
+    return redirect()->to($target);
+})->name('landing.book-search');
 
 Route::post('/logout', function () {
     Auth::logout();
