@@ -64,6 +64,13 @@ class ListBuku extends Component
             return;
         }
 
+        if ($this->bookHasActiveLoan($bookId)) {
+            $this->addError('selection', "Buku {$book->nama_buku} sedang dalam proses peminjaman.");
+            $this->selectedBooks = array_values(array_diff($this->selectedBooks, [$bookId]));
+            session()->put('loan_cart', $this->selectedBooks);
+            return;
+        }
+
         if (in_array($bookId, $this->selectedBooks, true)) { 
             $this->selectedBooks = array_values(array_diff($this->selectedBooks, [$bookId])); 
         } else { 
@@ -184,11 +191,13 @@ class ListBuku extends Component
         $books = $this->getPaginatedBooks();
         $selectedBooks = $this->getSelectedBooksInfo();
         $detailBook = $this->getDetailBook();
+        $activeLoanBookIds = $this->getActiveLoanBookIds();
 
         return view('livewire.siswa.list-buku', [ 
             'books' => $books, 
             'detailBook' => $detailBook, 
             'selectedBooksInfo' => $selectedBooks, 
+            'activeLoanBookIds' => $activeLoanBookIds,
         ]);
     } 
 
@@ -307,5 +316,42 @@ class ListBuku extends Component
         }
 
         return null;
+    }
+
+    private function getActiveLoanBookIds(): array
+    {
+        $user = Auth::user();
+        $siswaId = $user?->siswa?->id;
+
+        if (! $siswaId) {
+            return [];
+        }
+
+        return PeminjamanItem::query()
+            ->select('buku_id')
+            ->whereHas('peminjaman', fn ($query) => $query
+                ->where('siswa_id', $siswaId)
+                ->whereIn('status', ['pending', 'accepted']))
+            ->pluck('buku_id')
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function bookHasActiveLoan(int $bookId): bool
+    {
+        $user = Auth::user();
+        $siswaId = $user?->siswa?->id;
+
+        if (! $siswaId) {
+            return false;
+        }
+
+        return PeminjamanItem::query()
+            ->where('buku_id', $bookId)
+            ->whereHas('peminjaman', fn ($query) => $query
+                ->where('siswa_id', $siswaId)
+                ->whereIn('status', ['pending', 'accepted']))
+            ->exists();
     }
 }

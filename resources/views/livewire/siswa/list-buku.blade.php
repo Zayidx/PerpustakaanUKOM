@@ -68,6 +68,10 @@
                                 </div>
                             </div>
                             <div class="card-body d-flex flex-column">
+                                @php
+                                    $isSelected = in_array($book->id, $selectedBooks ?? [], true);
+                                    $isBorrowed = in_array($book->id, $activeLoanBookIds ?? [], true);
+                                @endphp
                                 <div class="d-flex gap-2 mt-auto">
                                     <button
                                         type="button"
@@ -78,14 +82,16 @@
                                     </button>
                                     <button
                                         type="button"
-                                        class="btn {{ in_array($book->id, $selectedBooks ?? [], true) ? 'btn-danger' : 'btn-primary' }}"
-                                        @if($book->stok < 1) disabled @endif
+                                        class="btn {{ $isBorrowed ? 'btn-secondary' : ($isSelected ? 'btn-danger' : 'btn-primary') }}"
+                                        @if($book->stok < 1 || $isBorrowed) disabled @endif
                                         wire:click="toggleSelection({{ $book->id }})"
                                     >
-                                        @if ($book->stok < 1)
+                                        @if ($isBorrowed)
+                                            Sedang Dipinjam
+                                        @elseif ($book->stok < 1)
                                             Habis
                                         @else
-                                            {{ in_array($book->id, $selectedBooks ?? [], true) ? 'Hapus' : 'Pilih' }}
+                                            {{ $isSelected ? 'Hapus' : 'Pilih' }}
                                         @endif
                                     </button>
                                 </div>

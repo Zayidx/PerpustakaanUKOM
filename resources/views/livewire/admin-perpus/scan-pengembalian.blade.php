@@ -108,50 +108,6 @@
         </div>
     </div>
 
-    @php
-        $returnNotificationType = $scanNotification['type'] ?? 'info';
-        $returnNotificationTitles = [
-            'success' => 'Berhasil',
-            'error' => 'Terjadi Kesalahan',
-            'warning' => 'Perhatian',
-            'info' => 'Informasi',
-        ];
-        $returnNotificationClasses = [
-            'success' => 'bg-success text-white',
-            'error' => 'bg-danger text-white',
-            'warning' => 'bg-warning text-dark',
-            'info' => 'bg-primary text-white',
-        ];
-    @endphp
-
-    <div
-        wire:ignore.self
-        class="modal fade"
-        id="returnScanResultModal"
-        tabindex="-1"
-        aria-labelledby="returnScanResultModalLabel"
-        aria-hidden="true"
-    >
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header {{ $returnNotificationClasses[$returnNotificationType] ?? $returnNotificationClasses['info'] }}">
-                    <h5 class="modal-title" id="returnScanResultModalLabel">
-                        {{ $returnNotificationTitles[$returnNotificationType] ?? $returnNotificationTitles['success'] }}
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    {{ $scanNotification['message'] ?? 'Tidak ada informasi terbaru.' }}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                        Tutup
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     @push('scripts')
         <script src="{{ asset('assets/js/html5-qrcode.min.js') }}"></script>
         <script>
@@ -224,7 +180,6 @@
                 }
                 returnScanner.initOnce();
                 setupLateModalListeners();
-                setupReturnScanModal();
             });
 
             const setupLateModalListeners = () => {
@@ -264,40 +219,9 @@
                 window.__lateFeeModalInitialized = true;
             };
 
-            const setupReturnScanModal = () => {
-                if (window.__returnScanModalInitialized) {
-                    return;
-                }
-
-                if (!window.bootstrap) {
-                    setTimeout(setupReturnScanModal, 150);
-                    return;
-                }
-
-                window.addEventListener('return-show-scan-modal', () => {
-                    const modalElement = document.getElementById('returnScanResultModal');
-
-                    if (!modalElement) {
-                        return;
-                    }
-
-                    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
-                    modalInstance.show();
-                });
-
-                document.addEventListener('hidden.bs.modal', (event) => {
-                    if (event.target && event.target.id === 'returnScanResultModal') {
-                        dispatchLivewireEvent('return-clear-scan-notification');
-                    }
-                });
-
-                window.__returnScanModalInitialized = true;
-            };
-
             const initReturnScanFeatures = () => {
                 returnScanner.initOnce();
                 setupLateModalListeners();
-                setupReturnScanModal();
             };
 
             document.addEventListener('livewire:load', initReturnScanFeatures);

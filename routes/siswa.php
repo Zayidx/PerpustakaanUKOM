@@ -10,4 +10,5 @@ Route::middleware(['auth', 'role:Siswa'])
         Route::get('/buku', \App\Livewire\Siswa\ListBuku::class)->name('buku');
         Route::get('/peminjaman', \App\Livewire\Siswa\ListPeminjaman::class)->name('peminjaman');
         Route::get('/peminjaman/kode/{kode}', \App\Livewire\Siswa\KodePinjaman::class)->name('kode-peminjaman');
+        Route::get('/pengembalian/kode/{kode}', \App\Livewire\Siswa\KodePengembalian::class)->name('kode-pengembalian');
     });

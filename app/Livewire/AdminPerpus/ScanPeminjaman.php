@@ -24,8 +24,6 @@ class ScanPeminjaman extends Component
 
     public string $manualCode = '';
 
-    public ?array $scanNotification = null;
-    
     protected array $messages = [
         'manualCode.required' => 'Kode peminjaman wajib diisi.',
         'manualCode.digits' => 'Kode peminjaman harus terdiri dari 6 angka.',
@@ -34,8 +32,7 @@ class ScanPeminjaman extends Component
     #[On('qr-scanned')]
     public function handleScan(mixed $event): void
     {
-        $this->reset(['errorMessage', 'loan', 'lastPayload']); 
-        $this->clearScanNotification();
+        $this->reset(['errorMessage', 'loan', 'lastPayload']);
 
         $payload = is_string($event) ? $event : ($event['payload'] ?? null); 
         $data = $payload ? json_decode($payload, true) : null; 
@@ -68,8 +65,7 @@ class ScanPeminjaman extends Component
 
     public function processManualCode(): void
     {
-        $this->reset(['errorMessage', 'loan', 'lastPayload']); 
-        $this->clearScanNotification();
+        $this->reset(['errorMessage', 'loan', 'lastPayload']);
         $this->resetErrorBag();
 
         $validated = $this->validate([
@@ -200,23 +196,12 @@ class ScanPeminjaman extends Component
         return view('livewire.admin-perpus.scan-peminjaman');
     } 
 
-    #[On('loan-clear-scan-notification')]
-    public function clearScanNotification(): void
-    {
-        $this->scanNotification = null;
-    }
-
     private function notifyScanResult(string $type, ?string $message): void
     {
         if (! $message) {
             return;
         }
 
-        $this->scanNotification = [
-            'type' => $type,
-            'message' => $message,
-        ];
-
-        $this->dispatch('loan-show-scan-modal');
+        $this->dispatch('notify', type: $type, message: $message);
     }
 }

@@ -30,8 +30,6 @@ class ScanPengembalian extends Component
 
     public ?array $pendingReturn = null;
 
-    public ?array $scanNotification = null;
-
     protected array $messages = [
         'manualCode.required' => 'Kode pengembalian wajib diisi.',
         'manualCode.digits' => 'Kode pengembalian harus terdiri dari 6 angka.',
@@ -41,7 +39,6 @@ class ScanPengembalian extends Component
     public function handleScan(mixed $event): void
     {
         $this->reset(['errorMessage', 'loan', 'lastPayload', 'lateInfo', 'pendingReturn']);
-        $this->clearScanNotification();
 
         $payload = is_string($event) ? $event : ($event['payload'] ?? null);
         $data = $payload ? json_decode($payload, true) : null;
@@ -81,7 +78,6 @@ class ScanPengembalian extends Component
     public function processManualCode(): void
     {
         $this->reset(['errorMessage', 'loan', 'lastPayload', 'lateInfo', 'pendingReturn']);
-        $this->clearScanNotification();
         $this->resetErrorBag();
 
         $validated = $this->validate([
@@ -275,23 +271,12 @@ class ScanPengembalian extends Component
         $this->notifyScanResult('success', 'Pengembalian berhasil diselesaikan.');
     }
 
-    #[On('return-clear-scan-notification')]
-    public function clearScanNotification(): void
-    {
-        $this->scanNotification = null;
-    }
-
     private function notifyScanResult(string $type, ?string $message): void
     {
         if (! $message) {
             return;
         }
 
-        $this->scanNotification = [
-            'type' => $type,
-            'message' => $message,
-        ];
-
-        $this->dispatch('return-show-scan-modal');
+        $this->dispatch('notify', type: $type, message: $message);
     }
 }

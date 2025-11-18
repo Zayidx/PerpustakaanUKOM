@@ -3,10 +3,14 @@
         <div class="row g-4">
             <div class="col-lg-5">
                 <div class="card shadow-sm h-100">
-                    <div class="card-header bg-primary text-white">
-                        Kode Peminjaman
+                    <div class="card-header bg-success text-white">
+                        Kode Pengembalian
                     </div>
                     <div class="card-body text-center">
+                        @php
+                            $lateDays = $loan['late_days'] ?? 0;
+                            $lateFee = $loan['late_fee'] ?? 0;
+                        @endphp
                         @php
                             $statusLabels = [
                                 'pending' => 'Menunggu',
@@ -17,22 +21,39 @@
                             $statusLabel = $statusLabels[$loan['status']] ?? ucfirst($loan['status']);
                         @endphp
                         <div class="mb-3">
-                            <span class="badge bg-{{ $loan['status'] === 'pending' ? 'warning text-dark' : ($loan['status'] === 'accepted' ? 'success' : 'secondary') }}">
+                            <span class="badge bg-success">
                                 Status: {{ $statusLabel }}
                             </span>
                         </div>
+
                         <p class="text-muted small mb-1">
-                            Kode peminjaman Anda:
+                            Kode pengembalian Anda:
                         </p>
                         <div class="fs-3 fw-bold mb-3">
                             {{ $loan['kode'] }}
                         </div>
+
+                        @if ($lateDays > 0)
+                            <div class="alert alert-warning text-start">
+                                Terlambat {{ $lateDays }} hari. Perkiraan denda: <strong>Rp{{ number_format($lateFee, 0, ',', '.') }}</strong>.
+                                Mohon siapkan pembayaran saat pengembalian.
+                            </div>
+                        @else
+                            <p class="text-muted small">Belum melewati jatuh tempo.</p>
+                        @endif
+
+                        <p class="text-muted small mb-2">
+                            Batas pengembalian: {{ $loan['due_at'] ? optional($loan['due_at'])->translatedFormat('d F Y') : '-' }}
+                        </p>
+
                         @if ($qrSvg)
-                            <div class="d-flex justify-content-center">
-                                {!! $qrSvg !!}
+                            <div class="d-flex justify-content-center my-3">
+                                <div class="border rounded p-3 bg-light">
+                                    {!! $qrSvg !!}
+                                </div>
                             </div>
                             <p class="text-muted mt-3 mb-0">
-                                Tunjukkan QR code atau bacakan kode 6 angka ini kepada Admin Perpus untuk diproses.
+                                Tunjukkan QR ini atau bacakan kode 6 angka tersebut kepada Admin Perpus untuk menyelesaikan pengembalian.
                             </p>
                         @else
                             <p class="text-danger mb-0">Gagal membuat QR code.</p>
@@ -44,7 +65,7 @@
             <div class="col-lg-7">
                 <div class="card shadow-sm">
                     <div class="card-header">
-                        Detail Peminjaman
+                        Detail Pengembalian
                     </div>
                     <div class="card-body">
                         <dl class="row mb-0">
@@ -56,7 +77,7 @@
                                 {{ optional($loan['created_at'])->translatedFormat('d F Y H:i') }}
                             </dd>
 
-                            <dt class="col-sm-4">Diterima</dt>
+                            <dt class="col-sm-4">Disetujui</dt>
                             <dd class="col-sm-8">
                                 {{ $loan['accepted_at'] ? optional($loan['accepted_at'])->translatedFormat('d F Y H:i') : '-' }}
                             </dd>
@@ -66,7 +87,7 @@
                                 {{ $loan['due_at'] ? optional($loan['due_at'])->translatedFormat('d F Y') : '-' }}
                             </dd>
 
-                            <dt class="col-sm-4">Admin Perpus Penerima</dt>
+                            <dt class="col-sm-4">Admin Perpus</dt>
                             <dd class="col-sm-8">{{ $loan['admin_perpus'] ?? '-' }}</dd>
                         </dl>
                     </div>
@@ -93,7 +114,7 @@
         </div>
     @else
         <div class="alert alert-danger">
-            Data peminjaman tidak tersedia.
+            Data pengembalian tidak tersedia.
         </div>
     @endif
 </div>
