@@ -7,6 +7,8 @@ use App\Models\Peminjaman;
 use App\Models\PeminjamanItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -177,7 +179,7 @@ class ListBuku extends Component
 
     public function render()
     {
-        $books = Buku::query()
+        $books = Buku::query() 
             ->with(['author', 'kategori', 'penerbit']) 
             ->when($this->search !== '', function ($query) { 
                 $query->where(function ($inner) { 
@@ -198,20 +200,22 @@ class ListBuku extends Component
 
         $books->setCollection(
             $books->getCollection()->map(function (Buku $book) {
-                $book->append(['cover_depan_url', 'cover_belakang_url']);
+                $book->setAttribute('cover_depan_url', $this->resolveCoverUrl($book->cover_depan));
+                $book->setAttribute('cover_belakang_url', $this->resolveCoverUrl($book->cover_belakang));
 
                 return $book;
             })
         );
 
-        $selectedBooks = Buku::query()
+        $selectedBooks = Buku::query() 
             ->with(['author', 'kategori']) 
             ->whereIn('id', $this->selectedBooks) 
             ->get() 
             ->sortBy(fn ($book) => array_search($book->id, $this->selectedBooks, true) ?? PHP_INT_MAX); 
 
         $selectedBooks = $selectedBooks->map(function (Buku $book) { 
-            $book->append(['cover_depan_url', 'cover_belakang_url']);
+            $book->setAttribute('cover_depan_url', $this->resolveCoverUrl($book->cover_depan));
+            $book->setAttribute('cover_belakang_url', $this->resolveCoverUrl($book->cover_belakang));
 
             return $book;
         })->values(); 
@@ -230,7 +234,8 @@ class ListBuku extends Component
             if (! $detailBook) { 
                 $this->clearDetail(); 
             } else {
-                $detailBook->append(['cover_depan_url', 'cover_belakang_url']);
+                $detailBook->setAttribute('cover_depan_url', $this->resolveCoverUrl($detailBook->cover_depan));
+                $detailBook->setAttribute('cover_belakang_url', $this->resolveCoverUrl($detailBook->cover_belakang));
             }
         }
 
@@ -248,5 +253,37 @@ class ListBuku extends Component
         } while (Peminjaman::where('kode', $code)->exists()); 
 
         return $code; 
+    }
+
+    private function resolveCoverUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        $normalized = ltrim($path, '/');
+
+        if (Str::startsWith($normalized, ['http://', 'https://'])) {
+            return $normalized;
+        }
+
+        if (Str::startsWith($normalized, 'assets/')) {
+            return asset($normalized);
+        }
+
+        if (Str::startsWith($normalized, 'storage/')) {
+            return asset($normalized);
+        }
+
+        if (Storage::disk('public')->exists($normalized)) {
+            return Storage::url($normalized);
+        }
+
+        $publicPath = public_path($normalized);
+        if (is_file($publicPath)) {
+            return asset($normalized);
+        }
+
+        return asset('storage/'.$normalized);
     }
 }

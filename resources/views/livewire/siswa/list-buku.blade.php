@@ -49,25 +49,17 @@
                 @forelse ($books as $book)
                     <div class="col-md-6">
                         <div class="card h-100 border-{{ in_array($book->id, $selectedBooks ?? [], true) ? 'primary' : 'light' }} overflow-hidden">
-                                <div class="position-relative">
-                                    <button
-                                        type="button"
-                                        class="ratio ratio-3x4 bg-light overflow-hidden border-0 p-0 w-100"
-                                        @if($book->stok < 1) disabled @endif
-                                        wire:click="toggleSelection({{ $book->id }})"
-                                    >
+                            <div class="position-relative">
+                                <div class="ratio ratio-3x4 bg-light overflow-hidden">
                                     @if ($book->cover_depan_url)
-                                        <img src="{{ $book->cover_depan_url }}"
-                                             alt="Cover {{ $book->nama_buku }}"
-                                             class="w-100 h-100 object-fit-cover"
-                                             onerror="console.error('Cover gagal dimuat:', this.src); this.classList.add('d-none'); this.insertAdjacentHTML('afterend', '<div class=\'d-flex flex-column justify-content-center align-items-center h-100 text-muted small px-3 text-center\'><i class=\'bi bi-book fs-3 mb-2\'></i><span>Cover belum tersedia</span></div>');">
+                                        <img src="{{ $book->cover_depan_url }}" alt="Cover {{ $book->nama_buku }}" class="w-100 h-100 object-fit-cover">
                                     @else
                                         <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted small px-3 text-center">
                                             <i class="bi bi-book fs-3 mb-2"></i>
                                             <span>Cover belum tersedia</span>
                                         </div>
                                     @endif
-                                    </button>
+                                </div>
                                 <span class="badge {{ $book->stok > 0 ? 'bg-success' : 'bg-danger' }} position-absolute top-0 start-0 m-2">
                                     {{ $book->stok > 0 ? 'Stok: '.$book->stok : 'Habis' }}
                                 </span>
@@ -83,6 +75,18 @@
                                         wire:click="showDetail({{ $book->id }})"
                                     >
                                         Detail
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn {{ in_array($book->id, $selectedBooks ?? [], true) ? 'btn-danger' : 'btn-primary' }}"
+                                        @if($book->stok < 1) disabled @endif
+                                        wire:click="toggleSelection({{ $book->id }})"
+                                    >
+                                        @if ($book->stok < 1)
+                                            Habis
+                                        @else
+                                            {{ in_array($book->id, $selectedBooks ?? [], true) ? 'Hapus' : 'Pilih' }}
+                                        @endif
                                     </button>
                                 </div>
                             </div>

@@ -16,7 +16,7 @@
 </head>
 
 <body>
-    <script src="{{ asset('assets/static/js/initTheme.js') }}"></script>
+    <script src="{{ asset('assets/static/js/initTheme.js') }}" data-navigate-once></script>
     <div id="app">
         @if (Request::routeIs('superadmin.*'))
             @include('components.layouts.partials.sidebar-super-admin-dashboard')
@@ -57,22 +57,22 @@
             </footer>
         </div>
     </div>
-    <script src="{{ asset('assets/static/js/components/dark.js') }}"></script>
-    <script src="{{ asset('assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
+    <script src="{{ asset('assets/static/js/components/dark.js') }}" data-navigate-once></script>
+    <script src="{{ asset('assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js') }}" data-navigate-once></script>
 
 
-    <script src="{{ asset('assets/compiled/js/app.js') }}"></script>
+    <script src="{{ asset('assets/compiled/js/app.js') }}" data-navigate-once></script>
 
 
 
     <!-- Need: Apexcharts -->
     @if (Request::routeIs('*.dashboard'))
-        <script src="{{ asset('assets/extensions/apexcharts/apexcharts.min.js') }}"></script>
-        <script src="{{ asset('assets/static/js/pages/dashboard.js') }}"></script>
+        <script src="{{ asset('assets/extensions/apexcharts/apexcharts.min.js') }}" data-navigate-once></script>
+        <script src="{{ asset('assets/static/js/pages/dashboard.js') }}" data-navigate-once></script>
     @endif
     @stack('scripts')
 
-    <script>
+    <script data-navigate-once>
         const applyStoredTheme = () => {
             const stored = localStorage.getItem('theme');
             if (!stored) {
