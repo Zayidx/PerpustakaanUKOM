@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin;
 
+use App\Livewire\Concerns\HandlesAlerts;
 use App\Models\KategoriAcara as KategoriAcaraModel;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -12,6 +13,7 @@ use Livewire\WithPagination;
 #[Title('Kategori Acara')]
 class KategoriAcara extends Component
 {
+    use HandlesAlerts;
     use WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
@@ -87,7 +89,7 @@ class KategoriAcara extends Component
             'id' => $this->kategoriId,
         ], $data);
 
-        session()->flash('message', $this->kategoriId ? 'Kategori acara berhasil diperbarui.' : 'Kategori acara baru berhasil dibuat.'); 
+        $this->flashSuccess($this->kategoriId ? 'Kategori acara berhasil diperbarui.' : 'Kategori acara baru berhasil dibuat.');
 
         $this->dispatch('close-modal', id: 'modal-kategori-acara'); 
         $this->resetForm(); 
@@ -98,12 +100,12 @@ class KategoriAcara extends Component
         $kategori = KategoriAcaraModel::withCount('acara')->findOrFail($id); 
 
         if ($kategori->acara_count > 0) { 
-            session()->flash('message', 'Kategori tidak dapat dihapus karena masih digunakan.');
+            $this->flashError('Kategori tidak dapat dihapus karena masih digunakan.');
             return;
         }
 
         $kategori->delete(); 
-        session()->flash('message', 'Kategori acara berhasil dihapus.');
+        $this->flashSuccess('Kategori acara berhasil dihapus.');
     } 
 
     private function resetForm(): void

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin;
 
+use App\Livewire\Concerns\HandlesAlerts;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -20,6 +21,7 @@ use App\Models\User;
 
 class ManajemenSuperAdmin extends Component
 {
+    use HandlesAlerts;
     use WithFileUploads;
     use WithPagination;
 
@@ -244,7 +246,7 @@ class ManajemenSuperAdmin extends Component
         });
 
         $this->resetForm();
-        session()->flash('message', 'Data Super Admin berhasil disimpan.');
+        $this->flashSuccess('Data Super Admin berhasil disimpan.');
         $this->dispatch('close-modal', id: 'modal-form');
     }
 
@@ -291,7 +293,7 @@ class ManajemenSuperAdmin extends Component
             $super_admins->delete();
         });
 
-        session()->flash('message', 'Data Super Admin berhasil dihapus.');
+        $this->flashSuccess('Data Super Admin berhasil dihapus.');
         $this->resetForm();
     }
 

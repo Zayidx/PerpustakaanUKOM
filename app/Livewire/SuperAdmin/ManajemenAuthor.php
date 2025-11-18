@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin;
 
+use App\Livewire\Concerns\HandlesAlerts;
 use App\Models\Author;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +18,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ManajemenAuthor extends Component
 {
+    use HandlesAlerts;
     use WithFileUploads;
     use WithPagination;
 
@@ -129,10 +131,7 @@ class ManajemenAuthor extends Component
             }
         });
 
-        session()->flash(
-            'message',
-            $this->editMode ? 'Data author berhasil diperbarui.' : 'Data author berhasil disimpan.' 
-        );
+        $this->flashSuccess($this->editMode ? 'Data author berhasil diperbarui.' : 'Data author berhasil disimpan.');
 
         $this->dispatch('close-modal', id: 'modal-form'); 
         $this->resetForm(); 
@@ -166,7 +165,7 @@ class ManajemenAuthor extends Component
             $author->delete(); 
         });
 
-        session()->flash('message', 'Data author berhasil dihapus.'); 
+        $this->flashSuccess('Data author berhasil dihapus.');
         $this->resetForm(); 
     } 
 

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin;
 
+use App\Livewire\Concerns\HandlesAlerts;
 use App\Models\KategoriBuku;
 use App\Models\Author; 
 use Illuminate\Validation\Rule;
@@ -14,6 +15,7 @@ use Livewire\WithPagination;
 
 class ManajemenKategoriBuku extends Component
 {
+    use HandlesAlerts;
     use WithPagination;
 
     protected $paginationTheme = 'bootstrap';
@@ -99,14 +101,14 @@ class ManajemenKategoriBuku extends Component
                 'deskripsi_kategori_buku' => $this->deskripsi_kategori_buku,
             ]);
 
-            session()->flash('message', 'Kategori buku berhasil diperbarui.');
+            $this->flashSuccess('Kategori buku berhasil diperbarui.');
         } else {
             KategoriBuku::create([ 
                 'nama_kategori_buku' => $this->nama_kategori_buku,
                 'deskripsi_kategori_buku' => $this->deskripsi_kategori_buku,
             ]);
 
-            session()->flash('message', 'Kategori buku berhasil ditambahkan.');
+            $this->flashSuccess('Kategori buku berhasil ditambahkan.');
         }
 
         $this->resetForm();
@@ -130,7 +132,7 @@ class ManajemenKategoriBuku extends Component
         $kategori = KategoriBuku::findOrFail((int) $id); 
         $kategori->delete(); 
 
-        session()->flash('message', 'Kategori buku berhasil dihapus.');
+        $this->flashSuccess('Kategori buku berhasil dihapus.');
         $this->resetForm();
     } 
 

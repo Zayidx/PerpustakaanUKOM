@@ -65,6 +65,8 @@
 
 
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" data-navigate-once></script>
+
     <!-- Need: Apexcharts -->
     @if (Request::routeIs('*.dashboard'))
         <script src="{{ asset('assets/extensions/apexcharts/apexcharts.min.js') }}" data-navigate-once></script>
@@ -116,8 +118,46 @@
             }
         };
 
-        document.addEventListener('DOMContentLoaded', bindThemeToggle);
-        document.addEventListener('livewire:navigated', bindThemeToggle);
+        document.addEventListener('DOMContentLoaded', () => {
+            bindThemeToggle();
+            initAlerts();
+        });
+        document.addEventListener('livewire:navigated', () => {
+            bindThemeToggle();
+            initAlerts();
+        });
+
+        function initAlerts() {
+            const showAlert = ({ message, type = 'success' }) => {
+                if (!window.Swal) {
+                    return;
+                }
+
+                window.Swal.fire({
+                    icon: type,
+                    title: type === 'error' ? 'Terjadi Kesalahan' : 'Berhasil',
+                    text: message,
+                    timer: 2500,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                });
+            };
+
+            if (window.Livewire) {
+                window.Livewire.on('notify', (payload) => showAlert(payload));
+            }
+
+            const flashMessage = @json(session('message'));
+            const flashError = @json(session('error'));
+
+            if (flashMessage) {
+                showAlert({ message: flashMessage, type: 'success' });
+            }
+
+            if (flashError) {
+                showAlert({ message: flashError, type: 'error' });
+            }
+        }
     </script>
 
 </body>

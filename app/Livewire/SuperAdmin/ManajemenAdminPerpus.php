@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin;
 
+use App\Livewire\Concerns\HandlesAlerts;
 use App\Models\RoleData;
 use App\Models\AdminPerpus;
 use App\Models\User;
@@ -20,6 +21,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ManajemenAdminPerpus extends Component
 {
+    use HandlesAlerts;
     use WithFileUploads, WithPagination;
 
     protected $paginationTheme = 'bootstrap';
@@ -137,7 +139,7 @@ class ManajemenAdminPerpus extends Component
 
         $roleId = RoleData::where('nama_role', 'AdminPerpus')->value('id'); 
         if (!$roleId) { 
-            session()->flash('message', 'Role Admin Perpus belum dikonfigurasi.');
+            $this->flashError('Role Admin Perpus belum dikonfigurasi.');
             return;
         }
 
@@ -193,7 +195,7 @@ class ManajemenAdminPerpus extends Component
         });
 
         $this->resetForm(); 
-        session()->flash('message', 'Data Admin Perpus berhasil disimpan.'); 
+        $this->flashSuccess('Data Admin Perpus berhasil disimpan.');
         $this->dispatch('close-modal', id: 'modal-form'); 
     } 
 
@@ -232,7 +234,7 @@ class ManajemenAdminPerpus extends Component
             }
         });
 
-        session()->flash('message', 'Data Admin Perpus berhasil dihapus.'); 
+        $this->flashSuccess('Data Admin Perpus berhasil dihapus.');
         $this->resetForm(); 
     } 
 

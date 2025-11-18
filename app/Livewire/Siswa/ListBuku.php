@@ -5,6 +5,8 @@ namespace App\Livewire\Siswa;
 use App\Models\Buku;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanItem;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -179,65 +181,9 @@ class ListBuku extends Component
 
     public function render()
     {
-        $books = Buku::query() 
-            ->with(['author', 'kategori', 'penerbit']) 
-            ->when($this->search !== '', function ($query) { 
-                $query->where(function ($inner) { 
-                    $inner->where('nama_buku', 'like', '%'.$this->search.'%') 
-                        ->orWhereHas('author', function ($author) { 
-                            $author->where('nama_author', 'like', '%'.$this->search.'%');
-                        })
-                        ->orWhereHas('kategori', function ($kategori) { 
-                            $kategori->where('nama_kategori_buku', 'like', '%'.$this->search.'%');
-                        })
-                        ->orWhereHas('penerbit', function ($penerbit) { 
-                            $penerbit->where('nama_penerbit', 'like', '%'.$this->search.'%');
-                        });
-                });
-            })
-            ->orderBy('nama_buku') 
-            ->paginate(12); 
-
-        $books->setCollection(
-            $books->getCollection()->map(function (Buku $book) {
-                $book->setAttribute('cover_depan_url', $this->resolveCoverUrl($book->cover_depan));
-                $book->setAttribute('cover_belakang_url', $this->resolveCoverUrl($book->cover_belakang));
-
-                return $book;
-            })
-        );
-
-        $selectedBooks = Buku::query() 
-            ->with(['author', 'kategori']) 
-            ->whereIn('id', $this->selectedBooks) 
-            ->get() 
-            ->sortBy(fn ($book) => array_search($book->id, $this->selectedBooks, true) ?? PHP_INT_MAX); 
-
-        $selectedBooks = $selectedBooks->map(function (Buku $book) { 
-            $book->setAttribute('cover_depan_url', $this->resolveCoverUrl($book->cover_depan));
-            $book->setAttribute('cover_belakang_url', $this->resolveCoverUrl($book->cover_belakang));
-
-            return $book;
-        })->values(); 
-
-        $missingSelection = array_diff($this->selectedBooks, $selectedBooks->pluck('id')->all()); 
-        if (! empty($missingSelection)) { 
-            $this->selectedBooks = array_values(array_diff($this->selectedBooks, $missingSelection)); 
-            session()->put('loan_cart', $this->selectedBooks); 
-        }
-
-        $detailBook = null; 
-
-        if ($this->detailBookId) { 
-            $detailBook = Buku::with(['author', 'kategori', 'penerbit'])->find($this->detailBookId); 
-
-            if (! $detailBook) { 
-                $this->clearDetail(); 
-            } else {
-                $detailBook->setAttribute('cover_depan_url', $this->resolveCoverUrl($detailBook->cover_depan));
-                $detailBook->setAttribute('cover_belakang_url', $this->resolveCoverUrl($detailBook->cover_belakang));
-            }
-        }
+        $books = $this->getPaginatedBooks();
+        $selectedBooks = $this->getSelectedBooksInfo();
+        $detailBook = $this->getDetailBook();
 
         return view('livewire.siswa.list-buku', [ 
             'books' => $books, 
@@ -253,6 +199,77 @@ class ListBuku extends Component
         } while (Peminjaman::where('kode', $code)->exists()); 
 
         return $code; 
+    }
+
+    private function getPaginatedBooks(): LengthAwarePaginator
+    {
+        $books = Buku::query()
+            ->with(['author', 'kategori', 'penerbit'])
+            ->when($this->search !== '', function ($query) {
+                $query->where(function ($inner) {
+                    $inner->where('nama_buku', 'like', '%'.$this->search.'%')
+                        ->orWhereHas('author', fn ($author) => $author->where('nama_author', 'like', '%'.$this->search.'%'))
+                        ->orWhereHas('kategori', fn ($kategori) => $kategori->where('nama_kategori_buku', 'like', '%'.$this->search.'%'))
+                        ->orWhereHas('penerbit', fn ($penerbit) => $penerbit->where('nama_penerbit', 'like', '%'.$this->search.'%'));
+                });
+            })
+            ->orderBy('nama_buku')
+            ->paginate(12);
+
+        $books->setCollection($books->getCollection()->map(fn (Buku $book) => $this->transformBookCover($book)));
+
+        return $books;
+    }
+
+    private function getSelectedBooksInfo(): Collection
+    {
+        $selected = Buku::query()
+            ->with(['author', 'kategori'])
+            ->whereIn('id', $this->selectedBooks)
+            ->get()
+            ->sortBy(fn ($book) => array_search($book->id, $this->selectedBooks, true) ?? PHP_INT_MAX)
+            ->map(fn (Buku $book) => $this->transformBookCover($book))
+            ->values();
+
+        $this->syncSelectedIds($selected);
+
+        return $selected;
+    }
+
+    private function getDetailBook(): ?Buku
+    {
+        if (! $this->detailBookId) {
+            return null;
+        }
+
+        $detailBook = Buku::with(['author', 'kategori', 'penerbit'])->find($this->detailBookId);
+
+        if (! $detailBook) {
+            $this->clearDetail();
+            return null;
+        }
+
+        return $this->transformBookCover($detailBook);
+    }
+
+    private function syncSelectedIds(Collection $selectedBooks): void
+    {
+        $missingSelection = array_diff($this->selectedBooks, $selectedBooks->pluck('id')->all());
+
+        if (empty($missingSelection)) {
+            return;
+        }
+
+        $this->selectedBooks = array_values(array_diff($this->selectedBooks, $missingSelection));
+        session()->put('loan_cart', $this->selectedBooks);
+    }
+
+    private function transformBookCover(Buku $book): Buku
+    {
+        $book->setAttribute('cover_depan_url', $this->resolveCoverUrl($book->cover_depan));
+        $book->setAttribute('cover_belakang_url', $this->resolveCoverUrl($book->cover_belakang));
+
+        return $book;
     }
 
     private function resolveCoverUrl(?string $path): ?string
@@ -275,15 +292,20 @@ class ListBuku extends Component
             return asset($normalized);
         }
 
-        if (Storage::disk('public')->exists($normalized)) {
-            return Storage::url($normalized);
-        }
-
         $publicPath = public_path($normalized);
         if (is_file($publicPath)) {
             return asset($normalized);
         }
 
-        return asset('storage/'.$normalized);
+        $storagePath = storage_path('app/public/'.$normalized);
+        if (is_file($storagePath)) {
+            return asset('storage/'.$normalized);
+        }
+
+        if (Storage::disk('public')->exists($normalized)) {
+            return Storage::url($normalized);
+        }
+
+        return null;
     }
 }

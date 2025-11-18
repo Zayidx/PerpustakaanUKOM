@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin; 
 
+use App\Livewire\Concerns\HandlesAlerts;
 use App\Models\Jurusan; 
 use App\Models\Kelas; 
 use App\Models\RoleData; 
@@ -22,6 +23,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ManajemenSiswa extends Component 
 { 
+    use HandlesAlerts;
     use WithFileUploads; 
     use WithPagination; 
 
@@ -197,7 +199,7 @@ class ManajemenSiswa extends Component
 
             $roleId = RoleData::where('nama_role', 'Siswa')->value('id'); 
             if (!$roleId) {
-                session()->flash('message', 'Role Siswa belum dikonfigurasi. Silakan tambahkan role terlebih dahulu.');
+                $this->flashError('Role Siswa belum dikonfigurasi. Silakan tambahkan role terlebih dahulu.');
                 return;
             }
 
@@ -267,7 +269,7 @@ class ManajemenSiswa extends Component
             });
 
             $this->resetForm(); 
-            session()->flash('message', 'Data siswa berhasil disimpan.');
+            $this->flashSuccess('Data siswa berhasil disimpan.');
             $this->dispatch('close-modal', id: 'modal-form'); 
         } 
 
@@ -318,7 +320,7 @@ class ManajemenSiswa extends Component
                 }
             });
 
-            session()->flash('message', 'Data siswa berhasil dihapus.');
+            $this->flashSuccess('Data siswa berhasil dihapus.');
             $this->resetForm();
         } 
 

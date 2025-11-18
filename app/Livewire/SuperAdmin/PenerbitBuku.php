@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin;
 
+use App\Livewire\Concerns\HandlesAlerts;
 use App\Models\Penerbit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +18,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class PenerbitBuku extends Component
 {
+    use HandlesAlerts;
     use WithPagination;
     use WithFileUploads;
 
@@ -132,10 +134,7 @@ class PenerbitBuku extends Component
             }
         });
 
-        session()->flash(
-            'message',
-            $this->editMode ? 'Penerbit berhasil diperbarui.' : 'Penerbit berhasil ditambahkan.' 
-        );
+        $this->flashSuccess($this->editMode ? 'Penerbit berhasil diperbarui.' : 'Penerbit berhasil ditambahkan.');
 
         $this->dispatch('close-modal', id: 'modal-form'); 
         $this->resetForm(); 
@@ -163,9 +162,9 @@ class PenerbitBuku extends Component
             Storage::disk('public')->delete($penerbit->logo); 
         }
 
-        $penerbit->delete(); 
+        $penerbit->delete();
 
-        session()->flash('message', 'Penerbit berhasil dihapus.'); 
+        $this->flashSuccess('Penerbit berhasil dihapus.');
         $this->resetForm(); 
     } 
 

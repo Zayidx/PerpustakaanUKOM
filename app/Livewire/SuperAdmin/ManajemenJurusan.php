@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin;
 
+use App\Livewire\Concerns\HandlesAlerts;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -14,6 +15,7 @@ use App\Models\Jurusan;
 
 class ManajemenJurusan extends Component
 {
+    use HandlesAlerts;
     use WithPagination;
 
     protected $paginationTheme = 'bootstrap';
@@ -99,7 +101,7 @@ class ManajemenJurusan extends Component
         }
 
         $this->resetForm();
-        session()->flash('message', 'Data jurusan berhasil disimpan.');
+        $this->flashSuccess('Data jurusan berhasil disimpan.');
         $this->dispatch('close-modal', id: 'modal-form-jurusan');
     }
 
@@ -108,13 +110,13 @@ class ManajemenJurusan extends Component
         $jurusan = Jurusan::withCount('siswa')->findOrFail($id);
 
         if ($jurusan->siswa_count > 0) {
-            session()->flash('message', 'Jurusan masih memiliki siswa aktif dan tidak dapat dihapus.');
+            $this->flashError('Jurusan masih memiliki siswa aktif dan tidak dapat dihapus.');
             return;
         }
 
         $jurusan->delete();
 
-        session()->flash('message', 'Data jurusan berhasil dihapus.');
+        $this->flashSuccess('Data jurusan berhasil dihapus.');
         $this->resetForm();
         $this->resetPage();
     }

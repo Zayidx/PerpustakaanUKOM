@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin;
 
+use App\Livewire\Concerns\HandlesAlerts;
 use App\Models\KategoriPengumuman;
 use App\Models\Pengumuman as PengumumanModel;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,7 @@ use Livewire\WithPagination;
 #[Title('Manajemen Pengumuman')]
 class ManajemenPengumuman extends Component
 {
+    use HandlesAlerts;
     use WithPagination;
 
     protected $paginationTheme = 'bootstrap';
@@ -197,7 +199,7 @@ class ManajemenPengumuman extends Component
 
         $this->pengumumanId = $pengumuman->id; 
 
-        session()->flash('message', $isUpdate ? 'Pengumuman berhasil diperbarui.' : 'Pengumuman baru berhasil dibuat.'); 
+        $this->flashSuccess($isUpdate ? 'Pengumuman berhasil diperbarui.' : 'Pengumuman baru berhasil dibuat.');
 
         $this->dispatch('close-modal', id: 'modal-pengumuman'); 
         $this->resetForm(); 
@@ -208,7 +210,7 @@ class ManajemenPengumuman extends Component
         $pengumuman = PengumumanModel::findOrFail($id); 
         $pengumuman->delete(); 
 
-        session()->flash('message', 'Pengumuman berhasil dihapus.'); 
+        $this->flashSuccess('Pengumuman berhasil dihapus.');
     } 
 
     private function resetForm(): void

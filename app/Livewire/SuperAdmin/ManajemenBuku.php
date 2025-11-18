@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin;
 
+use App\Livewire\Concerns\HandlesAlerts;
 use App\Models\Author;
 use App\Models\Buku as BukuModel;
 use App\Models\KategoriBuku;
@@ -21,6 +22,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ManajemenBuku extends Component
 {
+    use HandlesAlerts;
     use WithFileUploads;
     use WithPagination;
 
@@ -161,11 +163,11 @@ class ManajemenBuku extends Component
             if ($this->editMode && $this->bukuId) { 
                 $buku = BukuModel::findOrFail($this->bukuId); 
                 $buku->update($payload); 
-                session()->flash('message', 'Data buku berhasil diperbarui.'); 
+                $this->flashSuccess('Data buku berhasil diperbarui.');
             } else { 
                 $buku = BukuModel::create($payload); 
                 $this->bukuId = $buku->id; 
-                session()->flash('message', 'Data buku berhasil ditambahkan.'); 
+                $this->flashSuccess('Data buku berhasil ditambahkan.');
             }
 
             $this->dispatch('close-modal', id: 'modal-form'); 
@@ -179,7 +181,7 @@ class ManajemenBuku extends Component
                 'penerbit_id' => $this->penerbit_id,
             ]);
 
-            session()->flash('message', 'Terjadi kesalahan saat menyimpan data buku.'); 
+            $this->flashError('Terjadi kesalahan saat menyimpan data buku.');
         }
     } 
 
@@ -220,7 +222,7 @@ class ManajemenBuku extends Component
 
         $buku->delete(); 
 
-        session()->flash('message', 'Data buku berhasil dihapus.'); 
+        $this->flashSuccess('Data buku berhasil dihapus.');
         $this->resetForm(); 
     } 
 

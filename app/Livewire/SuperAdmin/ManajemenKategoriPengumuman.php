@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin;
 
+use App\Livewire\Concerns\HandlesAlerts;
 use App\Models\KategoriPengumuman as KategoriPengumumanModel;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -13,6 +14,7 @@ use Livewire\WithPagination;
 #[Title('Kategori Pengumuman')]
 class ManajemenKategoriPengumuman extends Component
 {
+    use HandlesAlerts;
     use WithPagination;
 
     protected $paginationTheme = 'bootstrap';
@@ -126,7 +128,7 @@ class ManajemenKategoriPengumuman extends Component
             ]
         );
 
-        session()->flash('message', $isUpdate ? 'Kategori pengumuman berhasil diperbarui.' : 'Kategori pengumuman baru berhasil dibuat.'); 
+        $this->flashSuccess($isUpdate ? 'Kategori pengumuman berhasil diperbarui.' : 'Kategori pengumuman baru berhasil dibuat.');
 
         $this->dispatch('close-modal', id: 'modal-kategori'); 
         $this->resetForm(); 
@@ -137,12 +139,12 @@ class ManajemenKategoriPengumuman extends Component
         $kategori = KategoriPengumumanModel::withCount('pengumuman')->findOrFail($id); 
 
         if ($kategori->pengumuman_count > 0) { 
-            session()->flash('message', 'Kategori tidak dapat dihapus karena masih digunakan oleh pengumuman.');
+            $this->flashError('Kategori tidak dapat dihapus karena masih digunakan oleh pengumuman.');
             return;
         }
 
         $kategori->delete(); 
-        session()->flash('message', 'Kategori pengumuman berhasil dihapus.'); 
+        $this->flashSuccess('Kategori pengumuman berhasil dihapus.');
     } 
 
     private function resetForm(): void

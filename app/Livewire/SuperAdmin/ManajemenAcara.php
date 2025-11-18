@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin;
 
+use App\Livewire\Concerns\HandlesAlerts;
 use App\Models\Acara;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ use Livewire\WithPagination;
 #[Title('Manajemen Acara')]
 class ManajemenAcara extends Component
 {
+    use HandlesAlerts;
     use WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
@@ -143,11 +145,11 @@ class ManajemenAcara extends Component
             'admin_id' => Auth::id(), 
         ];
 
-        Acara::updateOrCreate([ 
+        Acara::updateOrCreate([
             'id' => $this->acaraId,
         ], $data);
 
-        session()->flash('message', $this->acaraId ? 'Acara berhasil diperbarui.' : 'Acara baru berhasil dibuat.'); 
+        $this->flashSuccess($this->acaraId ? 'Acara berhasil diperbarui.' : 'Acara baru berhasil dibuat.');
 
         $this->dispatch('close-modal', id: 'modal-acara'); 
         $this->resetForm(); 
@@ -155,9 +157,9 @@ class ManajemenAcara extends Component
 
     public function delete(int $id): void
     {
-        Acara::findOrFail($id)->delete(); 
+        Acara::findOrFail($id)->delete();
 
-        session()->flash('message', 'Acara berhasil dihapus.'); 
+        $this->flashSuccess('Acara berhasil dihapus.');
         $this->resetForm(); 
     } 
 

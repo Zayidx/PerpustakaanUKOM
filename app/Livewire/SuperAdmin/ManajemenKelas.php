@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SuperAdmin;
 
+use App\Livewire\Concerns\HandlesAlerts;
 use App\Models\Kelas;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
@@ -13,6 +14,7 @@ use Livewire\WithPagination;
 
 class ManajemenKelas extends Component
 {
+    use HandlesAlerts;
     use WithPagination;
 
     protected $paginationTheme = 'bootstrap';
@@ -99,7 +101,7 @@ class ManajemenKelas extends Component
         }
 
         $this->resetForm(); 
-        session()->flash('message', 'Data kelas berhasil disimpan.'); 
+        $this->flashSuccess('Data kelas berhasil disimpan.'); 
         $this->dispatch('close-modal', id: 'modal-form-kelas'); 
     } 
 
@@ -108,13 +110,13 @@ class ManajemenKelas extends Component
         $kelas = Kelas::withCount('siswa')->findOrFail($id); 
 
         if ($kelas->siswa_count > 0) { 
-            session()->flash('message', 'Kelas masih memiliki siswa aktif dan tidak dapat dihapus.');
+            $this->flashError('Kelas masih memiliki siswa aktif dan tidak dapat dihapus.');
             return;
         }
 
         $kelas->delete(); 
 
-        session()->flash('message', 'Data kelas berhasil dihapus.'); 
+        $this->flashSuccess('Data kelas berhasil dihapus.'); 
         $this->resetForm(); 
         $this->resetPage(); 
     } 
