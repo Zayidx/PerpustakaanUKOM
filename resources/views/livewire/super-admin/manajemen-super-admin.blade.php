@@ -14,7 +14,7 @@
                             <div class="input-group input-group-sm">
 <input type="text"
                                        class="form-control"
-                                       placeholder="Nama / Email / NIP"
+                                       placeholder="Nama / Email / Telepon"
                                        wire:model.live.debounce.500ms="search">
                             </div>
                         </div>
@@ -115,28 +115,15 @@
                                     </div>
                                 </div>
 
-                                <div class="row"> 
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="nip" class="form-label">NIP</label>
-                                            <input required type="text" id="nip" class="form-control" wire:model.defer="nip">
-                                            @error('nip')
-                                                <span class="text-danger small">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
-                                            <select id="jenis_kelamin" class="form-select" wire:model.defer="jenis_kelamin">
-                                                <option value="laki-laki">Laki-laki</option>
-                                                <option value="perempuan">Perempuan</option>
-                                            </select>
-                                            @error('jenis_kelamin')
-                                                <span class="text-danger small">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
+                                <div class="mb-3">
+                                    <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
+                                    <select id="jenis_kelamin" class="form-select" wire:model.defer="jenis_kelamin">
+                                        <option value="laki-laki">Laki-laki</option>
+                                        <option value="perempuan">Perempuan</option>
+                                    </select>
+                                    @error('jenis_kelamin')
+                                        <span class="text-danger small">{{ $message }}</span>
+                                    @enderror
                                 </div>
 
                                 <div class="mb-3"> 
@@ -184,7 +171,6 @@
                         <th>Nama</th>
                         <th>Email</th>
                         <th>Telepon</th>
-                        <th>NIP</th>
                         <th>Jenis Kelamin</th>
                         <th>Alamat</th>
                         <th>Foto</th>
@@ -198,7 +184,6 @@
                             <td>{{ $item->user->nama_user ?? '-' }}</td>
                             <td>{{ $item->user->email_user ?? '-' }}</td>
                             <td>{{ $item->user->phone_number ?? '-' }}</td>
-                            <td>{{ $item->nip ?? '-' }}</td>
                             <td class="text-capitalize">{{ str_replace('-', ' ', $item->jenis_kelamin) }}</td>
                             <td>{{ $item->alamat ?? '-' }}</td>
                             <td class="w-25">
@@ -220,7 +205,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center text-muted">Belum ada data Super Admin.</td> 
+                            <td colspan="8" class="text-center text-muted">Belum ada data Super Admin.</td> 
                         </tr>
                     @endforelse
                 </tbody>

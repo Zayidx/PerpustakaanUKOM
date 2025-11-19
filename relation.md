@@ -128,7 +128,6 @@ Dokumen ini menjelaskan semua hubungan database dalam sistem manajemen perpustak
 **Kolom**:
 - `id` (Kunci Utama)
 - `user_id` (Kunci asing ke users)
-- `nip` (Nomor ID staf - unik)
 - `alamat` (Alamat)
 - `jenis_kelamin` (Jenis kelamin: laki-laki|perempuan)
 - `foto` (Path foto)

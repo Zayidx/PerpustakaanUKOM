@@ -63,7 +63,6 @@ class ManajemenSuperAdmin extends Component
     public ?string $password_confirmation = null;
     public string $alamat = '';
     public string $jenis_kelamin = 'laki-laki';
-    public string $nip = '';
     public $foto = null;
     public string $existingFoto = '';
 
@@ -85,10 +84,6 @@ class ManajemenSuperAdmin extends Component
         'alamat.max' => 'Alamat maksimal :max karakter.',
         'jenis_kelamin.required' => 'Jenis kelamin wajib dipilih.',
         'jenis_kelamin.in' => 'Jenis kelamin tidak valid.',
-        'nip.required' => 'NIP wajib diisi.',
-        'nip.string' => 'NIP harus berupa teks.',
-        'nip.max' => 'NIP maksimal :max karakter.',
-        'nip.unique' => 'NIP tersebut sudah terdaftar.',
         'foto.image' => 'File foto harus berupa gambar.',
         'foto.max' => 'Ukuran foto maksimal :max kilobyte.',
     ];
@@ -145,12 +140,6 @@ class ManajemenSuperAdmin extends Component
             'password_confirmation' => $passwordConfirmationRules,
             'alamat' => ['nullable', 'string', 'max:255'],
             'jenis_kelamin' => ['required', 'in:laki-laki,perempuan'],
-            'nip' => [
-                'required',
-                'string',
-                'max:30',
-                Rule::unique('super_admins', 'nip')->ignore($this->super_admin_id),
-            ],
             'foto' => ['nullable', 'image', 'max:1024'],
         ];
     }
@@ -196,10 +185,9 @@ class ManajemenSuperAdmin extends Component
         $nama = trim($this->nama);
         $email = strtolower(trim($this->email));
         $phone = trim($this->phone_number);
-        $nip = trim($this->nip);
         $alamat = $this->alamat ? trim($this->alamat) : null;
 
-        DB::transaction(function () use ($roleId, $imagePath, $nama, $email, $phone, $nip, $alamat) {
+        DB::transaction(function () use ($roleId, $imagePath, $nama, $email, $phone, $alamat) {
             if ($this->super_admin_id) {
                 $super_admins = SuperAdmin::with('user')->findOrFail($this->super_admin_id);
                 $user = $super_admins->user;
@@ -216,7 +204,6 @@ class ManajemenSuperAdmin extends Component
                 $user->save();
 
                 $super_admins->update([
-                    'nip' => $nip,
                     'alamat' => $alamat,
                     'jenis_kelamin' => $this->jenis_kelamin,
                     'foto' => $imagePath,
@@ -235,7 +222,6 @@ class ManajemenSuperAdmin extends Component
 
             $super_admins = SuperAdmin::create([
                 'user_id' => $user->id,
-                'nip' => $nip,
                 'alamat' => $alamat,
                 'jenis_kelamin' => $this->jenis_kelamin,
                 'foto' => $imagePath,
@@ -261,7 +247,6 @@ class ManajemenSuperAdmin extends Component
         $this->nama = $super_admins->user->nama_user ?? '';
         $this->email = $super_admins->user->email_user ?? '';
         $this->phone_number = $super_admins->user->phone_number ?? '';
-        $this->nip = $super_admins->nip;
         $this->alamat = $super_admins->alamat ?? '';
         $this->jenis_kelamin = $super_admins->jenis_kelamin;
         $this->existingFoto = $super_admins->foto ?? '';
@@ -308,8 +293,7 @@ class ManajemenSuperAdmin extends Component
                 $term = '%'.$this->search.'%';
 
                 $query->where(function ($inner) use ($term) {
-                    $inner->where('super_admins.nip', 'like', $term)
-                        ->orWhere('super_admins.alamat', 'like', $term)
+                    $inner->where('super_admins.alamat', 'like', $term)
                         ->orWhereHas('user', function ($userQuery) use ($term) {
                             $userQuery->where('nama_user', 'like', $term)
                                 ->orWhere('email_user', 'like', $term)
@@ -349,7 +333,6 @@ class ManajemenSuperAdmin extends Component
             'password_confirmation',
             'alamat',
             'jenis_kelamin',
-            'nip',
             'foto',
             'existingFoto',
         ]);

@@ -14,7 +14,6 @@ class SuperAdmin extends Model
 
     protected $fillable = [
         'user_id',
-        'nip',
         'alamat',
         'jenis_kelamin',
         'foto',

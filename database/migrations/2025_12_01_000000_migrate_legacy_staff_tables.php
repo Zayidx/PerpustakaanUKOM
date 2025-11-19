@@ -35,7 +35,6 @@ return new class extends Migration
                 if (! DB::table('super_admins')->where('user_id', $row->user_id)->exists()) {
                     DB::table('super_admins')->insert([
                         'user_id' => $row->user_id,
-                        'nip' => $row->nip,
                         'alamat' => $row->alamat,
                         'jenis_kelamin' => $row->jenis_kelamin,
                         'foto' => $row->foto,

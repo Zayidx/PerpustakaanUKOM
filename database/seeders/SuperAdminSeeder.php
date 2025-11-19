@@ -41,7 +41,6 @@ class SuperAdminSeeder extends Seeder
 
             SuperAdmin::create([
                 'user_id' => $user->id,
-                'nip' => $faker->unique()->numerify('##########'),
                 'alamat' => $faker->address(),
                 'jenis_kelamin' => $gender,
                 'foto' => null,

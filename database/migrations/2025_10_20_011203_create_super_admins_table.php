@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('super_admins', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('nip')->unique();
             $table->string('alamat')->nullable();
             $table->enum('jenis_kelamin', ['laki-laki', 'perempuan']);
             $table->string('foto')->nullable();

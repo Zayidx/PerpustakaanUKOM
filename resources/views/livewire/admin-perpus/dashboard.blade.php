@@ -1,3 +1,21 @@
+<style>
+    .stats-icon {
+    width: 3rem;
+    height: 3rem;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-body .d-flex {
+    min-height: 73px;
+}
+
+.stats-icon i {
+    transform: translate(-5px, -15px); 
+}
+</style>
 <div>
     <p class="text-muted mb-3">Kelola permintaan peminjaman dan pantau pengembalian siswa.</p>
 

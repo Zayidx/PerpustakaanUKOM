@@ -79,7 +79,6 @@ class DefaultUserSeeder extends Seeder
         SuperAdmin::updateOrCreate(
             ['user_id' => $superAdminUser->id],
             [
-                'nip' => $faker->unique()->numerify('7777######'),
                 'alamat' => $faker->address(),
                 'jenis_kelamin' => 'laki-laki',
                 'foto' => null,
