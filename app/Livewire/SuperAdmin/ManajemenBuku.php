@@ -7,6 +7,7 @@ use App\Models\Author;
 use App\Models\Buku as BukuModel;
 use App\Models\KategoriBuku;
 use App\Models\Penerbit;
+use App\Support\CoverUrlResolver;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -133,7 +134,7 @@ class ManajemenBuku extends Component
 
         $coverDepanPath = $this->existingCoverDepan; 
         if ($this->cover_depan instanceof TemporaryUploadedFile) { 
-            if ($coverDepanPath && $this->shouldDeleteFromStorage($coverDepanPath)) { 
+            if ($coverDepanPath && $this->shouldDeleteCover($coverDepanPath, 'cover_depan', $this->bukuId)) { 
                 Storage::disk('public')->delete($coverDepanPath);
             }
             $coverDepanPath = $this->cover_depan->store('admin/cover-buku', 'public'); 
@@ -141,7 +142,7 @@ class ManajemenBuku extends Component
 
         $coverBelakangPath = $this->existingCoverBelakang; 
         if ($this->cover_belakang instanceof TemporaryUploadedFile) { 
-            if ($coverBelakangPath && $this->shouldDeleteFromStorage($coverBelakangPath)) { 
+            if ($coverBelakangPath && $this->shouldDeleteCover($coverBelakangPath, 'cover_belakang', $this->bukuId)) { 
                 Storage::disk('public')->delete($coverBelakangPath);
             }
             $coverBelakangPath = $this->cover_belakang->store('admin/cover-buku', 'public'); 
@@ -201,8 +202,8 @@ class ManajemenBuku extends Component
         $this->tanggal_terbit = $buku->tanggal_terbit?->format('Y-m-d'); 
         $this->existingCoverDepan = $buku->cover_depan; 
         $this->existingCoverBelakang = $buku->cover_belakang; 
-        $this->existingCoverDepanUrl = $this->resolveCoverUrl($buku->cover_depan); 
-        $this->existingCoverBelakangUrl = $this->resolveCoverUrl($buku->cover_belakang); 
+        $this->existingCoverDepanUrl = CoverUrlResolver::resolve($buku->cover_depan); 
+        $this->existingCoverBelakangUrl = CoverUrlResolver::resolve($buku->cover_belakang); 
         $this->stok = $buku->stok; 
         $this->cover_depan = null; 
         $this->cover_belakang = null; 
@@ -212,11 +213,11 @@ class ManajemenBuku extends Component
     {
         $buku = BukuModel::findOrFail($id); 
 
-        if ($buku->cover_depan && $this->shouldDeleteFromStorage($buku->cover_depan)) { 
+        if ($buku->cover_depan && $this->shouldDeleteCover($buku->cover_depan, 'cover_depan', $buku->id)) { 
             Storage::disk('public')->delete($buku->cover_depan); 
         }
 
-        if ($buku->cover_belakang && $this->shouldDeleteFromStorage($buku->cover_belakang)) { 
+        if ($buku->cover_belakang && $this->shouldDeleteCover($buku->cover_belakang, 'cover_belakang', $buku->id)) { 
             Storage::disk('public')->delete($buku->cover_belakang); 
         }
 
@@ -300,36 +301,7 @@ class ManajemenBuku extends Component
         $this->resetValidation(); 
     } 
 
-    private function resolveCoverUrl(?string $path): ?string
-    {
-        if (! $path) { 
-            return null;
-        }
-
-        $normalized = ltrim($path, '/'); 
-
-        if (Str::startsWith($normalized, ['http://', 'https://'])) { 
-            return $normalized;
-        }
-
-        if (Str::startsWith($normalized, 'storage/')) { 
-            return asset($normalized);
-        }
-
-        $publicPath = public_path($normalized); 
-        if (is_file($publicPath)) {
-            return asset($normalized);
-        }
-
-        $storagePath = storage_path('app/public/'.$normalized); 
-        if (is_file($storagePath)) {
-            return asset('storage/'.$normalized);
-        }
-
-        return null; 
-    } 
-
-    private function shouldDeleteFromStorage(?string $path): bool
+    private function shouldDeleteCover(?string $path, string $column, ?int $excludeId = null): bool
     {
         if (! $path) { 
             return false;
@@ -337,7 +309,14 @@ class ManajemenBuku extends Component
 
         $normalized = ltrim($path, '/'); 
 
-        return ! Str::startsWith($normalized, 'assets/'); 
+        if (Str::startsWith($normalized, 'assets/')) {
+            return false;
+        }
+
+        return ! BukuModel::query()
+            ->where($column, $path)
+            ->when($excludeId, fn ($query) => $query->where('id', '!=', $excludeId))
+            ->exists();
     } 
 
     private function normalizeSort($value): string

@@ -23,6 +23,10 @@ body {
 .navbar {
   border-bottom: 1px solid #f0f0f0;
 }
+.input-group-text .bi {
+    position: relative;
+    top: -10px; /* sesuaikan  -1, -2, atau -0.5 */
+}
 
 .auto-hide-navbar {
   transition: transform 0.3s ease-in-out;

@@ -3,6 +3,7 @@
 namespace App\Livewire\Siswa;
 
 use App\Models\Buku;
+use App\Models\KategoriBuku;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanItem;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -25,14 +26,14 @@ class ListBuku extends Component
     #[Layout('components.layouts.dashboard-layouts')]
     #[Title('Daftar Buku')]
     public string $search = '';
+    public ?int $categoryFilter = null;
 
-    
     public array $selectedBooks = [];
-
     public ?int $detailBookId = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
+        'categoryFilter' => ['except' => null],
     ];
 
     public function mount(): void
@@ -45,8 +46,13 @@ class ListBuku extends Component
 
     public function updatingSearch(): void
     {
-        $this->resetPage(); 
-    } 
+        $this->resetPage();
+    }
+
+    public function updatedCategoryFilter(): void
+    {
+        $this->resetPage();
+    }
 
     public function toggleSelection(int $bookId): void
     {
@@ -193,11 +199,12 @@ class ListBuku extends Component
         $detailBook = $this->getDetailBook();
         $activeLoanBookIds = $this->getActiveLoanBookIds();
 
-        return view('livewire.siswa.list-buku', [ 
-            'books' => $books, 
-            'detailBook' => $detailBook, 
-            'selectedBooksInfo' => $selectedBooks, 
+        return view('livewire.siswa.list-buku', [
+            'books' => $books,
+            'detailBook' => $detailBook,
+            'selectedBooksInfo' => $selectedBooks,
             'activeLoanBookIds' => $activeLoanBookIds,
+            'categoryOptions' => $this->getCategoryOptions(),
         ]);
     } 
 
@@ -215,13 +222,14 @@ class ListBuku extends Component
         $books = Buku::query()
             ->with(['author', 'kategori', 'penerbit'])
             ->when($this->search !== '', function ($query) {
-                $query->where(function ($inner) {
-                    $inner->where('nama_buku', 'like', '%'.$this->search.'%')
-                        ->orWhereHas('author', fn ($author) => $author->where('nama_author', 'like', '%'.$this->search.'%'))
-                        ->orWhereHas('kategori', fn ($kategori) => $kategori->where('nama_kategori_buku', 'like', '%'.$this->search.'%'))
-                        ->orWhereHas('penerbit', fn ($penerbit) => $penerbit->where('nama_penerbit', 'like', '%'.$this->search.'%'));
+                $term = '%'.$this->search.'%';
+                $query->where(function ($inner) use ($term) {
+                    $inner->where('nama_buku', 'like', $term)
+                        ->orWhereHas('author', fn ($author) => $author->where('nama_author', 'like', $term))
+                        ->orWhereHas('penerbit', fn ($penerbit) => $penerbit->where('nama_penerbit', 'like', $term));
                 });
             })
+            ->when($this->categoryFilter, fn ($query) => $query->where('kategori_id', (int) $this->categoryFilter))
             ->orderBy('nama_buku')
             ->paginate(12);
 
@@ -353,5 +361,12 @@ class ListBuku extends Component
                 ->where('siswa_id', $siswaId)
                 ->whereIn('status', ['pending', 'accepted']))
             ->exists();
+    }
+
+    private function getCategoryOptions()
+    {
+        return KategoriBuku::query()
+            ->orderBy('nama_kategori_buku')
+            ->get(['id', 'nama_kategori_buku']);
     }
 }

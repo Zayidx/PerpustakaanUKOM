@@ -10,6 +10,7 @@ use App\Models\User;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class SiswaSeeder extends Seeder
 {
@@ -49,16 +50,28 @@ class SiswaSeeder extends Seeder
 
             $user = User::create([
                 'nama_user' => $faker->name($gender === 'laki-laki' ? 'male' : 'female'),
-                'email_user' => $faker->unique()->safeEmail(),
-                'phone_number' => $faker->unique()->numerify('08##########'),
+                'email_user' => $this->generateUniqueValue(
+                    fn () => Str::lower($faker->userName()).'.'.Str::lower(Str::random(6)).'@example.org',
+                    fn ($value) => User::where('email_user', $value)->exists(),
+                ),
+                'phone_number' => $this->generateUniqueValue(
+                    fn () => '08'.$faker->numerify('##########'),
+                    fn ($value) => User::where('phone_number', $value)->exists(),
+                ),
                 'password' => Hash::make('password'),
                 'role_id' => $roleSiswa->id,
             ]);
 
             Siswa::create([
                 'user_id' => $user->id,
-                'nisn' => $faker->unique()->numerify('00##########'),
-                'nis' => $faker->unique()->numerify('########'),
+                'nisn' => $this->generateUniqueValue(
+                    fn () => $faker->numerify('00##########'),
+                    fn ($value) => Siswa::where('nisn', $value)->exists(),
+                ),
+                'nis' => $this->generateUniqueValue(
+                    fn () => $faker->numerify('########'),
+                    fn ($value) => Siswa::where('nis', $value)->exists(),
+                ),
                 'alamat' => $faker->address(),
                 'jenis_kelamin' => $gender,
                 'kelas_id' => $kelas->id,
@@ -66,5 +79,18 @@ class SiswaSeeder extends Seeder
                 'foto' => null,
             ]);
         }
+    }
+
+    private function generateUniqueValue(callable $generator, callable $existsChecker, int $maxAttempts = 100): string
+    {
+        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+            $value = (string) $generator();
+
+            if (! $existsChecker($value)) {
+                return $value;
+            }
+        }
+
+        throw new \RuntimeException('Gagal menghasilkan data unik setelah '.$maxAttempts.' percobaan.');
     }
 }

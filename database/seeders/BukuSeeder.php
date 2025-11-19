@@ -8,6 +8,7 @@ use App\Models\KategoriBuku;
 use App\Models\Penerbit;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class BukuSeeder extends Seeder
 {
@@ -16,9 +17,13 @@ class BukuSeeder extends Seeder
         $coverDepanFile = 'BungkamSuara.jpg';
         $coverBelakangFile = 'DompetAyahSepatuIbu.jpeg';
 
-        $coverDirectory = 'assets/img/buku';
-        $publicCoverDepan = public_path($coverDirectory.'/'.$coverDepanFile);
-        $publicCoverBelakang = public_path($coverDirectory.'/'.$coverBelakangFile);
+        $coverDirectory = 'admin/cover-buku';
+        $disk = Storage::disk('public');
+        $disk->makeDirectory($coverDirectory);
+
+        $seedImageDirectory = database_path('seeders/images');
+        $coverDepanPath = $this->ensureCoverIsAvailable($disk, $seedImageDirectory, $coverDirectory, $coverDepanFile);
+        $coverBelakangPath = $this->ensureCoverIsAvailable($disk, $seedImageDirectory, $coverDirectory, $coverBelakangFile);
 
         $buku = [
             [
@@ -80,11 +85,27 @@ class BukuSeeder extends Seeder
                     'penerbit_id' => $penerbitId,
                     'deskripsi' => $item['deskripsi'],
                     'tanggal_terbit' => Carbon::parse($item['tanggal_terbit']),
-                    'cover_depan' => is_file($publicCoverDepan) ? $coverDirectory.'/'.$coverDepanFile : null,
-                    'cover_belakang' => is_file($publicCoverBelakang) ? $coverDirectory.'/'.$coverBelakangFile : null,
+                    'cover_depan' => $coverDepanPath,
+                    'cover_belakang' => $coverBelakangPath,
                     'stok' => 10,
                 ]
             );
         }
+    }
+
+    private function ensureCoverIsAvailable($disk, string $sourceDir, string $targetDir, string $filename): ?string
+    {
+        $sourcePath = $sourceDir.'/'.$filename;
+        $targetPath = $targetDir.'/'.$filename;
+
+        if (! is_file($sourcePath)) {
+            return null;
+        }
+
+        if (! $disk->exists($targetPath)) {
+            $disk->put($targetPath, file_get_contents($sourcePath));
+        }
+
+        return $targetPath;
     }
 }

@@ -1,6 +1,6 @@
 <div>
     <div class="row align-items-center mb-4">
-        <div class="col-md-8">
+        <div class="col-md-6 col-lg-7">
             <div class="input-group">
                 <span class="input-group-text bg-white">
                     <i class="bi bi-search"></i>
@@ -8,12 +8,20 @@
                 <input
                     type="text"
                     class="form-control"
-                    placeholder="Cari buku, penulis, atau kategori..."
+                    placeholder="Cari judul, penulis, atau penerbit"
                     wire:model.live.debounce.400ms="search"
                 >
             </div>
         </div>
-        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <div class="col-md-2 col-lg-2 mt-3 mt-md-0">
+            <select class="form-select" wire:model.live="categoryFilter">
+                <option value="">Semua kategori</option>
+                @foreach ($categoryOptions as $kategori)
+                    <option value="{{ $kategori->id }}">{{ $kategori->nama_kategori_buku }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4 col-lg-3 text-md-end mt-3 mt-md-0">
             <div class="d-flex justify-content-md-end justify-content-start align-items-center gap-2">
                 <span class="badge bg-primary fs-6">
                     {{ count($selectedBooksInfo) }} buku dipilih
@@ -47,10 +55,10 @@
         <div class="col-12">
             <div class="row g-3">
                 @forelse ($books as $book)
-                    <div class="col-md-6">
+                    <div class="col-xl-3 col-lg-4 col-md-6">
                         <div class="card h-100 border-{{ in_array($book->id, $selectedBooks ?? [], true) ? 'primary' : 'light' }} overflow-hidden">
                             <div class="position-relative">
-                                <div class="ratio ratio-3x4 bg-light overflow-hidden">
+                                <div class="ratio ratio-3x4 bg-light overflow-hidden" style="padding-top: 133.333% !important;">
                                     @if ($book->cover_depan_url)
                                         <img src="{{ $book->cover_depan_url }}" alt="Cover {{ $book->nama_buku }}" class="w-100 h-100 object-fit-cover">
                                     @else
@@ -146,7 +154,7 @@
                             <div class="col-md-5">
                                 <div class="row g-2">
                                     <div class="col-6 col-md-12">
-                                        <div class="ratio ratio-3x4 border rounded overflow-hidden">
+                                <div class="ratio ratio-3x4 border rounded overflow-hidden" style="padding-top: 133.333% !important;">
                                             @if ($detailCoverDepan)
                                                 <img src="{{ $detailCoverDepan }}" alt="Cover depan {{ $detailBook->nama_buku }}" class="w-100 h-100 object-fit-cover">
                                             @else
@@ -157,7 +165,7 @@
                                         </div>
                                     </div>
                                     <div class="col-6 col-md-12">
-                                        <div class="ratio ratio-3x4 border rounded overflow-hidden">
+                                <div class="ratio ratio-3x4 border rounded overflow-hidden" style="padding-top: 133.333% !important;">
                                             @if ($detailCoverBelakang)
                                                 <img src="{{ $detailCoverBelakang }}" alt="Cover belakang {{ $detailBook->nama_buku }}" class="w-100 h-100 object-fit-cover">
                                             @else
