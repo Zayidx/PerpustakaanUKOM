@@ -15,11 +15,7 @@
 
                         <div style="flex: 0 1 180px;">
                             <div class="input-group input-group-sm">
-                                <span class="input-group-text d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-search align-middle"></i>
-                                </span>
-
-                                <input
+<input
                                     type="text"
                                     class="form-control"
                                     placeholder="Nama / NISN"
@@ -374,4 +370,3 @@ window.addEventListener('close-modal', event => {
     instance.hide();
 });
 </script>
-s

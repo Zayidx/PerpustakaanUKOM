@@ -16,8 +16,7 @@
                     <div class="d-flex flex-wrap align-items-stretch gap-2">
                         <div style="flex: 0 1 220px;">
                             <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                <input
+<input
                                     type="text"
                                     class="form-control"
                                     placeholder="Cari nama/email"
@@ -158,11 +157,16 @@
                                 <td>{{ $item->no_telp ?? '-' }}</td>
                                 <td>{{ $item->alamat ?? '-' }}</td>
                                 <td>
-                                    @if ($item->foto)
-                                        <img src="{{ asset('storage/' . $item->foto) }}" alt="Foto" class="rounded" width="100">
-                                    @else
-                                        <span class="text-muted">Tidak ada</span>
-                                    @endif
+                                    <div class="d-flex flex-column align-items-start gap-2">
+                                        @if ($item->foto)
+                                            <img src="{{ asset('storage/' . $item->foto) }}" alt="Foto" class="rounded-circle" width="60" height="60">
+                                            <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeFoto({{ $item->id }})">
+                                                Hapus Foto
+                                            </button>
+                                        @else
+                                            <span class="text-muted">Tidak ada</span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="d-flex gap-2">

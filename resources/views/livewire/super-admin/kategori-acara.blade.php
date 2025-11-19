@@ -19,8 +19,7 @@
                     <div class="d-flex flex-wrap align-items-stretch gap-2">
                         <div style="flex: 0 1 240px;">
                             <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                <input type="text"
+<input type="text"
                                        class="form-control"
                                        placeholder="Cari nama kategori"
                                        wire:model.live.debounce.500ms="search">

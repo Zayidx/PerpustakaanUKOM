@@ -63,10 +63,7 @@
                     <div class="row g-3 align-items-center">
                         <div class="col-md-5">
                             <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-white">
-                                    <i class="bi bi-search"></i>
-                                </span>
-                                <input
+<input
                                     type="search"
                                     class="form-control"
                                     placeholder="Cari kode, nama siswa, atau NIS"

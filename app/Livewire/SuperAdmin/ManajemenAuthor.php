@@ -176,6 +176,23 @@ class ManajemenAuthor extends Component
         }
     } 
 
+    public function removeFoto(int $id): void
+    {
+        $author = Author::findOrFail($id);
+
+        if ($author->foto) {
+            Storage::disk('public')->delete($author->foto);
+            $author->update(['foto' => null]);
+        }
+
+        if ($this->authorId === $id) {
+            $this->existingFoto = '';
+            $this->foto = null;
+        }
+
+        $this->flashSuccess('Foto author berhasil dihapus.');
+    }
+
     #[Computed]
     public function getListAuthorProperty()
     {

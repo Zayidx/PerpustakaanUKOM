@@ -15,8 +15,7 @@
                        
                         <div style="flex: 0 1 200px;">
                             <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                <input type="text" class="form-control" placeholder="Cari nama atau deskripsi"
+<input type="text" class="form-control" placeholder="Cari nama atau deskripsi"
                                     wire:model.live.debounce.500ms="search">
                             </div>
                         </div>

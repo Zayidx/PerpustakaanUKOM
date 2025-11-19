@@ -2,9 +2,6 @@
     <div class="row align-items-center mb-4">
         <div class="col-md-6 col-lg-7">
             <div class="input-group">
-                <span class="input-group-text bg-white">
-                    <i class="bi bi-search"></i>
-                </span>
                 <input
                     type="text"
                     class="form-control"
@@ -151,63 +148,93 @@
                             $detailCoverBelakang = $detailBook->cover_belakang_url;
                         @endphp
                         <div class="row g-4">
-                            <div class="col-md-5">
-                                <div class="row g-2">
-                                    <div class="col-6 col-md-12">
-                                <div class="ratio ratio-3x4 border rounded overflow-hidden" style="padding-top: 133.333% !important;">
+                            <div class="col-lg-6">
+                                <div class="row row-cols-2 g-3">
+                                    <div class="col">
+                                        <div class="ratio ratio-3x4 border rounded overflow-hidden shadow-sm" style="padding-top: 133.333% !important;">
                                             @if ($detailCoverDepan)
                                                 <img src="{{ $detailCoverDepan }}" alt="Cover depan {{ $detailBook->nama_buku }}" class="w-100 h-100 object-fit-cover">
                                             @else
-                                                <span class="text-muted small d-flex align-items-center justify-content-center h-100 w-100">
+                                                <div class="d-flex align-items-center justify-content-center h-100 w-100 text-muted small text-center px-3">
                                                     Cover depan belum tersedia
-                                                </span>
+                                                </div>
                                             @endif
                                         </div>
                                     </div>
-                                    <div class="col-6 col-md-12">
-                                <div class="ratio ratio-3x4 border rounded overflow-hidden" style="padding-top: 133.333% !important;">
+                                    <div class="col">
+                                        <div class="ratio ratio-3x4 border rounded overflow-hidden shadow-sm" style="padding-top: 133.333% !important;">
                                             @if ($detailCoverBelakang)
                                                 <img src="{{ $detailCoverBelakang }}" alt="Cover belakang {{ $detailBook->nama_buku }}" class="w-100 h-100 object-fit-cover">
                                             @else
-                                                <span class="text-muted small d-flex align-items-center justify-content-center h-100 w-100">
+                                                <div class="d-flex align-items-center justify-content-center h-100 w-100 text-muted small text-center px-3">
                                                     Cover belakang belum tersedia
-                                                </span>
+                                                </div>
                                             @endif
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-7">
-                                <div class="mb-3">
+                            <div class="col-lg-6">
+                                <div class="d-flex flex-wrap gap-2 mb-3">
                                     <span class="badge bg-secondary">
                                         {{ $detailBook->kategori?->nama_kategori_buku ?? 'Kategori tidak diketahui' }}
                                     </span>
+                                    <span class="badge bg-light text-dark border">
+                                        {{ $detailBook->penerbit?->nama_penerbit ?? 'Penerbit tidak diketahui' }}
+                                    </span>
+                                    <span class="badge {{ $detailBook->stok > 0 ? 'bg-success' : 'bg-danger' }}">
+                                        {{ $detailBook->stok > 0 ? 'Tersisa '.$detailBook->stok : 'Stok habis' }}
+                                    </span>
                                 </div>
-                                <dl class="row mb-3">
-                                    <dt class="col-sm-4">Penulis</dt>
-                                    <dd class="col-sm-8 text-muted">
-                                        {{ $detailBook->author?->nama_author ?? 'Tidak diketahui' }}
-                                    </dd>
-                                    <dt class="col-sm-4">Penerbit</dt>
-                                    <dd class="col-sm-8 text-muted">
-                                        {{ $detailBook->penerbit?->nama_penerbit ?? 'Tidak diketahui' }}
-                                    </dd>
-                                    <dt class="col-sm-4">Tanggal Terbit</dt>
-                                    <dd class="col-sm-8 text-muted">
-                                        {{ optional($detailBook->tanggal_terbit)->translatedFormat('d F Y') ?? 'Tidak diketahui' }}
-                                    </dd>
-                                    <dt class="col-sm-4">Stok</dt>
-                                    <dd class="col-sm-8">
-                                        <span class="badge {{ $detailBook->stok > 0 ? 'bg-success' : 'bg-danger' }}">
-                                            {{ $detailBook->stok > 0 ? 'Tersisa: '.$detailBook->stok : 'Stok habis' }}
-                                        </span>
-                                    </dd>
-                                </dl>
-                                <div>
+                                <div class="mb-3">
                                     <h6>Deskripsi</h6>
                                     <p class="mb-0 text-muted">
                                         {{ $detailBook->deskripsi ?: 'Belum ada deskripsi.' }}
                                     </p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6 class="mb-2">Informasi Penulis</h6>
+                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                        <div class="rounded-circle overflow-hidden" style="width:56px;height:56px;">
+                                            @if ($detailBook->author?->foto)
+                                                <img src="{{ asset('storage/'.$detailBook->author->foto) }}" alt="Foto penulis" class="w-100 h-100 object-fit-cover">
+                                            @else
+                                                <div class="bg-light h-100 w-100 d-flex align-items-center justify-content-center text-muted">
+                                                    <i class="bi bi-person"></i>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">{{ $detailBook->author?->nama_author ?? 'Tidak diketahui' }}</div>
+                                            <small class="text-muted">{{ $detailBook->author?->email_author ?? '-' }}</small>
+                                        </div>
+                                    </div>
+                                    <dl class="row mb-0 text-muted small">
+                                        <dt class="col-sm-4">No. Telp</dt>
+                                        <dd class="col-sm-8">{{ $detailBook->author?->no_telp ?? '-' }}</dd>
+                                        <dt class="col-sm-4">Alamat</dt>
+                                        <dd class="col-sm-8">{{ $detailBook->author?->alamat ?? '-' }}</dd>
+                                    </dl>
+                                </div>
+                                <div class="mb-3">
+                                    <h6 class="mb-2">Informasi Penerbit</h6>
+                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                        <div class="rounded bg-white border overflow-hidden d-flex align-items-center justify-content-center" style="width:64px;height:64px;">
+                                            @if ($detailBook->penerbit?->logo)
+                                                <img src="{{ asset('storage/'.$detailBook->penerbit->logo) }}" alt="Logo penerbit" class="w-100 h-100 object-fit-contain p-1">
+                                            @else
+                                                <span class="text-muted small">Tidak ada logo</span>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">{{ $detailBook->penerbit?->nama_penerbit ?? 'Tidak diketahui' }}</div>
+                                            <small class="text-muted">Hak cipta: {{ $detailBook->penerbit?->tahun_hakcipta ?? '-' }}</small>
+                                        </div>
+                                    </div>
+                                    <dl class="row mb-0 text-muted small">
+                                        <dt class="col-sm-4">Deskripsi</dt>
+                                        <dd class="col-sm-8">{{ $detailBook->penerbit?->deskripsi ?? '-' }}</dd>
+                                    </dl>
                                 </div>
                             </div>
                         </div>
