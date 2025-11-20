@@ -18,6 +18,7 @@ class KodePinjaman extends Component
     public ?array $loan = null;
 
     public ?string $qrSvg = null;
+    public ?string $lastKnownStatus = null;
 
     public function mount(string $kode): void
     {
@@ -25,6 +26,29 @@ class KodePinjaman extends Component
 
         $this->loadLoan(); 
     } 
+
+    public function refreshLoan(): void
+    {
+        $previousStatus = $this->lastKnownStatus;
+
+        $this->loadLoan();
+
+        if (! $previousStatus || ! $this->lastKnownStatus || $previousStatus === $this->lastKnownStatus) {
+            return;
+        }
+
+        if ($this->lastKnownStatus === 'accepted') {
+            $this->dispatch('loan-status-updated', type: 'success', message: 'Peminjaman berhasil dipindai dan disetujui.');
+            return;
+        }
+
+        if ($this->lastKnownStatus === 'cancelled') {
+            $this->dispatch('loan-status-updated', type: 'error', message: 'Peminjaman dibatalkan oleh petugas.');
+            return;
+        }
+
+        $this->dispatch('loan-status-updated', type: 'info', message: 'Status peminjaman diperbarui.');
+    }
 
     public function render()
     {
@@ -66,6 +90,8 @@ class KodePinjaman extends Component
                 'kategori' => $item->buku->kategori?->nama_kategori_buku, 
             ])->toArray(), 
         ];
+
+        $this->lastKnownStatus = $this->loan['status'];
 
         $payload = [ 
             'code' => $loan->kode, 

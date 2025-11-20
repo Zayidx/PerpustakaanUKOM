@@ -1,4 +1,7 @@
-<div>
+@php
+    $loanStatus = data_get($loan, 'status');
+@endphp
+<div @if ($loanStatus === 'pending') wire:poll.5s="refreshLoan" @endif>
     @if ($loan)
         <div class="row g-4">
             <div class="col-lg-5">
@@ -97,3 +100,64 @@
         </div>
     @endif
 </div>
+
+@if ($loan)
+    @push('scripts')
+        <script>
+        document.addEventListener('livewire:load', () => {
+            const showAlert = ({ message, type = 'info' }) => {
+                if (!window.Swal) {
+                    return;
+                }
+
+                window.Swal.fire({
+                    icon: type,
+                    title: type === 'error' ? 'Gagal' : 'Berhasil',
+                    text: message,
+                    timer: 2500,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                });
+            };
+
+            const loanCodeKey = `loan-code-alert-{{ $loan['kode'] ?? 'unknown' }}`;
+            const statusMessages = {
+                accepted: { type: 'success', message: 'Peminjaman berhasil dipindai dan disetujui.' },
+                returned: { type: 'success', message: 'Peminjaman ini sudah selesai.' },
+                cancelled: { type: 'error', message: 'Peminjaman dibatalkan oleh petugas.' },
+            };
+
+            const registerInitialAlert = () => {
+                window.__shownLoanAlerts = window.__shownLoanAlerts || {};
+
+                if (window.__shownLoanAlerts[loanCodeKey]) {
+                    return;
+                }
+
+                const currentStatus = @json($loan['status'] ?? null);
+                if (!currentStatus || currentStatus === 'pending') {
+                    return;
+                }
+
+                const payload = statusMessages[currentStatus] ?? {
+                    type: 'info',
+                    message: 'Status peminjaman diperbarui.',
+                };
+
+                window.__shownLoanAlerts[loanCodeKey] = true;
+                showAlert(payload);
+            };
+
+            if (window.Livewire) {
+                window.Livewire.on('loan-status-updated', (payload = {}) => {
+                    window.__shownLoanAlerts = window.__shownLoanAlerts || {};
+                    window.__shownLoanAlerts[loanCodeKey] = true;
+                    showAlert(payload);
+                });
+            }
+
+            registerInitialAlert();
+        });
+        </script>
+    @endpush
+@endif

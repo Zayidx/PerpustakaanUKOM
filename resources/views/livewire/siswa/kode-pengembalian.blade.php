@@ -1,4 +1,7 @@
-<div>
+@php
+    $loanStatus = data_get($loan, 'status');
+@endphp
+<div @if ($loanStatus === 'accepted') wire:poll.5s="refreshLoan" @endif>
     @if ($loan)
         <div class="row g-4">
             <div class="col-lg-5">
@@ -21,7 +24,7 @@
                             $statusLabel = $statusLabels[$loan['status']] ?? ucfirst($loan['status']);
                         @endphp
                         <div class="mb-3">
-                            <span class="badge bg-success">
+                            <span class="badge {{ $loanStatus === 'returned' ? 'bg-secondary' : 'bg-success' }}">
                                 Status: {{ $statusLabel }}
                             </span>
                         </div>
@@ -46,7 +49,7 @@
                             Batas pengembalian: {{ $loan['due_at'] ? optional($loan['due_at'])->translatedFormat('d F Y') : '-' }}
                         </p>
 
-                        @if ($qrSvg)
+                        @if ($qrSvg && $loanStatus === 'accepted')
                             <div class="d-flex justify-content-center my-3">
                                 <div class="border rounded p-3 bg-light">
                                     {!! $qrSvg !!}
@@ -55,6 +58,10 @@
                             <p class="text-muted mt-3 mb-0">
                                 Tunjukkan QR ini atau bacakan kode 6 angka tersebut kepada Admin Perpus untuk menyelesaikan pengembalian.
                             </p>
+                        @elseif ($loanStatus === 'returned')
+                            <div class="alert alert-success">
+                                Pengembalian Anda telah selesai diproses. QR tidak lagi diperlukan.
+                            </div>
                         @else
                             <p class="text-danger mb-0">Gagal membuat QR code.</p>
                         @endif
@@ -118,3 +125,53 @@
         </div>
     @endif
 </div>
+
+@if ($loan)
+    @push('scripts')
+        <script>
+            document.addEventListener('livewire:load', () => {
+                const showAlert = ({ message, type = 'success' }) => {
+                    if (!window.Swal) {
+                        return;
+                    }
+
+                    window.Swal.fire({
+                        icon: type,
+                        title: type === 'error' ? 'Gagal' : 'Berhasil',
+                        text: message,
+                        timer: 2500,
+                        showConfirmButton: false,
+                        timerProgressBar: true,
+                    });
+                };
+
+                const loanKey = `return-code-alert-{{ $loan['kode'] ?? 'unknown' }}`;
+                const maybeShowInitialAlert = () => {
+                    window.__shownReturnAlerts = window.__shownReturnAlerts || {};
+
+                    if (window.__shownReturnAlerts[loanKey]) {
+                        return;
+                    }
+
+                    const status = @json($loan['status'] ?? null);
+                    if (status !== 'returned') {
+                        return;
+                    }
+
+                    window.__shownReturnAlerts[loanKey] = true;
+                    showAlert({ type: 'success', message: 'Pengembalian buku selesai diproses.' });
+                };
+
+                if (window.Livewire) {
+                    window.Livewire.on('loan-status-updated', (payload = {}) => {
+                        window.__shownReturnAlerts = window.__shownReturnAlerts || {};
+                        window.__shownReturnAlerts[loanKey] = true;
+                        showAlert(payload);
+                    });
+                }
+
+                maybeShowInitialAlert();
+            });
+        </script>
+    @endpush
+@endif

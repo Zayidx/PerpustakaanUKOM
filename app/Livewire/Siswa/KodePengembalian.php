@@ -21,6 +21,7 @@ class KodePengembalian extends Component
     public ?string $qrSvg = null;
 
     public ?array $lateInfo = null;
+    public ?string $lastKnownStatus = null;
 
     public function mount(string $kode): void
     {
@@ -53,7 +54,7 @@ class KodePengembalian extends Component
             ->first();
 
         abort_if(! $loan, 404, 'Peminjaman tidak ditemukan.');
-        abort_if($loan->status !== 'accepted', 404, 'Kode pengembalian hanya tersedia untuk peminjaman yang sedang dipinjam.');
+        abort_if(! in_array($loan->status, ['accepted', 'returned'], true), 404, 'Kode pengembalian hanya tersedia untuk peminjaman yang sedang dipinjam.');
 
         $lateInfo = $this->calculateLateInfo($loan);
         $this->lateInfo = $lateInfo;
@@ -93,6 +94,23 @@ class KodePengembalian extends Component
                 'kategori' => $item->buku->kategori?->nama_kategori_buku,
             ])->toArray(),
         ];
+
+        $this->lastKnownStatus = $this->loan['status'];
+    }
+
+    public function refreshLoan(): void
+    {
+        $previousStatus = $this->lastKnownStatus;
+
+        $this->loadLoan();
+
+        if (! $previousStatus || ! $this->lastKnownStatus || $previousStatus === $this->lastKnownStatus) {
+            return;
+        }
+
+        if ($this->lastKnownStatus === 'returned') {
+            $this->dispatch('loan-status-updated', type: 'success', message: 'Pengembalian buku selesai diproses.');
+        }
     }
 
     protected function calculateLateInfo(Peminjaman $loan): array
