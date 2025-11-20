@@ -9,7 +9,7 @@
                     <div class="card-header bg-primary text-white">
                         Kode Peminjaman
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body text-center mt-5">
                         @php
                             $statusLabels = [
                                 'pending' => 'Menunggu',

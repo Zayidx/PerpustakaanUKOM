@@ -9,7 +9,7 @@
                     <div class="card-header bg-success text-white">
                         Kode Pengembalian
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body text-center mt-5">
                         @php
                             $lateDays = $loan['late_days'] ?? 0;
                             $lateFee = $loan['late_fee'] ?? 0;
@@ -51,7 +51,7 @@
 
                         @if ($qrSvg && $loanStatus === 'accepted')
                             <div class="d-flex justify-content-center my-3">
-                                <div class="border rounded p-3 bg-light">
+                                <div class="rounded p-3">
                                     {!! $qrSvg !!}
                                 </div>
                             </div>
