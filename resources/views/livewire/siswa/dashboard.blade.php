@@ -15,6 +15,14 @@
 .stats-icon i {
     transform: translate(-5px, -15px); 
 }
+
+#main {
+    padding-bottom: 0px !important;
+}
+
+.page-content {
+    flex-grow: 1; 
+}
 </style>
 <div>
     <p class="text-muted mb-3">Lihat status peminjaman aktif, riwayat, dan jadwal pengembalian buku.</p>
