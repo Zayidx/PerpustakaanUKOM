@@ -104,7 +104,7 @@ class ManajemenAuthor extends Component
 
     public function store(): void
     {
-        $uploadDirectory = 'admin/foto-author'; 
+        $uploadDirectory = 'img/author'; 
         $this->validate(); 
 
         $imagePath = $this->existingFoto; 
@@ -163,7 +163,7 @@ class ManajemenAuthor extends Component
 
         DB::transaction(function () use ($author) { 
             if ($author->foto) { 
-                $this->deleteImage('admin/foto-author', $author->foto); 
+                $this->deleteImage('img/author', $author->foto); 
             }
 
             $author->delete(); 
@@ -179,23 +179,6 @@ class ManajemenAuthor extends Component
             $this->validateOnly('foto'); 
         }
     } 
-
-    public function removeFoto(int $id): void
-    {
-        $author = Author::findOrFail($id);
-
-        if ($author->foto) {
-            $this->deleteImage('admin/foto-author', $author->foto);
-            $author->update(['foto' => null]);
-        }
-
-        if ($this->authorId === $id) {
-            $this->existingFoto = '';
-            $this->foto = null;
-        }
-
-        $this->flashSuccess('Foto author berhasil dihapus.');
-    }
 
     #[Computed]
     public function getListAuthorProperty()

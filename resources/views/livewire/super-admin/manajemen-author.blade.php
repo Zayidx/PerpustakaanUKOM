@@ -121,7 +121,7 @@
                                     @if ($this->canPreviewImage($foto))
                                         <img src="{{ $foto->temporaryUrl() }}" alt="Preview Foto" class="mt-2 rounded" width="200">
                                     @elseif ($existingFoto)
-                                        <img src="{{ $this->imageUrl($existingFoto, 'admin/foto-author') }}" alt="Foto Author" class="mt-2 rounded" width="200">
+                                        <img src="{{ $this->imageUrl($existingFoto, 'img/author') }}" alt="Foto Author" class="mt-2 rounded" width="200">
                                     @endif
                                 </div>
 
@@ -165,10 +165,7 @@
                                 <td>
                                     <div class="d-flex flex-column align-items-start gap-2">
                                         @if ($item->foto)
-                                            <img src="{{ $this->imageUrl($item->foto, 'admin/foto-author') }}" alt="Foto" class="rounded-circle" width="60" height="60">
-                                            <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeFoto({{ $item->id }})">
-                                                Hapus Foto
-                                            </button>
+                                            <img src="{{ $this->imageUrl($item->foto, 'img/author') }}" alt="Foto" class="rounded-circle" width="60" height="60">
                                         @else
                                             <span class="text-muted">Tidak ada</span>
                                         @endif
