@@ -173,15 +173,6 @@
                 },
             };
 
-            document.addEventListener('livewire:navigated', () => {
-                const container = document.getElementById(returnScanner.containerId);
-                if (container) {
-                    delete container.dataset.initialized;
-                }
-                returnScanner.initOnce();
-                setupLateModalListeners();
-            });
-
             const setupLateModalListeners = () => {
                 if (window.__lateFeeModalInitialized) {
                     return;

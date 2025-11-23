@@ -77,7 +77,6 @@
                                         <a
                                             href="{{ route('siswa.kode-peminjaman', ['kode' => $loan->kode]) }}"
                                             class="btn btn-outline-secondary btn-sm"
-                                            wire:navigate
                                         >
                                             Lihat Kode Peminjaman
                                         </a>
@@ -85,7 +84,6 @@
                                         <a
                                             href="{{ route('siswa.kode-pengembalian', ['kode' => $loan->kode]) }}"
                                             class="btn btn-outline-primary btn-sm"
-                                            wire:navigate
                                         >
                                             Lihat Kode Pengembalian
                                         </a>

@@ -162,14 +162,6 @@
                 },
             };
 
-            document.addEventListener('livewire:navigated', () => {
-                const container = document.getElementById(loanScanner.containerId);
-                if (container) {
-                    delete container.dataset.initialized;
-                }
-                loanScanner.initOnce();
-            });
-
             const initLoanScanFeatures = () => {
                 loanScanner.initOnce();
             };

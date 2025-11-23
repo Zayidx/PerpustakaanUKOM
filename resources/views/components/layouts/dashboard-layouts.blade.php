@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ asset('assets/compiled/css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/compiled/css/app-dark.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/compiled/css/iconly.css') }}">
+    @livewireStyles
     @stack('styles')
 </head>
 
@@ -72,9 +73,29 @@
         <script src="{{ asset('assets/extensions/apexcharts/apexcharts.min.js') }}" data-navigate-once></script>
         <script src="{{ asset('assets/static/js/pages/dashboard.js') }}" data-navigate-once></script>
     @endif
+    @livewireScripts
     @stack('scripts')
 
     <script data-navigate-once>
+        const shouldForceRefresh = {{ Request::routeIs('*.dashboard') ? 'true' : 'false' }};
+
+        const ensureDashboardRefresh = () => {
+            if (!shouldForceRefresh) {
+                return;
+            }
+
+            try {
+                const key = 'dashboard_refreshed_' + window.location.pathname;
+                if (sessionStorage.getItem(key)) {
+                    return;
+                }
+                sessionStorage.setItem(key, '1');
+                window.location.reload();
+            } catch (error) {
+                // ignore if sessionStorage unavailable
+            }
+        };
+
         const applyStoredTheme = () => {
             const stored = localStorage.getItem('theme');
             if (!stored) {
@@ -119,14 +140,11 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
+            ensureDashboardRefresh();
             bindThemeToggle();
             initAlerts();
+            bindSidebarToggle();
         });
-        document.addEventListener('livewire:navigated', () => {
-            bindThemeToggle();
-            initAlerts();
-        });
-
         function initAlerts() {
             const showAlert = ({ message, type = 'success' }) => {
                 if (!window.Swal) {
@@ -157,6 +175,29 @@
             if (flashError) {
                 showAlert({ message: flashError, type: 'error' });
             }
+        }
+
+        function bindSidebarToggle() {
+            const sidebar = document.querySelector('#sidebar .sidebar-wrapper');
+            const main = document.getElementById('main');
+            const burger = document.querySelector('.burger-btn');
+            const closeButtons = document.querySelectorAll('.sidebar-hide');
+
+            if (!sidebar || !burger || burger.dataset.bound === 'true') {
+                return;
+            }
+
+            const toggleSidebar = (event) => {
+                event.preventDefault();
+                sidebar.classList.toggle('active');
+                if (main) {
+                    main.classList.toggle('active');
+                }
+            };
+
+            burger.addEventListener('click', toggleSidebar);
+            closeButtons.forEach((btn) => btn.addEventListener('click', toggleSidebar));
+            burger.dataset.bound = 'true';
         }
     </script>
 

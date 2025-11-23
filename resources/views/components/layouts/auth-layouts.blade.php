@@ -10,6 +10,7 @@
     <link rel="stylesheet" crossorigin href="{{ asset('assets/compiled/css/app.css') }}">
     <link rel="stylesheet" crossorigin href="{{ asset('assets/compiled/css/app-dark.css') }}">
     <link rel="stylesheet" crossorigin href="{{ asset('assets/compiled/css/auth.css') }}">
+    @livewireStyles
     <style>
         .logo {
             font-size: 1.8rem;
@@ -36,7 +37,7 @@
 <body>
     <script src="{{ asset('assets/static/js/initTheme.js') }}"></script>
     <script>
-        document.addEventListener('livewire:navigated', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             if (typeof initTheme === 'function') {
                 initTheme();
             }
@@ -56,6 +57,7 @@
         </div>
 
     </div>
+    @livewireScripts
 </body>
 
 </html>

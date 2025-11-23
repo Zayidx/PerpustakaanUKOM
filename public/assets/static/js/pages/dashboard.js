@@ -115,5 +115,4 @@
   }
 
   document.addEventListener('DOMContentLoaded', renderDashboardCharts)
-  document.addEventListener('livewire:navigated', renderDashboardCharts)
 })()

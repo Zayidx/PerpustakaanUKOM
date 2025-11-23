@@ -3,7 +3,7 @@
         <div class="sidebar-header position-relative">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="logo">
-                    <a wire:navigate href="{{ route('welcome') }}" wire:navigate><img src="{{ asset('assets/logo.png') }}"
+                    <a href="{{ route('welcome') }}"><img src="{{ asset('assets/logo.png') }}"
                             alt="Logo" srcset=""></a>
                 </div>
                 <div class="theme-toggle d-flex gap-2  align-items-center mt-2">
@@ -44,7 +44,7 @@
             <ul class="menu">
                 <li class="sidebar-title">Menu</li>
                 <li class="sidebar-item {{ Request::routeIs('superadmin.dashboard') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.dashboard') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.dashboard') }}" class='sidebar-link'>
                         <i class="bi bi-grid-fill"></i>
                         <span>Dashboard</span>
                     </a>
@@ -52,31 +52,31 @@
 
                 <li class="sidebar-title">Pengguna &amp; Akademik</li>
                 <li class="sidebar-item {{ Request::routeIs('superadmin.manajemen-siswa') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.manajemen-siswa') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.manajemen-siswa') }}" class='sidebar-link'>
                         <i class="bi bi-people-fill"></i>
                         <span>Kelola Siswa</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('superadmin.manajemen-kelas') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.manajemen-kelas') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.manajemen-kelas') }}" class='sidebar-link'>
                         <i class="bi bi-collection-fill"></i>
                         <span>Kelola Kelas</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('superadmin.manajemen-jurusan') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.manajemen-jurusan') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.manajemen-jurusan') }}" class='sidebar-link'>
                         <i class="bi bi-mortarboard-fill"></i>
                         <span>Kelola Jurusan</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('superadmin.manajemen-super-admin') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.manajemen-super-admin') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.manajemen-super-admin') }}" class='sidebar-link'>
                         <i class="bi bi-person-gear"></i>
                         <span>Manajemen Super Admin</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('superadmin.manajemen-admin-perpus') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.manajemen-admin-perpus') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.manajemen-admin-perpus') }}" class='sidebar-link'>
                         <i class="bi bi-person-badge-fill"></i>
                         <span>Manajemen Admin Perpus</span>
                     </a>
@@ -84,54 +84,54 @@
 
                 <li class="sidebar-title mt-4">Perpustakaan</li>
                 <li class="sidebar-item {{ Request::routeIs('superadmin.manajemen-author') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.manajemen-author') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.manajemen-author') }}" class='sidebar-link'>
                         <i class="bi bi-pencil-square"></i>
                         <span>Manajemen Author</span>
                     </a>
                 </li>
 
                 <li class="sidebar-item {{ Request::routeIs('superadmin.kategori-buku') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.kategori-buku') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.kategori-buku') }}" class='sidebar-link'>
                         <i class="bi bi-tags-fill"></i>
                         <span>Kategori Buku</span>
                     </a>
                 </li>
 
                 <li class="sidebar-item {{ Request::routeIs('superadmin.penerbit-buku') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.penerbit-buku') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.penerbit-buku') }}" class='sidebar-link'>
                         <i class="bi bi-building"></i>
                         <span>Penerbit Buku</span>
                     </a>
                 </li>
 
                 <li class="sidebar-item {{ Request::routeIs('superadmin.buku') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.buku') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.buku') }}" class='sidebar-link'>
                         <i class="bi bi-book-half"></i>
                         <span>Manajemen Buku</span>
                     </a>
                 </li>
 <li class="sidebar-title mt-4">Acara</li>
                 <li class="sidebar-item {{ Request::routeIs('superadmin.manajemen-acara') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.manajemen-acara') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.manajemen-acara') }}" class='sidebar-link'>
                         <i class="bi bi-calendar3"></i>
                         <span>Manajemen Acara</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('superadmin.kategori-acara') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.kategori-acara') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.kategori-acara') }}" class='sidebar-link'>
                         <i class="bi bi-collection"></i>
                         <span>Kategori Acara</span>
                     </a>
                 </li>
                 <li class="sidebar-title mt-4">Pengumuman</li>
                 <li class="sidebar-item {{ Request::routeIs('superadmin.pengumuman') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.pengumuman') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.pengumuman') }}" class='sidebar-link'>
                         <i class="bi bi-megaphone-fill"></i>
                         <span>Manajemen Pengumuman</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('superadmin.kategori-pengumuman') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('superadmin.kategori-pengumuman') }}" class='sidebar-link'>
+                    <a href="{{ route('superadmin.kategori-pengumuman') }}" class='sidebar-link'>
                         <i class="bi bi-tags-fill"></i>
                         <span>Kategori Pengumuman</span>
                     </a>

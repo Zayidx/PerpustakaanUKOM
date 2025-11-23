@@ -3,7 +3,7 @@
         <div class="sidebar-header position-relative">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="logo">
-                    <a wire:navigate href="{{ route('adminperpus.dashboard') }}"><img src="{{ asset('assets/compiled/svg/logo.svg') }}"
+                    <a href="{{ route('adminperpus.dashboard') }}"><img src="{{ asset('assets/compiled/svg/logo.svg') }}"
                             alt="Logo" srcset=""></a>
                 </div>
                 <div class="theme-toggle d-flex gap-2  align-items-center mt-2">
@@ -44,26 +44,26 @@
             <ul class="menu">
                 <li class="sidebar-title">Menu</li>
                 <li class="sidebar-item {{ Request::routeIs('adminperpus.dashboard') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('adminperpus.dashboard') }}" class='sidebar-link'>
+                    <a href="{{ route('adminperpus.dashboard') }}" class='sidebar-link'>
                         <i class="bi bi-grid-fill"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
                 <li class="sidebar-title mt-4">Transaksi</li>
                 <li class="sidebar-item {{ Request::routeIs('adminperpus.scan-peminjaman') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('adminperpus.scan-peminjaman') }}" class='sidebar-link'>
+                    <a href="{{ route('adminperpus.scan-peminjaman') }}" class='sidebar-link'>
                         <i class="bi bi-qr-code-scan"></i>
                         <span>Scan Peminjaman</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('adminperpus.scan-pengembalian') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('adminperpus.scan-pengembalian') }}" class='sidebar-link'>
+                    <a href="{{ route('adminperpus.scan-pengembalian') }}" class='sidebar-link'>
                         <i class="bi bi-arrow-counterclockwise"></i>
                         <span>Scan Pengembalian</span>
                     </a>
                 </li>
                 <li class="sidebar-item {{ Request::routeIs('adminperpus.peminjaman') ? 'active' : '' }} ">
-                    <a wire:navigate href="{{ route('adminperpus.peminjaman') }}" class='sidebar-link'>
+                    <a href="{{ route('adminperpus.peminjaman') }}" class='sidebar-link'>
                         <i class="bi bi-journal-text"></i>
                         <span>Kelola Peminjaman</span>
                     </a>
