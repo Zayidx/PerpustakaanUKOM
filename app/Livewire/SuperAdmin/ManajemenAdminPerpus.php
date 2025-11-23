@@ -3,12 +3,12 @@
 namespace App\Livewire\SuperAdmin;
 
 use App\Livewire\Concerns\HandlesAlerts;
+use App\Livewire\Concerns\HandlesImageUploads;
 use App\Models\RoleData;
 use App\Models\AdminPerpus;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -22,6 +22,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 class ManajemenAdminPerpus extends Component
 {
     use HandlesAlerts;
+    use HandlesImageUploads;
     use WithFileUploads, WithPagination;
 
     protected $paginationTheme = 'bootstrap';
@@ -73,6 +74,7 @@ class ManajemenAdminPerpus extends Component
         'mata_pelajaran.required' => 'Mata pelajaran wajib diisi.',
         'alamat.required' => 'Alamat wajib diisi.', 
         'foto.image' => 'File harus berupa gambar.',
+        'foto.mimes' => 'Format foto harus JPG atau PNG.',
         'foto.max' => 'Ukuran foto maksimal 2MB.',
     ];
 
@@ -91,7 +93,7 @@ class ManajemenAdminPerpus extends Component
             'jenis_kelamin' => ['required', 'in:Laki-laki,Perempuan'], 
             'mata_pelajaran' => ['required', 'string', 'max:100'], 
             'alamat' => ['required', 'string', 'max:255'], 
-            'foto' => ['nullable', 'image', 'max:2048'], 
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'], 
         ];
     } 
 
@@ -135,6 +137,7 @@ class ManajemenAdminPerpus extends Component
 
     public function store()
     {
+        $uploadDirectory = 'admin/foto-admin-perpus'; 
         $this->validate(); 
 
         $roleId = RoleData::where('nama_role', 'AdminPerpus')->value('id'); 
@@ -145,12 +148,13 @@ class ManajemenAdminPerpus extends Component
 
         $imagePath = $this->existingFoto; 
         if ($this->foto instanceof TemporaryUploadedFile) { 
-            Storage::disk('public')->makeDirectory('admin/foto-admin-perpus'); 
-            if ($this->existingFoto) { 
-                Storage::disk('public')->delete($this->existingFoto);
-            }
-            $imagePath = $this->foto->store('admin/foto-admin-perpus', 'public'); 
+            $imagePath = $this->storeImageAndReturnName(
+                $this->foto,
+                $uploadDirectory,
+                $this->existingFoto
+            ); 
         }
+        $imagePath = $this->onlyFilename($uploadDirectory, $imagePath); 
 
         DB::transaction(function () use ($roleId, $imagePath) { 
             if ($this->admin_perpus_id) { 
@@ -224,7 +228,7 @@ class ManajemenAdminPerpus extends Component
 
         DB::transaction(function () use ($adminPerpus) { 
             if ($adminPerpus->foto) { 
-                Storage::disk('public')->delete($adminPerpus->foto); 
+                $this->deleteImage('admin/foto-admin-perpus', $adminPerpus->foto); 
             }
 
             if ($adminPerpus->user) { 
@@ -237,6 +241,13 @@ class ManajemenAdminPerpus extends Component
         $this->flashSuccess('Data Admin Perpus berhasil dihapus.');
         $this->resetForm(); 
     } 
+
+    public function updatedFoto(): void
+    {
+        if ($this->foto instanceof TemporaryUploadedFile) {
+            $this->validateOnly('foto');
+        }
+    }
 
     #[Computed]
     public function listAdminPerpus()

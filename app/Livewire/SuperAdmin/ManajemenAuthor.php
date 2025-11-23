@@ -3,9 +3,9 @@
 namespace App\Livewire\SuperAdmin;
 
 use App\Livewire\Concerns\HandlesAlerts;
+use App\Livewire\Concerns\HandlesImageUploads;
 use App\Models\Author;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -19,6 +19,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 class ManajemenAuthor extends Component
 {
     use HandlesAlerts;
+    use HandlesImageUploads;
     use WithFileUploads;
     use WithPagination;
 
@@ -51,6 +52,7 @@ class ManajemenAuthor extends Component
         'nama_author.unique' => 'Nama author sudah digunakan.',
         'email_author.email' => 'Format email tidak valid.',
         'foto.image' => 'File harus berupa gambar.',
+        'foto.mimes' => 'Format foto harus JPG atau PNG.',
         'foto.max' => 'Ukuran foto maksimal 2MB.',
     ];
 
@@ -66,7 +68,7 @@ class ManajemenAuthor extends Component
             'email_author' => ['nullable', 'email', 'max:255'], 
             'no_telp' => ['nullable', 'string', 'max:20'], 
             'alamat' => ['nullable', 'string', 'max:255'], 
-            'foto' => ['nullable', 'image', 'max:2048'], 
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'], 
         ];
     } 
 
@@ -102,16 +104,18 @@ class ManajemenAuthor extends Component
 
     public function store(): void
     {
+        $uploadDirectory = 'admin/foto-author'; 
         $this->validate(); 
 
         $imagePath = $this->existingFoto; 
         if ($this->foto instanceof TemporaryUploadedFile) { 
-            Storage::disk('public')->makeDirectory('admin/foto-author'); 
-            if ($imagePath) {
-                Storage::disk('public')->delete($imagePath); 
-            }
-            $imagePath = $this->foto->store('admin/foto-author', 'public'); 
+            $imagePath = $this->storeImageAndReturnName(
+                $this->foto,
+                $uploadDirectory,
+                $imagePath
+            ); 
         }
+        $imagePath = $this->onlyFilename($uploadDirectory, $imagePath); 
 
         $payload = [
             'nama_author' => trim($this->nama_author), 
@@ -159,7 +163,7 @@ class ManajemenAuthor extends Component
 
         DB::transaction(function () use ($author) { 
             if ($author->foto) { 
-                Storage::disk('public')->delete($author->foto); 
+                $this->deleteImage('admin/foto-author', $author->foto); 
             }
 
             $author->delete(); 
@@ -181,7 +185,7 @@ class ManajemenAuthor extends Component
         $author = Author::findOrFail($id);
 
         if ($author->foto) {
-            Storage::disk('public')->delete($author->foto);
+            $this->deleteImage('admin/foto-author', $author->foto);
             $author->update(['foto' => null]);
         }
 

@@ -87,16 +87,22 @@
                                 
                                 <div class="mb-3">
                                     <label for="logo" class="form-label">Logo</label>
-                                    <input type="file" id="logo" class="form-control" wire:model="logo">
+                                    <input
+                                        type="file"
+                                        id="logo"
+                                        class="form-control"
+                                        wire:model="logo"
+                                        accept="image/jpeg,image/png"
+                                    >
                                     @error('logo')
                                         <span class="text-danger small">{{ $message }}</span>
                                     @enderror
 
                                     
-                                    @if ($logo)
+                                    @if ($this->canPreviewImage($logo))
                                         <img src="{{ $logo->temporaryUrl() }}" alt="Preview Logo" class="mt-2 rounded" width="200">
                                     @elseif ($existingLogo)
-                                        <img src="{{ asset('storage/' . $existingLogo) }}" alt="Logo Penerbit" class="mt-2 rounded" width="200">
+                                        <img src="{{ $this->imageUrl($existingLogo, 'admin/logo-penerbit') }}" alt="Logo Penerbit" class="mt-2 rounded" width="200">
                                     @endif
                                 </div>
 
@@ -146,7 +152,7 @@
                                 <td>{{ $item->deskripsi ?? '-' }}</td>
                                 <td>
                                     @if ($item->logo)
-                                        <img src="{{ asset('storage/' . $item->logo) }}" alt="Logo" class="rounded" width="100">
+                                        <img src="{{ $this->imageUrl($item->logo, 'admin/logo-penerbit') }}" alt="Logo" class="rounded" width="100">
                                     @else
                                         <span class="text-muted">Tidak ada</span>
                                     @endif

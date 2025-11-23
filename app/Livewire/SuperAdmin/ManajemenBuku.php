@@ -3,13 +3,13 @@
 namespace App\Livewire\SuperAdmin;
 
 use App\Livewire\Concerns\HandlesAlerts;
+use App\Livewire\Concerns\HandlesImageUploads;
 use App\Models\Author;
 use App\Models\Buku as BukuModel;
 use App\Models\KategoriBuku;
 use App\Models\Penerbit;
 use App\Support\CoverUrlResolver;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
@@ -24,6 +24,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 class ManajemenBuku extends Component
 {
     use HandlesAlerts;
+    use HandlesImageUploads;
     use WithFileUploads;
     use WithPagination;
 
@@ -71,8 +72,10 @@ class ManajemenBuku extends Component
         'stok.integer' => 'Stok buku harus berupa angka.',
         'stok.min' => 'Stok buku tidak boleh kurang dari 0.',
         'cover_depan.image' => 'Cover depan harus berupa file gambar.',
+        'cover_depan.mimes' => 'Format cover depan harus JPG atau PNG.',
         'cover_depan.max' => 'Ukuran cover depan maksimal 2MB.',
         'cover_belakang.image' => 'Cover belakang harus berupa file gambar.',
+        'cover_belakang.mimes' => 'Format cover belakang harus JPG atau PNG.',
         'cover_belakang.max' => 'Ukuran cover belakang maksimal 2MB.',
     ];
 
@@ -91,8 +94,8 @@ class ManajemenBuku extends Component
             'deskripsi' => ['required', 'string'], 
             'tanggal_terbit' => ['required', 'date'], 
             'stok' => ['required', 'integer', 'min:0'], 
-            'cover_depan' => ['nullable', 'image', 'max:2048'], 
-            'cover_belakang' => ['nullable', 'image', 'max:2048'], 
+            'cover_depan' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'], 
+            'cover_belakang' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'], 
         ];
     } 
 
@@ -130,23 +133,35 @@ class ManajemenBuku extends Component
     {
         $this->validate(); 
 
-        Storage::disk('public')->makeDirectory('admin/cover-buku'); 
+        $coverDirectory = 'admin/cover-buku'; 
 
         $coverDepanPath = $this->existingCoverDepan; 
         if ($this->cover_depan instanceof TemporaryUploadedFile) { 
-            if ($coverDepanPath && $this->shouldDeleteCover($coverDepanPath, 'cover_depan', $this->bukuId)) { 
-                Storage::disk('public')->delete($coverDepanPath);
+            if ($this->shouldDeleteCover($coverDepanPath, 'cover_depan', $this->bukuId)) { 
+                $this->deleteImage($coverDirectory, $coverDepanPath);
             }
-            $coverDepanPath = $this->cover_depan->store('admin/cover-buku', 'public'); 
+            $coverDepanPath = $this->storeImageAndReturnName(
+                $this->cover_depan,
+                $coverDirectory,
+                null,
+                false
+            ); 
         }
 
         $coverBelakangPath = $this->existingCoverBelakang; 
         if ($this->cover_belakang instanceof TemporaryUploadedFile) { 
-            if ($coverBelakangPath && $this->shouldDeleteCover($coverBelakangPath, 'cover_belakang', $this->bukuId)) { 
-                Storage::disk('public')->delete($coverBelakangPath);
+            if ($this->shouldDeleteCover($coverBelakangPath, 'cover_belakang', $this->bukuId)) { 
+                $this->deleteImage($coverDirectory, $coverBelakangPath);
             }
-            $coverBelakangPath = $this->cover_belakang->store('admin/cover-buku', 'public'); 
+            $coverBelakangPath = $this->storeImageAndReturnName(
+                $this->cover_belakang,
+                $coverDirectory,
+                null,
+                false
+            ); 
         }
+        $coverDepanPath = $this->onlyFilename($coverDirectory, $coverDepanPath); 
+        $coverBelakangPath = $this->onlyFilename($coverDirectory, $coverBelakangPath); 
 
         $payload = [
             'nama_buku' => trim($this->nama_buku), 
@@ -192,6 +207,8 @@ class ManajemenBuku extends Component
 
         $buku = BukuModel::findOrFail($id); 
 
+        $coverDirectory = 'admin/cover-buku'; 
+
         $this->editMode = true; 
         $this->bukuId = $buku->id; 
         $this->nama_buku = $buku->nama_buku; 
@@ -202,8 +219,12 @@ class ManajemenBuku extends Component
         $this->tanggal_terbit = $buku->tanggal_terbit?->format('Y-m-d'); 
         $this->existingCoverDepan = $buku->cover_depan; 
         $this->existingCoverBelakang = $buku->cover_belakang; 
-        $this->existingCoverDepanUrl = CoverUrlResolver::resolve($buku->cover_depan); 
-        $this->existingCoverBelakangUrl = CoverUrlResolver::resolve($buku->cover_belakang); 
+        $this->existingCoverDepanUrl = CoverUrlResolver::resolve(
+            $this->normalizeUploadPath($coverDirectory, $buku->cover_depan)
+        ); 
+        $this->existingCoverBelakangUrl = CoverUrlResolver::resolve(
+            $this->normalizeUploadPath($coverDirectory, $buku->cover_belakang)
+        ); 
         $this->stok = $buku->stok; 
         $this->cover_depan = null; 
         $this->cover_belakang = null; 
@@ -213,12 +234,14 @@ class ManajemenBuku extends Component
     {
         $buku = BukuModel::findOrFail($id); 
 
+        $coverDirectory = 'admin/cover-buku'; 
+
         if ($buku->cover_depan && $this->shouldDeleteCover($buku->cover_depan, 'cover_depan', $buku->id)) { 
-            Storage::disk('public')->delete($buku->cover_depan); 
+            $this->deleteImage($coverDirectory, $buku->cover_depan); 
         }
 
         if ($buku->cover_belakang && $this->shouldDeleteCover($buku->cover_belakang, 'cover_belakang', $buku->id)) { 
-            Storage::disk('public')->delete($buku->cover_belakang); 
+            $this->deleteImage($coverDirectory, $buku->cover_belakang); 
         }
 
         $buku->delete(); 
@@ -313,8 +336,15 @@ class ManajemenBuku extends Component
             return false;
         }
 
+        $fileNames = [
+            $normalized,
+            basename($normalized),
+        ];
+
         return ! BukuModel::query()
-            ->where($column, $path)
+            ->where(function ($query) use ($column, $fileNames) {
+                $query->whereIn($column, $fileNames);
+            })
             ->when($excludeId, fn ($query) => $query->where('id', '!=', $excludeId))
             ->exists();
     } 

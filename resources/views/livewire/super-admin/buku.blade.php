@@ -125,10 +125,16 @@
                                 
                                 <div class="mb-3">
                                     <label for="cover_depan" class="form-label">Cover Depan</label>
-                                    <input type="file" id="cover_depan" class="form-control" wire:model="cover_depan">
+                                    <input
+                                        type="file"
+                                        id="cover_depan"
+                                        class="form-control"
+                                        wire:model="cover_depan"
+                                        accept="image/jpeg,image/png"
+                                    >
                                     @error('cover_depan') <span class="text-danger small">{{ $message }}</span> @enderror
 
-                                    @if ($cover_depan)
+                                    @if ($this->canPreviewImage($cover_depan))
                                         <img src="{{ $cover_depan->temporaryUrl() }}" alt="Preview Cover Depan" class="mt-2 rounded" width="200">
                                     @elseif ($existingCoverDepanUrl)
                                         <img src="{{ $existingCoverDepanUrl }}" alt="Cover Depan Buku" class="mt-2 rounded" width="200">
@@ -138,10 +144,16 @@
                                 
                                 <div class="mb-3">
                                     <label for="cover_belakang" class="form-label">Cover Belakang</label>
-                                    <input type="file" id="cover_belakang" class="form-control" wire:model="cover_belakang">
+                                    <input
+                                        type="file"
+                                        id="cover_belakang"
+                                        class="form-control"
+                                        wire:model="cover_belakang"
+                                        accept="image/jpeg,image/png"
+                                    >
                                     @error('cover_belakang') <span class="text-danger small">{{ $message }}</span> @enderror
 
-                                    @if ($cover_belakang)
+                                    @if ($this->canPreviewImage($cover_belakang))
                                         <img src="{{ $cover_belakang->temporaryUrl() }}" alt="Preview Cover Belakang" class="mt-2 rounded" width="200">
                                     @elseif ($existingCoverBelakangUrl)
                                         <img src="{{ $existingCoverBelakangUrl }}" alt="Cover Belakang Buku" class="mt-2 rounded" width="200">

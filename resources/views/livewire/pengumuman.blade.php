@@ -32,7 +32,7 @@
                 </select>
             </div>
             <a href="{{ route('welcome') }}#announcements"
-               class="btn btn-outline-primary btn-sm">
+               class="btn btn-primary">
                 <i class="fa-solid fa-arrow-left me-2"></i> Kembali ke Beranda
             </a>
         </div>

@@ -3,9 +3,9 @@
 namespace App\Livewire\SuperAdmin;
 
 use App\Livewire\Concerns\HandlesAlerts;
+use App\Livewire\Concerns\HandlesImageUploads;
 use App\Models\Penerbit;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -19,6 +19,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 class PenerbitBuku extends Component
 {
     use HandlesAlerts;
+    use HandlesImageUploads;
     use WithPagination;
     use WithFileUploads;
 
@@ -54,6 +55,7 @@ class PenerbitBuku extends Component
         'tahun_hakcipta.integer' => 'Tahun hak cipta harus berupa angka.',
         'logo.required' => 'Logo wajib diunggah.',
         'logo.image' => 'Logo harus berupa file gambar.',
+        'logo.mimes' => 'Format logo harus JPG atau PNG.',
         'logo.max' => 'Ukuran logo maksimal 2MB.',
     ];
 
@@ -69,8 +71,8 @@ class PenerbitBuku extends Component
             'deskripsi' => ['required', 'string'], 
             'tahun_hakcipta' => ['required', 'integer'], 
             'logo' => $this->editMode
-                ? ['nullable', 'image', 'max:2048'] 
-                : ['required', 'image', 'max:2048'], 
+                ? ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'] 
+                : ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'], 
         ];
     } 
 
@@ -106,16 +108,18 @@ class PenerbitBuku extends Component
 
     public function store(): void
     {
+        $uploadDirectory = 'admin/logo-penerbit'; 
         $this->validate(); 
 
         $logoPath = $this->existingLogo; 
         if ($this->logo instanceof TemporaryUploadedFile) { 
-            Storage::disk('public')->makeDirectory('admin/logo-penerbit'); 
-            if ($logoPath) { 
-                Storage::disk('public')->delete($logoPath);
-            }
-            $logoPath = $this->logo->store('admin/logo-penerbit', 'public'); 
+            $logoPath = $this->storeImageAndReturnName(
+                $this->logo,
+                $uploadDirectory,
+                $logoPath
+            ); 
         }
+        $logoPath = $this->onlyFilename($uploadDirectory, $logoPath); 
 
         $payload = [
             'nama_penerbit' => trim($this->nama_penerbit), 
@@ -159,7 +163,7 @@ class PenerbitBuku extends Component
         $penerbit = Penerbit::findOrFail($id); 
 
         if ($penerbit->logo) { 
-            Storage::disk('public')->delete($penerbit->logo); 
+            $this->deleteImage('admin/logo-penerbit', $penerbit->logo); 
         }
 
         $penerbit->delete();

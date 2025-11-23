@@ -136,16 +136,22 @@
 
                                 <div class="mb-3"> 
                                     <label for="foto" class="form-label">Foto</label>
-                                    <input type="file" id="foto" class="form-control" wire:model="foto" accept="image/*">
+                                    <input
+                                        type="file"
+                                        id="foto"
+                                        class="form-control"
+                                        wire:model="foto"
+                                        accept="image/jpeg,image/png"
+                                    >
                                     @error('foto')
                                         <span class="text-danger small">{{ $message }}</span>
                                     @enderror
 
                                     <div class="mt-3">
-                                        @if ($foto)
+                                    @if ($this->canPreviewImage($foto))
                                             <img src="{{ $foto->temporaryUrl() }}" alt="Preview" class="img-fluid rounded" style="max-width: 200px;">
                                         @elseif ($existingFoto)
-                                            <img src="{{ asset('storage/' . $existingFoto) }}" alt="Foto Super Admin" class="img-fluid rounded" style="max-width: 200px;">
+                                            <img src="{{ $this->imageUrl($existingFoto, 'super-admin/foto-super-admins') }}" alt="Foto Super Admin" class="img-fluid rounded" style="max-width: 200px;">
                                         @endif
                                     </div>
                                 </div>
@@ -188,7 +194,7 @@
                             <td>{{ $item->alamat ?? '-' }}</td>
                             <td class="w-25">
                                 @if ($item->foto)
-                                    <img src="{{ asset('storage/' . $item->foto) }}" class="img-fluid rounded" alt="Foto Super Admin" style="max-width: 100px;">
+                                    <img src="{{ $this->imageUrl($item->foto, 'super-admin/foto-super-admins') }}" class="img-fluid rounded" alt="Foto Super Admin" style="max-width: 100px;">
                                 @else
                                     <span class="text-muted">Belum ada foto</span>
                                 @endif

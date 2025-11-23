@@ -3,6 +3,7 @@
 namespace App\Livewire\SuperAdmin; 
 
 use App\Livewire\Concerns\HandlesAlerts;
+use App\Livewire\Concerns\HandlesImageUploads;
 use App\Models\Jurusan; 
 use App\Models\Kelas; 
 use App\Models\RoleData; 
@@ -10,7 +11,6 @@ use App\Models\Siswa;
 use App\Models\User; 
 use Illuminate\Support\Facades\DB; 
 use Illuminate\Support\Facades\Hash; 
-use Illuminate\Support\Facades\Storage; 
 use Illuminate\Validation\Rule; 
 use Livewire\Attributes\Computed; 
 use Livewire\Attributes\Layout; 
@@ -24,6 +24,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 class ManajemenSiswa extends Component 
 { 
     use HandlesAlerts;
+    use HandlesImageUploads;
     use WithFileUploads; 
     use WithPagination; 
 
@@ -98,6 +99,7 @@ class ManajemenSiswa extends Component
         'nis.unique' => 'NIS tersebut sudah terdaftar.',
 
         'foto.image' => 'File foto harus berupa gambar.',
+        'foto.mimes' => 'Format foto harus JPG atau PNG.',
         'foto.max' => 'Ukuran foto maksimal :max kilobyte.',
 
         'kelas_id.required' => 'Kelas wajib dipilih.',
@@ -173,7 +175,7 @@ class ManajemenSiswa extends Component
                     'digits_between:4,20', 
                     Rule::unique('siswa', 'nis')->ignore($this->siswa_id), 
                 ],
-                'foto' => ['nullable', 'image', 'max:1024'], 
+                'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:1024'], 
             ];
         } 
 
@@ -185,11 +187,13 @@ class ManajemenSiswa extends Component
     }
 
         
-        public function store(): void
-        {
-            if ($this->password === '') {
-                $this->password = null; 
-            }
+    public function store(): void
+    {
+        $uploadDirectory = 'admin/foto-siswa'; 
+
+        if ($this->password === '') {
+            $this->password = null; 
+        }
 
             if ($this->password_confirmation === '') {
                 $this->password_confirmation = null; 
@@ -197,23 +201,24 @@ class ManajemenSiswa extends Component
 
             $this->validate(); 
 
-            $roleId = RoleData::where('nama_role', 'Siswa')->value('id'); 
-            if (!$roleId) {
-                $this->flashError('Role Siswa belum dikonfigurasi. Silakan tambahkan role terlebih dahulu.');
-                return;
-            }
+        $roleId = RoleData::where('nama_role', 'Siswa')->value('id'); 
+        if (!$roleId) {
+            $this->flashError('Role Siswa belum dikonfigurasi. Silakan tambahkan role terlebih dahulu.');
+            return;
+        }
 
-            $imagePath = $this->existingFoto;
-            if ($this->foto instanceof TemporaryUploadedFile) { 
-                Storage::disk('public')->makeDirectory('admin/foto-siswa'); 
-                if ($this->existingFoto) { 
-                    Storage::disk('public')->delete($this->existingFoto);
-                }
-                $imagePath = $this->foto->store('admin/foto-siswa', 'public'); 
-            }
+        $imagePath = $this->existingFoto;
+        if ($this->foto instanceof TemporaryUploadedFile) { 
+            $imagePath = $this->storeImageAndReturnName(
+                $this->foto,
+                $uploadDirectory,
+                $this->existingFoto
+            ); 
+        }
+        $imagePath = $this->onlyFilename($uploadDirectory, $imagePath); 
 
-            $nama = trim($this->nama); 
-            $email = strtolower(trim($this->email));
+        $nama = trim($this->nama); 
+        $email = strtolower(trim($this->email));
             $phone = trim($this->phone_number);
             $nisn = trim($this->nisn);
             $nis = trim($this->nis);
@@ -304,14 +309,14 @@ class ManajemenSiswa extends Component
     }
 
         
-        public function delete(int $id): void
-        {
-            $siswa = Siswa::with('user')->findOrFail($id); 
+    public function delete(int $id): void
+    {
+        $siswa = Siswa::with('user')->findOrFail($id); 
 
-            DB::transaction(function () use ($siswa) { 
-                if ($siswa->foto) {
-                    Storage::disk('public')->delete($siswa->foto); 
-                }
+        DB::transaction(function () use ($siswa) { 
+            if ($siswa->foto) {
+                $this->deleteImage('admin/foto-siswa', $siswa->foto); 
+            }
 
                 if ($siswa->user) {
                     $siswa->user->delete(); 

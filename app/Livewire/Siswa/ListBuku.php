@@ -2,16 +2,16 @@
 
 namespace App\Livewire\Siswa;
 
+use App\Livewire\Concerns\HandlesImageUploads;
 use App\Models\Buku;
 use App\Models\KategoriBuku;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanItem;
+use App\Support\CoverUrlResolver;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -21,6 +21,7 @@ use Livewire\WithPagination;
 
 class ListBuku extends Component
 {
+    use HandlesImageUploads;
     use WithPagination;
 
     #[Layout('components.layouts.dashboard-layouts')]
@@ -283,47 +284,10 @@ class ListBuku extends Component
 
     private function transformBookCover(Buku $book): Buku
     {
-        $book->setAttribute('cover_depan_url', $this->resolveCoverUrl($book->cover_depan));
-        $book->setAttribute('cover_belakang_url', $this->resolveCoverUrl($book->cover_belakang));
+        $book->setAttribute('cover_depan_url', CoverUrlResolver::resolve($book->cover_depan));
+        $book->setAttribute('cover_belakang_url', CoverUrlResolver::resolve($book->cover_belakang));
 
         return $book;
-    }
-
-    private function resolveCoverUrl(?string $path): ?string
-    {
-        if (! $path) {
-            return null;
-        }
-
-        $normalized = ltrim($path, '/');
-
-        if (Str::startsWith($normalized, ['http://', 'https://'])) {
-            return $normalized;
-        }
-
-        if (Str::startsWith($normalized, 'assets/')) {
-            return asset($normalized);
-        }
-
-        if (Str::startsWith($normalized, 'storage/')) {
-            return asset($normalized);
-        }
-
-        $publicPath = public_path($normalized);
-        if (is_file($publicPath)) {
-            return asset($normalized);
-        }
-
-        $storagePath = storage_path('app/public/'.$normalized);
-        if (is_file($storagePath)) {
-            return asset('storage/'.$normalized);
-        }
-
-        if (Storage::disk('public')->exists($normalized)) {
-            return Storage::url($normalized);
-        }
-
-        return null;
     }
 
     private function getActiveLoanBookIds(): array

@@ -197,7 +197,7 @@
                                     <div class="d-flex align-items-center gap-3 mb-2">
                                         <div class="rounded-circle overflow-hidden" style="width:56px;height:56px;">
                                             @if ($detailBook->author?->foto)
-                                                <img src="{{ asset('storage/'.$detailBook->author->foto) }}" alt="Foto penulis" class="w-100 h-100 object-fit-cover">
+                                                <img src="{{ $this->imageUrl($detailBook->author?->foto, 'admin/foto-author') }}" alt="Foto penulis" class="w-100 h-100 object-fit-cover">
                                             @else
                                                 <div class="bg-light h-100 w-100 d-flex align-items-center justify-content-center text-muted">
                                                     <i class="bi bi-person"></i>
@@ -221,7 +221,7 @@
                                     <div class="d-flex align-items-center gap-3 mb-2">
                                         <div class="rounded bg-white border overflow-hidden d-flex align-items-center justify-content-center" style="width:64px;height:64px;">
                                             @if ($detailBook->penerbit?->logo)
-                                                <img src="{{ asset('storage/'.$detailBook->penerbit->logo) }}" alt="Logo penerbit" class="w-100 h-100 object-fit-contain p-1">
+                                                <img src="{{ $this->imageUrl($detailBook->penerbit?->logo, 'admin/logo-penerbit') }}" alt="Logo penerbit" class="w-100 h-100 object-fit-contain p-1">
                                             @else
                                                 <span class="text-muted small">Tidak ada logo</span>
                                             @endif

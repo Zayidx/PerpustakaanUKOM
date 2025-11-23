@@ -11,9 +11,9 @@
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav align-items-lg-center">
                     <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}#home">Beranda</a></li>
-                 
+                  <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}#services">Layanan</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}#events">Acara</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}#services">Layanan</a></li>
+                   
                     <li class="nav-item"><a class="nav-link" href="{{ route('welcome') }}#contact">Kontak</a></li>
                 </ul>
                 @php

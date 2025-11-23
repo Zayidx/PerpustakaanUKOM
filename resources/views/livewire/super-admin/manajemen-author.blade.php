@@ -106,16 +106,22 @@
                                 
                                 <div class="mb-3">
                                     <label for="foto" class="form-label">Foto</label>
-                                    <input type="file" id="foto" class="form-control" wire:model="foto">
+                                    <input
+                                        type="file"
+                                        id="foto"
+                                        class="form-control"
+                                        wire:model="foto"
+                                        accept="image/jpeg,image/png"
+                                    >
                                     @error('foto')
                                         <span class="text-danger small">{{ $message }}</span>
                                     @enderror
 
                                     
-                                    @if ($foto)
+                                    @if ($this->canPreviewImage($foto))
                                         <img src="{{ $foto->temporaryUrl() }}" alt="Preview Foto" class="mt-2 rounded" width="200">
                                     @elseif ($existingFoto)
-                                        <img src="{{ asset('storage/' . $existingFoto) }}" alt="Foto Author" class="mt-2 rounded" width="200">
+                                        <img src="{{ $this->imageUrl($existingFoto, 'admin/foto-author') }}" alt="Foto Author" class="mt-2 rounded" width="200">
                                     @endif
                                 </div>
 
@@ -159,7 +165,7 @@
                                 <td>
                                     <div class="d-flex flex-column align-items-start gap-2">
                                         @if ($item->foto)
-                                            <img src="{{ asset('storage/' . $item->foto) }}" alt="Foto" class="rounded-circle" width="60" height="60">
+                                            <img src="{{ $this->imageUrl($item->foto, 'admin/foto-author') }}" alt="Foto" class="rounded-circle" width="60" height="60">
                                             <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeFoto({{ $item->id }})">
                                                 Hapus Foto
                                             </button>

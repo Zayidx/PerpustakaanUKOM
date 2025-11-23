@@ -3,9 +3,9 @@
 namespace App\Livewire\SuperAdmin;
 
 use App\Livewire\Concerns\HandlesAlerts;
+use App\Livewire\Concerns\HandlesImageUploads;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -22,6 +22,7 @@ use App\Models\User;
 class ManajemenSuperAdmin extends Component
 {
     use HandlesAlerts;
+    use HandlesImageUploads;
     use WithFileUploads;
     use WithPagination;
 
@@ -85,6 +86,7 @@ class ManajemenSuperAdmin extends Component
         'jenis_kelamin.required' => 'Jenis kelamin wajib dipilih.',
         'jenis_kelamin.in' => 'Jenis kelamin tidak valid.',
         'foto.image' => 'File foto harus berupa gambar.',
+        'foto.mimes' => 'Format foto harus JPG atau PNG.',
         'foto.max' => 'Ukuran foto maksimal :max kilobyte.',
     ];
 
@@ -140,7 +142,7 @@ class ManajemenSuperAdmin extends Component
             'password_confirmation' => $passwordConfirmationRules,
             'alamat' => ['nullable', 'string', 'max:255'],
             'jenis_kelamin' => ['required', 'in:laki-laki,perempuan'],
-            'foto' => ['nullable', 'image', 'max:1024'],
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:1024'],
         ];
     }
 
@@ -152,6 +154,7 @@ class ManajemenSuperAdmin extends Component
 
     public function store(): void
     {
+        $uploadDirectory = 'super-admin/foto-super-admins';
         if ($this->password === '') {
             $this->password = null;
         }
@@ -173,14 +176,13 @@ class ManajemenSuperAdmin extends Component
         $imagePath = $this->existingFoto;
 
         if ($this->foto instanceof TemporaryUploadedFile) {
-            Storage::disk('public')->makeDirectory('super-admin/foto-super-admins');
-
-            if ($this->existingFoto) {
-                Storage::disk('public')->delete($this->existingFoto);
-            }
-
-            $imagePath = $this->foto->store('super-admin/foto-super-admins', 'public');
+            $imagePath = $this->storeImageAndReturnName(
+                $this->foto,
+                $uploadDirectory,
+                $this->existingFoto
+            );
         }
+        $imagePath = $this->onlyFilename($uploadDirectory, $imagePath);
 
         $nama = trim($this->nama);
         $email = strtolower(trim($this->email));
@@ -267,7 +269,7 @@ class ManajemenSuperAdmin extends Component
 
         DB::transaction(function () use ($super_admins) {
             if ($super_admins->foto) {
-                Storage::disk('public')->delete($super_admins->foto);
+                $this->deleteImage('super-admin/foto-super-admins', $super_admins->foto);
             }
 
             if ($super_admins->user) {

@@ -213,14 +213,14 @@
                                         id="foto"
                                         class="form-control"
                                         wire:model="foto"
-                                        accept="image/*"
+                                        accept="image/jpeg,image/png"
                                     >
                                     @error('foto')
                                     <span class="text-danger small">{{ $message }}</span>
                                     @enderror
 
                                     <div class="mt-3">
-                                        @if ($foto)
+                                        @if ($this->canPreviewImage($foto))
                                             <img
                                                 src="{{ $foto->temporaryUrl() }}"
                                                 alt="Preview"
@@ -229,7 +229,7 @@
                                             >
                                         @elseif ($existingFoto)
                                             <img
-                                                src="{{ asset('storage/' . $existingFoto) }}"
+                                                src="{{ $this->imageUrl($existingFoto, 'admin/foto-siswa') }}"
                                                 alt="Foto Siswa"
                                                 class="img-fluid rounded"
                                                 style="max-width: 200px;"
@@ -297,7 +297,7 @@
                         <td class="w-25">
                             @if ($item->foto)
                                 <img
-                                    src="{{ asset('storage/' . $item->foto) }}"
+                                    src="{{ $this->imageUrl($item->foto, 'admin/foto-siswa') }}"
                                     class="img-fluid rounded"
                                     alt="Foto Siswa"
                                 >

@@ -32,6 +32,24 @@ class CoverUrlResolver
             return asset('storage/'.$diskPath);
         }
 
+        if ($diskPath !== '' && is_file(public_path($diskPath))) {
+            return asset($diskPath);
+        }
+
+        if (! str_contains($normalized, '/')) {
+            $defaultPath = 'admin/cover-buku/'.$normalized;
+
+            if (Storage::disk('public')->exists($defaultPath)) {
+                return asset('storage/'.$defaultPath);
+            }
+
+            $defaultPublicPath = public_path($defaultPath);
+
+            if (is_file($defaultPublicPath)) {
+                return asset($defaultPath);
+            }
+        }
+
         $publicPath = public_path($normalized);
         if (is_file($publicPath)) {
             return asset($normalized);

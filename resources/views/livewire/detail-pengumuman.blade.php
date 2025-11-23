@@ -40,7 +40,7 @@
                         </div>
 
                         <div class="mt-4">
-                            <a href="{{ route('landing.pengumuman') }}" class="btn btn-outline-primary">
+                            <a href="{{ route('landing.pengumuman') }}" class="btn btn-primary">
                                 <i class="fa-solid fa-arrow-left me-2"></i> Kembali ke Daftar Pengumuman
                             </a>
                         </div>
