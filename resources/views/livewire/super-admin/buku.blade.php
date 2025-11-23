@@ -214,15 +214,17 @@
                                 </span>
                             </td>
                                 <td>
-                                    @if ($item->cover_depan_url)
-                                        <img src="{{ $item->cover_depan_url }}" alt="Cover Depan" class="rounded" width="80">
+                                    @php $coverDepan = $this->imageUrl($item->cover_depan, 'admin/cover-buku') @endphp
+                                    @if ($coverDepan)
+                                        <img src="{{ $coverDepan }}" alt="Cover Depan" class="rounded" width="80">
                                     @else
                                         <span class="text-muted">Tidak ada</span>
                                     @endif
                                 </td>
                                 <td>
-                                    @if ($item->cover_belakang_url)
-                                        <img src="{{ $item->cover_belakang_url }}" alt="Cover Belakang" class="rounded" width="80">
+                                    @php $coverBelakang = $this->imageUrl($item->cover_belakang, 'admin/cover-buku') @endphp
+                                    @if ($coverBelakang)
+                                        <img src="{{ $coverBelakang }}" alt="Cover Belakang" class="rounded" width="80">
                                     @else
                                         <span class="text-muted">Tidak ada</span>
                                     @endif

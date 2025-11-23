@@ -54,7 +54,7 @@
                 @forelse ($books as $book)
                     <div class="col-xl-3 col-lg-4 col-md-6">
                         <div class="card h-100 border-{{ in_array($book->id, $selectedBooks ?? [], true) ? 'primary' : 'light' }} overflow-hidden">
-                            <div class="position-relative">
+                                <div class="position-relative">
                                 <div class="ratio ratio-3x4 bg-light overflow-hidden" style="padding-top: 133.333% !important;">
                                     @if ($book->cover_depan_url)
                                         <img src="{{ $book->cover_depan_url }}" alt="Cover {{ $book->nama_buku }}" class="w-100 h-100 object-fit-cover">
@@ -69,7 +69,7 @@
                                     {{ $book->stok > 0 ? 'Stok: '.$book->stok : 'Habis' }}
                                 </span>
                                 <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white px-3 py-2">
-                                    <h6 class="mb-0 text-truncate">{{ $book->nama_buku }}</h6>
+                                    <h6 class="mb-0 text-truncate text-white">{{ $book->nama_buku }}</h6>
                                 </div>
                             </div>
                             <div class="card-body d-flex flex-column">
@@ -143,17 +143,13 @@
                 </div>
                 <div class="modal-body">
                     @if($detailBook)
-                        @php
-                            $detailCoverDepan = $detailBook->cover_depan_url;
-                            $detailCoverBelakang = $detailBook->cover_belakang_url;
-                        @endphp
                         <div class="row g-4">
                             <div class="col-lg-6">
                                 <div class="row row-cols-2 g-3">
                                     <div class="col">
                                         <div class="ratio ratio-3x4 border rounded overflow-hidden shadow-sm" style="padding-top: 133.333% !important;">
-                                            @if ($detailCoverDepan)
-                                                <img src="{{ $detailCoverDepan }}" alt="Cover depan {{ $detailBook->nama_buku }}" class="w-100 h-100 object-fit-cover">
+                                            @if ($detailBook->cover_depan_url)
+                                                <img src="{{ $detailBook->cover_depan_url }}" alt="Cover depan {{ $detailBook->nama_buku }}" class="w-100 h-100 object-fit-cover">
                                             @else
                                                 <div class="d-flex align-items-center justify-content-center h-100 w-100 text-muted small text-center px-3">
                                                     Cover depan belum tersedia
@@ -163,8 +159,8 @@
                                     </div>
                                     <div class="col">
                                         <div class="ratio ratio-3x4 border rounded overflow-hidden shadow-sm" style="padding-top: 133.333% !important;">
-                                            @if ($detailCoverBelakang)
-                                                <img src="{{ $detailCoverBelakang }}" alt="Cover belakang {{ $detailBook->nama_buku }}" class="w-100 h-100 object-fit-cover">
+                                            @if ($detailBook->cover_belakang_url)
+                                                <img src="{{ $detailBook->cover_belakang_url }}" alt="Cover belakang {{ $detailBook->nama_buku }}" class="w-100 h-100 object-fit-cover">
                                             @else
                                                 <div class="d-flex align-items-center justify-content-center h-100 w-100 text-muted small text-center px-3">
                                                     Cover belakang belum tersedia

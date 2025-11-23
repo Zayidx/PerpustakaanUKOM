@@ -7,7 +7,6 @@ use App\Models\Buku;
 use App\Models\KategoriBuku;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanItem;
-use App\Support\CoverUrlResolver;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -284,8 +283,8 @@ class ListBuku extends Component
 
     private function transformBookCover(Buku $book): Buku
     {
-        $book->setAttribute('cover_depan_url', CoverUrlResolver::resolve($book->cover_depan));
-        $book->setAttribute('cover_belakang_url', CoverUrlResolver::resolve($book->cover_belakang));
+        $book->setAttribute('cover_depan_url', $this->imageUrl($book->cover_depan, 'admin/cover-buku'));
+        $book->setAttribute('cover_belakang_url', $this->imageUrl($book->cover_belakang, 'admin/cover-buku'));
 
         return $book;
     }

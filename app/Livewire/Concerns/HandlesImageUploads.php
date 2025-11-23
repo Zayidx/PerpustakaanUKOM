@@ -104,17 +104,13 @@ trait HandlesImageUploads
 
         if (Storage::disk('public')->exists($path)) {
             $this->mirrorToPublic(dirname($path), basename($path));
-
-            $publicPath = public_path($path);
-            if (is_file($publicPath)) {
-                return asset($path);
-            }
-
-            return Storage::disk('public')->url($path);
         }
 
-        $publicPath = public_path($path);
-        if (is_file($publicPath)) {
+        if ($this->findPublicFile($path)) {
+            return asset($path);
+        }
+
+        if (Storage::disk('public')->exists($path)) {
             return asset($path);
         }
 
@@ -144,19 +140,51 @@ trait HandlesImageUploads
             return;
         }
 
-        $targetPath = public_path($normalized);
-        $targetDir = dirname($targetPath);
+        $storagePath = $sourcePath && is_file($sourcePath)
+            ? $sourcePath
+            : Storage::disk('public')->path($normalized);
 
-        File::ensureDirectoryExists($targetDir);
-
-        if ($sourcePath && is_file($sourcePath)) {
-            File::copy($sourcePath, $targetPath);
+        if (! is_file($storagePath)) {
             return;
         }
 
-        $storagePath = Storage::disk('public')->path($normalized);
-        if (is_file($storagePath)) {
+        foreach ($this->publicRoots() as $root) {
+            $targetPath = rtrim($root, '/').'/'.$normalized;
+            $targetDir = dirname($targetPath);
+
+            File::ensureDirectoryExists($targetDir);
             File::copy($storagePath, $targetPath);
         }
+    }
+
+    private function findPublicFile(string $relativePath): ?string
+    {
+        $normalized = ltrim($relativePath, '/');
+
+        foreach ($this->publicRoots() as $root) {
+            $candidate = rtrim($root, '/').'/'.$normalized;
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private function publicRoots(): array
+    {
+        $roots = [public_path()];
+
+        $custom = env('PUBLIC_MIRROR_PATH');
+        if ($custom && is_dir($custom)) {
+            $roots[] = rtrim($custom, '/');
+        }
+
+        $sibling = base_path('../public_html');
+        if (is_dir($sibling)) {
+            $roots[] = realpath($sibling) ?: $sibling;
+        }
+
+        return array_values(array_unique($roots));
     }
 }

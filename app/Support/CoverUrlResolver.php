@@ -27,25 +27,29 @@ class CoverUrlResolver
             return asset($normalized);
         }
 
-        $diskPath = self::normalizeDiskPath($normalized);
-        if ($diskPath !== '' && Storage::disk('public')->exists($diskPath)) {
-            return asset('storage/'.$diskPath);
+        if ($publicPath = self::findInPublicRoots($normalized)) {
+            return asset($normalized);
         }
 
-        if ($diskPath !== '' && is_file(public_path($diskPath))) {
-            return asset($diskPath);
+        $diskPath = self::normalizeDiskPath($normalized);
+        if ($diskPath !== '') {
+            if (self::findInPublicRoots($diskPath)) {
+                return asset($diskPath);
+            }
+
+            if (Storage::disk('public')->exists($diskPath)) {
+                return asset($diskPath);
+            }
         }
 
         if (! str_contains($normalized, '/')) {
             $defaultPath = 'admin/cover-buku/'.$normalized;
 
-            if (Storage::disk('public')->exists($defaultPath)) {
-                return asset('storage/'.$defaultPath);
+            if (self::findInPublicRoots($defaultPath)) {
+                return asset($defaultPath);
             }
 
-            $defaultPublicPath = public_path($defaultPath);
-
-            if (is_file($defaultPublicPath)) {
+            if (Storage::disk('public')->exists($defaultPath)) {
                 return asset($defaultPath);
             }
         }
@@ -74,5 +78,30 @@ class CoverUrlResolver
         }
 
         return ltrim($path, '/');
+    }
+
+    private static function findInPublicRoots(string $relativePath): ?string
+    {
+        $normalized = ltrim($relativePath, '/');
+        $roots = [public_path()];
+
+        $custom = env('PUBLIC_MIRROR_PATH');
+        if ($custom && is_dir($custom)) {
+            $roots[] = rtrim($custom, '/');
+        }
+
+        $sibling = base_path('../public_html');
+        if (is_dir($sibling)) {
+            $roots[] = realpath($sibling) ?: $sibling;
+        }
+
+        foreach (array_unique($roots) as $root) {
+            $candidate = rtrim($root, '/').'/'.$normalized;
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
     }
 }
