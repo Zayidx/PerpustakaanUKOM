@@ -1,85 +1,79 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Perpustakaan Digital – Laravel 12 + Livewire 3
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi manajemen perpustakaan berbasis web dengan peminjaman/pengembalian berbasis QR, peran terpisah (Super Admin, Admin Perpus, Siswa), dan dashboard interaktif tanpa build pipeline frontend.
 
-## Paket yang Digunakan
+## Isi Singkat
+- Ringkasan fitur
+- Teknologi & prasyarat
+- Instalasi cepat
+- Akun default setelah seeding
+- Catatan penggunaan QR scanner
+- Perintah umum
+- Referensi dokumentasi internal
 
-### Dependensi PHP
+## Fitur Utama
+- **Manajemen koleksi**: Buku, kategori, penulis, penerbit, stok, dan unggah sampul.
+- **Peminjaman & pengembalian**: QR/PIN 6 digit; Admin Perpus dapat scan atau input manual; stok otomatis berkurang saat disetujui.
+- **Pengumuman & acara**: CRUD dengan konten Markdown (CommonMark) yang dirender aman di view publik.
+- **Role & dashboard**: Super Admin (pengaturan global), Admin Perpus (operasional pinjam/return), Siswa (cari buku, ajukan pinjam, lacak status).
+- **Livewire-first UI**: Navigasi cepat, pagination/filter, dan notifikasi Swal tanpa reload penuh.
+- **Tanpa npm/vite**: Aset disajikan dari `public/assets` sehingga setup lebih ringan.
 
-- `php` (^8.2): Versi minimal PHP agar seluruh fitur Laravel 12 dan ekstensi yang dibutuhkan dapat berjalan.
-- `laravel/framework`: Kerangka kerja utama yang menyediakan routing, ORM, queue, job, dan seluruh fondasi aplikasi.
-- `laravel/tinker`: Konsol interaktif untuk mengeksekusi kode Laravel/PHP secara cepat saat debugging.
-- `livewire/livewire`: Membuat komponen UI reaktif tanpa menulis JavaScript manual, cocok untuk dashboard dan form dinamis.
-- `simplesoftwareio/simple-qrcode`: Utilitas pembuat QR code di sisi server, sering dipakai untuk kartu anggota atau tiket.
+## Teknologi & Prasyarat
+- PHP 8.2+ dan Composer
+- MySQL/MariaDB
+- Ekstensi PHP: mbstring, openssl, pdo, gd/imagemagick (untuk QR/gambar)
+- Server lokal dengan HTTPS atau `http://localhost` (dibutuhkan untuk izin kamera)
 
-### Dependensi PHP (Pengembangan)
+## Instalasi Cepat
+1) Clone repo dan pasang dependensi
+```bash
+git clone <repo-url> perpustakaan
+cd perpustakaan
+composer install
+```
+2) Salin `.env` lalu atur koneksi database dan `APP_URL`
+```bash
+cp .env.example .env
+# sesuaikan DB_DATABASE, DB_USERNAME, DB_PASSWORD, APP_URL
+```
+3) Generate key dan jalankan migrasi + seeder
+```bash
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+```
+4) Jalankan server pengembangan
+```bash
+php artisan serve
+```
+Aplikasi siap di `http://localhost:8000` (gunakan HTTPS bila ingin menguji kamera di produksi).
 
-- `fakerphp/faker`: Generator data palsu untuk seed database dan pengujian.
-- `laravel/pail`: Konsol log real-time sehingga event atau error dapat dipantau saat dev server berjalan.
-- `laravel/pint`: Formatter kode otomatis mengikuti gaya PSR-12.
-- `laravel/sail`: Lingkungan pengembangan berbasis Docker yang siap pakai untuk Laravel.
-- `mockery/mockery`: Framework mocking ketika menulis unit test yang kompleks.
-- `nunomaduro/collision`: Menambah tampilan error yang kaya informasi di CLI sehingga debugging lebih cepat.
-- `phpunit/phpunit`: Kerangka utama untuk menjalankan test unit maupun feature di Laravel.
+## Akun Default (setelah `--seed`)
+- Super Admin: `superadmin@gmail.com` / `superadmin123`
+- Admin Perpus: `adminperpus@gmail.com` / `adminperpus123`
+- Siswa: `siswa@gmail.com` / `siswa123`
 
-### Asset Frontend
+## Catatan QR Scanner (Desktop & Mobile)
+- Halaman scanner: `/admin-perpus/scan-peminjaman` dan `/admin-perpus/scan-pengembalian`.
+- Izinkan akses kamera di browser; HTTPS atau `http://localhost` wajib untuk izin kamera.
+- Scanner otomatis memilih kamera belakang/eksternal jika tersedia; fallback ke kamera default.
+- Jika kamera bermasalah, gunakan input manual kode 6 digit di halaman yang sama.
 
-Aplikasi tidak lagi menggunakan pipeline Vite maupun npm. Seluruh stylesheet dan script disajikan sebagai berkas statis di dalam `public/` (misalnya `public/css/app.css` dan `public/assets/**`). Untuk memperbarui tampilan, edit langsung berkas statis tersebut atau tambahkan file baru sesuai kebutuhan.
+## Perintah Umum
+- Jalankan test: `php artisan test`
+- Bersihkan cache konfigurasi: `php artisan config:clear`
+- Sinkronisasi storage publik: `php artisan storage:link`
 
-## About Laravel
+## Struktur Singkat
+- `app/Livewire/*` – logika halaman dashboard (peminjaman, buku, pengumuman, dsb).
+- `resources/views/livewire/*` – tampilan Livewire, termasuk scanner QR.
+- `database/migrations` – skema tabel utama (buku, peminjaman, pengumuman, user/role).
+- `database/seeders` – data awal role, pengguna contoh, referensi buku, dan siswa.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Dokumentasi Tambahan
+- `documentation.md` – detail modul Manajemen Siswa.
+- `documentation_peminjaman.md` – alur peminjaman (QR/PIN) dari siswa ke admin.
+- `documentation_pengumuman.md` – modul pengumuman & konten Markdown.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Selamat menggunakan, dan silakan sesuaikan lebih lanjut sesuai kebutuhan perpustakaan Anda!

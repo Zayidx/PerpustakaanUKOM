@@ -134,7 +134,7 @@
                     return;
                 }
 
-                const currentStatus = @json($loan['status'] ?? null);
+                const currentStatus = "{{ $loan['status'] ?? '' }}";
                 if (!currentStatus || currentStatus === 'pending') {
                     return;
                 }

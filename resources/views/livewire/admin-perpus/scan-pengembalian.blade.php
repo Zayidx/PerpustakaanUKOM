@@ -1,4 +1,18 @@
 <div>
+    @push('styles')
+        <style>
+            /* Mirror preview so left/right match user movement */
+            #qr-return-reader video,
+            #qr-return-reader img {
+                transform: scaleX(-1);
+            }
+
+            #qr-return-reader {
+                min-height: 360px;
+            }
+        </style>
+    @endpush
+
     <div class="row g-4">
         <div class="col-lg-6">
             <div class="card shadow-sm">
@@ -119,7 +133,7 @@
                 instance: null,
                 containerId: 'qr-return-reader',
                 initOnce() {
-                    const attemptStart = () => {
+                    const attemptStart = async () => {
                         const container = document.getElementById(this.containerId);
 
                         if (!container) {
@@ -139,30 +153,66 @@
                         dispatchLivewireEvent('qr-scanner-error');
 
                         if (this.instance) {
-                            this.instance.stop().catch(() => {
-                                
-                            }).finally(() => {
+                            try {
+                                await this.instance.stop();
+                            } catch (_) {
+                                // ignore
+                            } finally {
                                 this.instance.clear();
-                            });
+                            }
                         }
 
-                        this.instance = new Html5Qrcode(this.containerId, { verbose: false });
+                        const supportedFormats = window.Html5QrcodeSupportedFormats?.QR_CODE
+                            ? [Html5QrcodeSupportedFormats.QR_CODE]
+                            : undefined;
 
-                        const config = {
+                        const buildConfig = () => ({
                             fps: 10,
-                            qrbox: { width: 250, height: 250 },
+                            qrbox: { width: 320, height: 320 },
+                            disableFlip: false, // allow mirrored preview
+                            videoConstraints: {
+                                width: { ideal: 1280 },
+                                height: { ideal: 720 },
+                            },
+                        });
+
+                        this.instance = new Html5Qrcode(this.containerId, {
+                            verbose: false,
+                            formatsToSupport: supportedFormats,
+                            experimentalFeatures: {
+                                useBarCodeDetectorIfSupported: true,
+                            },
+                        });
+
+                        const startWithConstraints = async (constraints) => {
+                            const config = buildConfig();
+                            await this.instance.start(
+                                constraints,
+                                config,
+                                (decodedText) => dispatchLivewireEvent('qr-scanned', decodedText),
+                                () => {}
+                            );
                         };
 
-                        this.instance.start(
-                            { facingMode: 'environment' },
-                            config,
-                            (decodedText) => dispatchLivewireEvent('qr-scanned', decodedText),
-                            () => {}
-                        ).catch((error) => {
-                            const message = error?.message ?? String(error);
-                            container.innerHTML = `<span class="text-danger small">Kamera tidak bisa diakses: ${message}</span>`;
-                            dispatchLivewireEvent('qr-scanner-error', message);
-                        });
+                        try {
+                            const cameras = await Html5Qrcode.getCameras();
+                            const preferred = cameras?.find((cam) => /back|rear|environment/i.test(cam.label ?? '')) ?? cameras?.[0];
+
+                            if (preferred?.id) {
+                                await startWithConstraints({ deviceId: { exact: preferred.id } });
+                                return;
+                            }
+
+                            await startWithConstraints({ facingMode: 'environment' });
+                        } catch (error) {
+                            try {
+                                await startWithConstraints({ facingMode: 'user' });
+                            } catch (fallbackError) {
+                                const message = (fallbackError?.message ?? error?.message) || 'Kamera tidak bisa diakses.';
+                                container.innerHTML = `<span class="text-danger small">Kamera tidak bisa diakses: ${message}</span>`;
+                                dispatchLivewireEvent('qr-scanner-error', message);
+                            }
+                        }
                     };
 
                     if (document.readyState === 'loading') {
