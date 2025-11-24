@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('penerbit', function (Blueprint $table) {
             $table->id();
             $table->string('nama_penerbit');
-            $table->string('deskripsi');
+            $table->text('deskripsi');
             $table->string('logo');
             $table->string('tahun_hakcipta');
             $table->timestamps();
