@@ -1,7 +1,12 @@
 @php
     $loanStatus = data_get($loan, 'status');
 @endphp
-<div @if ($loanStatus === 'accepted') wire:poll.5s="refreshLoan" @endif>
+<div
+    id="return-code-wrapper"
+    data-loan-code="{{ $loan['kode'] ?? 'unknown' }}"
+    data-loan-status="{{ $loan['status'] ?? '' }}"
+    @if ($loanStatus === 'accepted') wire:poll.5s="refreshLoan" @endif
+>
     @if ($loan)
         <div class="row g-4">
             <div class="col-lg-5">
@@ -145,7 +150,12 @@
                     });
                 };
 
-                const loanKey = `return-code-alert-{{ $loan['kode'] ?? 'unknown' }}`;
+                const wrapper = document.getElementById('return-code-wrapper');
+                if (!wrapper) {
+                    return;
+                }
+
+                const loanKey = `return-code-alert-${wrapper.dataset.loanCode || 'unknown'}`;
                 const maybeShowInitialAlert = () => {
                     window.__shownReturnAlerts = window.__shownReturnAlerts || {};
 
@@ -153,7 +163,7 @@
                         return;
                     }
 
-                    const status = {!! json_encode($loan['status'] ?? null) !!};
+                    const status = wrapper.dataset.loanStatus || null;
                     if (status !== 'returned') {
                         return;
                     }

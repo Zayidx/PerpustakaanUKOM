@@ -16,7 +16,11 @@
     @stack('styles')
 </head>
 
-<body>
+<body
+    data-dashboard-refresh="{{ Request::routeIs('*.dashboard') ? 'true' : 'false' }}"
+    data-flash-message="{{ e(session('message')) }}"
+    data-flash-error="{{ e(session('error')) }}"
+>
     <script src="{{ asset('assets/static/js/initTheme.js') }}" data-navigate-once></script>
     <div id="app">
         @if (Request::routeIs('superadmin.*'))
@@ -77,7 +81,7 @@
     @stack('scripts')
 
     <script data-navigate-once>
-        const shouldForceRefresh = {{ Request::routeIs('*.dashboard') ? 'true' : 'false' }};
+        const shouldForceRefresh = document.body.dataset.dashboardRefresh === 'true';
 
         const ensureDashboardRefresh = () => {
             if (!shouldForceRefresh) {
@@ -165,8 +169,8 @@
                 window.Livewire.on('notify', (payload) => showAlert(payload));
             }
 
-            const flashMessage = @json(session('message'));
-            const flashError = @json(session('error'));
+            const flashMessage = document.body.dataset.flashMessage || '';
+            const flashError = document.body.dataset.flashError || '';
 
             if (flashMessage) {
                 showAlert({ message: flashMessage, type: 'success' });
