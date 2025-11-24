@@ -153,7 +153,7 @@
                         return;
                     }
 
-                    const status = @json($loan['status'] ?? null);
+                    const status = {!! json_encode($loan['status'] ?? null) !!};
                     if (status !== 'returned') {
                         return;
                     }

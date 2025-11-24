@@ -144,7 +144,7 @@
                                 </small>
                                 <div class="progress mt-2" style="height: 5px;">
                                     <div class="progress-bar {{ $loan->status === 'returned' ? 'bg-success' : 'bg-primary' }}"
-                                        style="width: {{ $loan->status === 'returned' ? 100 : 70 }}%"></div>
+                                        style="width: {{ $loan->status === 'returned' ? '100%' : '70%' }}"></div>
                                 </div>
                             </div>
                         @empty
