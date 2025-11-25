@@ -169,7 +169,8 @@
                                 </div>
                                 <div class="progress mt-2" style="height: 4px;">
                                     <div class="progress-bar {{ $loan->status === 'returned' ? 'bg-success' : 'bg-primary' }}"
-                                        role="progressbar" style="width: {{ $loan->status === 'returned' ? 100 : 60 }}%">
+                                        role="progressbar"
+                                        data-width="{{ $loan->status === 'returned' ? 100 : 60 }}">
                                     </div>
                                 </div>
                             </div>
@@ -182,3 +183,14 @@
         </section>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.progress-bar[data-width]').forEach((bar) => {
+            const width = bar.dataset.width;
+            if (width) {
+                bar.style.width = `${width}%`;
+            }
+        });
+    });
+</script>

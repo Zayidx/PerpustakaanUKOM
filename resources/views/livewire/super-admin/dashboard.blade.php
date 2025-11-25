@@ -221,7 +221,7 @@
                                 </div>
                                 <div class="progress mt-2" style="height: 6px;">
                                     <div class="progress-bar bg-primary" role="progressbar"
-                                        style="width: {{ $percentage }}%" aria-valuenow="{{ $percentage }}"
+                                        data-width="{{ $percentage }}" aria-valuenow="{{ $percentage }}"
                                         aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                             </div>
@@ -234,3 +234,14 @@
         </section>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.progress-bar[data-width]').forEach((bar) => {
+            const width = bar.dataset.width;
+            if (width) {
+                bar.style.width = `${width}%`;
+            }
+        });
+    });
+</script>
