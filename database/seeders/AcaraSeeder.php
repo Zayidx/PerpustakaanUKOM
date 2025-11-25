@@ -198,10 +198,10 @@ class AcaraSeeder extends Seeder
                 'end' => [17, 0],
             ],
             [
-                'judul' => 'Diskusi Panel: Literasi Digital di Era AI',
+                'judul' => 'Diskusi Panel: Literasi Digital dan Keamanan Data',
                 'lokasi' => 'Auditorium Sekolah',
                 'kategori' => 'Diskusi Panel',
-                'deskripsi' => 'Diskusi pakar mengenai peran literasi digital dan keamanan data di era kecerdasan buatan.',
+                'deskripsi' => 'Diskusi pakar mengenai peran literasi digital dan keamanan data di era teknologi modern.',
                 'days' => 21,
                 'start' => [9, 30],
                 'end' => [11, 30],

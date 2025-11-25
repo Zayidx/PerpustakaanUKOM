@@ -586,11 +586,6 @@
         slug: 'advanced-templates'
       },
       {
-        key: 'ai',
-        name: 'AI Assistant',
-        type: 'premium'
-      },
-      {
         key: 'casechange',
         name: 'Case Change',
         type: 'premium'
