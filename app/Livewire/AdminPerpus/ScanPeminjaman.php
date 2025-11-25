@@ -11,9 +11,12 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use App\Models\Buku;
 use App\Models\Peminjaman;
+use App\Support\QrPayloadSignature;
 
 class ScanPeminjaman extends Component
 {
+    private const QR_MAX_AGE_MINUTES = 43200; // 30 hari
+
     #[Layout('components.layouts.dashboard-layouts')]
     #[Title('Scan Peminjaman')]
     public ?array $loan = null;
@@ -39,6 +42,12 @@ class ScanPeminjaman extends Component
 
         if (! is_array($data) || empty($data['code'])) { 
             $this->errorMessage = 'QR code tidak valid.';
+            $this->notifyScanResult('error', $this->errorMessage);
+            return;
+        }
+
+        if (! QrPayloadSignature::isValid($data, self::QR_MAX_AGE_MINUTES)) {
+            $this->errorMessage = 'QR code tidak dikenali atau sudah kedaluwarsa.';
             $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
@@ -88,9 +97,19 @@ class ScanPeminjaman extends Component
             return;
         }
 
-        $loan = Peminjaman::query() 
+        if (isset($data['action']) && $data['action'] !== 'borrow') {
+            $this->errorMessage = 'QR ini bukan untuk peminjaman.';
+            $this->notifyScanResult('error', $this->errorMessage);
+            return;
+        }
+
+        $loan = Peminjaman::query()
             ->with(['items.buku', 'siswa.user', 'siswa.kelas'])
             ->where('kode', $data['code'])
+            ->where(function ($query) use ($adminPerpus) {
+                $query->whereNull('admin_perpus_id')
+                    ->orWhere('admin_perpus_id', $adminPerpus->id);
+            })
             ->first();
 
         if (! $loan) {
@@ -101,6 +120,12 @@ class ScanPeminjaman extends Component
 
         if (isset($data['loan_id']) && (int) $data['loan_id'] !== $loan->id) { 
             $this->errorMessage = 'Kode peminjaman tidak cocok.';
+            $this->notifyScanResult('error', $this->errorMessage);
+            return;
+        }
+
+        if (isset($data['student_id']) && (int) $data['student_id'] !== (int) $loan->siswa_id) {
+            $this->errorMessage = 'QR peminjaman tidak sesuai pemilik.';
             $this->notifyScanResult('error', $this->errorMessage);
             return;
         }

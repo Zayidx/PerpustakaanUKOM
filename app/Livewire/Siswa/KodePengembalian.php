@@ -9,6 +9,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Support\QrPayloadSignature;
 
 class KodePengembalian extends Component
 {
@@ -59,10 +60,11 @@ class KodePengembalian extends Component
         $lateInfo = $this->calculateLateInfo($loan);
         $this->lateInfo = $lateInfo;
 
-        $payload = [
+        $payload = QrPayloadSignature::sign([
             'code' => $loan->kode,
             'loan_id' => $loan->id,
             'student_id' => $loan->siswa_id,
+            'admin_perpus_id' => $loan->admin_perpus_id,
             'action' => 'return',
             'books' => $loan->items->map(fn ($item) => [
                 'id' => $item->buku_id,
@@ -70,7 +72,7 @@ class KodePengembalian extends Component
             ])->values()->all(),
             'generated_at' => now()->toIso8601String(),
             'late_days' => $lateInfo['late_days'],
-        ];
+        ]);
 
         $this->qrSvg = QrCode::format('svg')
             ->size(240)

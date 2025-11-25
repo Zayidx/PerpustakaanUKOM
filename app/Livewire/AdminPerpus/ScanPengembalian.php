@@ -13,9 +13,12 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Illuminate\Support\Carbon;
+use App\Support\QrPayloadSignature;
 
 class ScanPengembalian extends Component
 {
+    private const QR_MAX_AGE_MINUTES = 43200; // 30 hari
+
     #[Layout('components.layouts.dashboard-layouts')]
     #[Title('Scan Pengembalian')]
     public ?array $loan = null;
@@ -51,6 +54,12 @@ class ScanPengembalian extends Component
 
         if (isset($data['action']) && $data['action'] !== 'return') {
             $this->errorMessage = 'QR ini bukan untuk pengembalian.';
+            $this->notifyScanResult('error', $this->errorMessage);
+            return;
+        }
+
+        if (! QrPayloadSignature::isValid($data, self::QR_MAX_AGE_MINUTES)) {
+            $this->errorMessage = 'QR code tidak dikenali atau sudah kedaluwarsa.';
             $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
@@ -106,10 +115,26 @@ class ScanPengembalian extends Component
         $loan = Peminjaman::query()
             ->with(['items.buku', 'siswa.user', 'siswa.kelas'])
             ->where('kode', $data['code'])
+            ->where(function ($query) use ($adminPerpus) {
+                $query->whereNull('admin_perpus_id')
+                    ->orWhere('admin_perpus_id', $adminPerpus->id);
+            })
             ->first();
 
         if (! $loan) {
             $this->errorMessage = 'Data peminjaman tidak ditemukan.';
+            $this->notifyScanResult('error', $this->errorMessage);
+            return;
+        }
+
+        if (isset($data['loan_id']) && (int) $data['loan_id'] !== $loan->id) {
+            $this->errorMessage = 'Kode pengembalian tidak cocok.';
+            $this->notifyScanResult('error', $this->errorMessage);
+            return;
+        }
+
+        if (isset($data['student_id']) && (int) $data['student_id'] !== (int) $loan->siswa_id) {
+            $this->errorMessage = 'QR pengembalian tidak sesuai pemilik.';
             $this->notifyScanResult('error', $this->errorMessage);
             return;
         }
@@ -140,7 +165,7 @@ class ScanPengembalian extends Component
             return;
         }
 
-        $this->completeReturn($loan, $lateInfo, $payload);
+        $this->completeReturn($loan, $lateInfo, $payload, true);
     }
 
     private function formatLoan(Peminjaman $loan, ?array $lateInfo = null): array
@@ -204,7 +229,7 @@ class ScanPengembalian extends Component
         }
 
         $lateInfo = $this->calculateLateInfo($loan);
-        $this->completeReturn($loan, $lateInfo, $this->pendingReturn['payload'] ?? null);
+        $this->completeReturn($loan, $lateInfo, $this->pendingReturn['payload'] ?? null, true);
         $this->pendingReturn = null;
         $this->dispatch('hide-late-modal');
     }
@@ -217,10 +242,32 @@ class ScanPengembalian extends Component
         $this->notifyScanResult('error', $this->errorMessage);
     }
 
-    private function completeReturn(Peminjaman $loan, array $lateInfo, ?string $payload = null): void
+    public function markLateFeeUnpaid(): void
+    {
+        if (! $this->pendingReturn) {
+            return;
+        }
+
+        $loan = Peminjaman::with(['items.buku', 'siswa.user', 'siswa.kelas'])
+            ->find($this->pendingReturn['loan_id']);
+
+        if (! $loan) {
+            $this->cancelLateFee();
+            $this->errorMessage = 'Data peminjaman tidak ditemukan.';
+            $this->notifyScanResult('error', $this->errorMessage);
+            return;
+        }
+
+        $lateInfo = $this->calculateLateInfo($loan);
+        $this->completeReturn($loan, $lateInfo, $this->pendingReturn['payload'] ?? null, false);
+        $this->pendingReturn = null;
+        $this->dispatch('hide-late-modal');
+    }
+
+    private function completeReturn(Peminjaman $loan, array $lateInfo, ?string $payload = null, bool $lateFeePaid = true): void
     {
         try {
-            DB::transaction(function () use ($loan, $lateInfo) {
+            DB::transaction(function () use ($loan, $lateInfo, $lateFeePaid) {
                 $items = $loan->items()->with('buku')->get();
                 $bookIds = $items->pluck('buku_id')->all();
 
@@ -249,7 +296,7 @@ class ScanPengembalian extends Component
                         'admin_perpus_id' => Auth::user()?->adminPerpus?->id,
                         'late_days' => $lateInfo['late_days'],
                         'amount' => $lateInfo['late_fee'],
-                        'paid_at' => now(),
+                        'paid_at' => $lateFeePaid ? now() : null,
                     ]);
                 }
             });
@@ -267,7 +314,6 @@ class ScanPengembalian extends Component
         $this->lastPayload = $payload;
         $this->pendingReturn = null;
         $this->errorMessage = null;
-        $this->pendingReturn = null;
         $this->notifyScanResult('success', 'Pengembalian berhasil diselesaikan.');
     }
 

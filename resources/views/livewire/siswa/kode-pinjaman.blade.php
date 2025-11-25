@@ -1,7 +1,7 @@
 @php
     $loanStatus = data_get($loan, 'status');
 @endphp
-<div @if ($loanStatus === 'pending') wire:poll.5s="refreshLoan" @endif>
+<div wire:poll.2s.keep-alive="refreshLoan">
     @if ($loan)
         <div class="row g-4">
             <div class="col-lg-5">
@@ -24,13 +24,27 @@
                                 Status: {{ $statusLabel }}
                             </span>
                         </div>
-                        <p class="text-muted small mb-1">
-                            Kode peminjaman Anda:
-                        </p>
-                        <div class="fs-3 fw-bold mb-3">
-                            {{ $loan['kode'] }}
-                        </div>
-                        @if ($qrSvg)
+                        @if ($loanStatus === 'pending')
+                            <p class="text-muted small mb-1">
+                                Kode peminjaman Anda:
+                            </p>
+                            <div class="fs-3 fw-bold mb-3">
+                                {{ $loan['kode'] }}
+                            </div>
+                        @endif
+                        @if ($loanStatus === 'accepted')
+                            <div class="alert alert-success">
+                                Peminjaman Anda telah disetujui. QR tidak lagi diperlukan.
+                            </div>
+                        @elseif ($loanStatus === 'returned')
+                            <div class="alert alert-success">
+                                Peminjaman sudah dikembalikan. QR ini tidak lagi diperlukan.
+                            </div>
+                        @elseif ($loanStatus === 'cancelled')
+                            <div class="alert alert-warning">
+                                Peminjaman dibatalkan. QR ini tidak lagi berlaku.
+                            </div>
+                        @elseif ($qrSvg)
                             <div class="d-flex justify-content-center">
                                 {!! $qrSvg !!}
                             </div>

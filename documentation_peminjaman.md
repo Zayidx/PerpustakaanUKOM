@@ -50,10 +50,21 @@ Komponen: `app/Livewire/Siswa/KodePinjaman.php`
 View: `resources/views/livewire/siswa/kode-pinjaman.blade.php`
 
 - **Load data**: memastikan peminjaman milik siswa yang login; memuat buku, kategori, penerbit, dan admin yang akan mengesahkan (jika sudah diisi).
-- **QR & PIN**: membuat SVG via `SimpleSoftwareIO\QrCode` berisi payload:
-  ```json
-  { "code": "<PIN 6 digit>", "loan_id": <id>, "student_id": <siswa_id>, "books": [{ "id": 1, "title": "..." }], "generated_at": "<ISO time>" }
-  ```
+- **QR & PIN**: membuat SVG via `SimpleSoftwareIO\QrCode` (`SimpleSoftwareIO\QrCode\Facades\QrCode`) yang menandatangani payload dengan `app.key` melalui helper `App\Support\QrPayloadSignature`:
+  - Payload contoh:
+    ```json
+    {
+      "code": "<PIN 6 digit>",
+      "loan_id": <id>,
+      "student_id": <siswa_id>,
+      "admin_perpus_id": <admin_id|null>,
+      "action": "borrow",
+      "generated_at": "<ISO time>",
+      "books": [{ "id": 1, "title": "..." }],
+      "signature": "<HMAC-SHA256>"
+    }
+    ```
+  - Signature diverifikasi saat discan; QR kedaluwarsa setelah 30 hari.
 - **Status update**: halaman melakukan `wire:poll.5s` saat status `pending`; `refreshLoan()` mendeteksi perubahan status dan memicu alert (Swal) melalui event `loan-status-updated`.
 - **Tampilan**: badge status (`Menunggu` / `Sedang Dipinjam`), QR + PIN, detail waktu dibuat/diterima/jatuh tempo, daftar buku.
 
@@ -89,8 +100,8 @@ Library scanner: `public/assets/js/html5-qrcode.min.js` (kamera perlu HTTPS atau
   - `GET /siswa/peminjaman` → `Siswa\ListPeminjaman`
   - `GET /siswa/peminjaman/kode/{kode}` → `Siswa\KodePinjaman`
 - `routes/adminperpus.php`:
-  - `GET /admin-perpus/scan-peminjaman` → `AdminPerpus\ScanPeminjaman`
-  - `GET /admin-perpus/peminjaman` → `AdminPerpus\ManajemenPeminjaman` (dipakai untuk monitoring dan pembatalan/return; tidak dijelaskan di sini).
+- `GET /admin-perpus/scan-peminjaman` → `AdminPerpus\ScanPeminjaman`
+- `GET /admin-perpus/peminjaman` → `AdminPerpus\ManajemenPeminjaman` (dipakai untuk monitoring dan pembatalan/return; tidak dijelaskan di sini).
 
 Semua route dilindungi middleware `auth` + `role` masing-masing.
 
@@ -101,7 +112,56 @@ Semua route dilindungi middleware `auth` + `role` masing-masing.
 - Stok buku **tidak berubah** saat siswa membuat permintaan; stok baru berkurang setelah Admin Perpus menyetujui.
 - `due_at` dihitung otomatis +7 hari sejak pemrosesan; dapat diubah nanti via manajemen jika diperlukan.
 
-## 10) Pengujian
+## 10) Implementasi QR & Scanner (detail)
+
+### Komponen/Kode yang digunakan
+- Dokumentasi lebih ringkas tersedia di `QRCodeDocumentation.md` (generator) dan `ScannerDocumentation.md` (scanner).
+- **Generator QR (PHP)**: `SimpleSoftwareIO\QrCode\Facades\QrCode` di `app/Livewire/Siswa/KodePinjaman.php` (peminjaman) dan `app/Livewire/Siswa/KodePengembalian.php` (pengembalian).
+- **Penandatangan payload**: `App\Support\QrPayloadSignature` (HMAC-SHA256 dengan `app.key`, auto-decode base64). Menjamin payload tidak bisa diubah tanpa kunci aplikasi.
+- **Scanner kamera (JS)**: `public/assets/js/html5-qrcode.min.js` dipanggil di view `resources/views/livewire/admin-perpus/scan-peminjaman.blade.php` dan `scan-pengembalian.blade.php`.
+- **Komponen Livewire admin**: `app/Livewire/AdminPerpus/ScanPeminjaman.php` dan `ScanPengembalian.php` sebagai penerima event `qr-scanned`/input manual.
+
+### Payload QR peminjaman
+```json
+{
+  "code": "<PIN 6 digit>",
+  "loan_id": <id>,
+  "student_id": <siswa_id>,
+  "admin_perpus_id": <admin_id|null>,
+  "action": "borrow",
+  "generated_at": "<ISO time>",
+  "books": [{ "id": 1, "title": "..." }],
+  "signature": "<HMAC-SHA256>"
+}
+```
+- Ditandatangani saat dibuat, kedaluwarsa setelah 30 hari (divalidasi di sisi admin).
+- Versi pengembalian memakai `action: "return"` dan menambahkan `late_days`.
+
+### Validasi saat discan (Admin)
+- Memeriksa signature (HMAC) dan usia QR.
+- Mengecek `action` sesuai halaman (`borrow` untuk peminjaman).
+- Memastikan `loan_id`/`student_id` cocok.
+- Memastikan loan milik admin_perpus yang login (atau `admin_perpus_id` masih null sehingga bisa di-claim).
+- Menolak jika loan tidak ditemukan atau status tidak sesuai (mis. bukan `pending` untuk peminjaman).
+
+### Proses di admin (peminjaman)
+- Input kamera (`qr-scanned`) atau manual 6 digit (`processManualCode`).
+- Jika status `pending`: lock stok buku (`lockForUpdate`), tolak jika stok kurang, kurangi stok, set `accepted_at = now()`, `due_at = now()->addWeek()`, isi `admin_perpus_id`, ubah status ke `accepted`.
+- Notifikasi dikirim via event Livewire `notify`.
+
+### Proses kamera (JS)
+- Memuat `html5-qrcode.min.js`, membuat instance `Html5Qrcode`.
+- Mencari kamera belakang lebih dulu (`deviceId` label `back|rear|environment`, lalu `facingMode: environment`), fallback ke kamera depan (flip diizinkan).
+- `disableFlip` diaktifkan untuk kamera belakang, dimatikan untuk kamera depan.
+- `qr-scanned` dipicu setiap kali teks QR terbaca, diteruskan ke Livewire.
+- Jika gagal akses kamera, menampilkan error di container dan memungkinkan klik untuk retry.
+
+### Refresh otomatis di halaman siswa
+- Peminjaman: `wire:poll.2s.keep-alive="refreshLoan"` selalu aktif sehingga status berubah otomatis saat admin memproses.
+- Pengembalian: polling 2 detik saat status masih `accepted` sampai menjadi `returned`.
+- QR/kode 6 digit disembunyikan otomatis setelah status berubah (`accepted/returned/cancelled`), dan muncul pesan bahwa QR tidak lagi diperlukan.
+
+## 11) Pengujian
 
 File: `tests/Feature/LoanFlowTest.php`
 - `test_student_can_generate_loan_code`: memastikan permintaan `pending` tercipta dan redirect ke halaman kode tanpa mengubah stok.

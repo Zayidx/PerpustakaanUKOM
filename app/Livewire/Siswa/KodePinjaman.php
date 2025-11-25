@@ -8,6 +8,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Support\QrPayloadSignature;
 
 class KodePinjaman extends Component
 {
@@ -93,16 +94,18 @@ class KodePinjaman extends Component
 
         $this->lastKnownStatus = $this->loan['status'];
 
-        $payload = [ 
-            'code' => $loan->kode, 
-            'loan_id' => $loan->id, 
-            'student_id' => $loan->siswa_id, 
-            'books' => $loan->items->map(fn ($item) => [ 
-                'id' => $item->buku_id, 
-                'title' => $item->buku->nama_buku, 
-            ])->values()->all(), 
-            'generated_at' => $loan->created_at?->toIso8601String(), 
-        ];
+        $payload = QrPayloadSignature::sign([
+            'code' => $loan->kode,
+            'loan_id' => $loan->id,
+            'student_id' => $loan->siswa_id,
+            'admin_perpus_id' => $loan->admin_perpus_id,
+            'action' => 'borrow',
+            'generated_at' => now()->toIso8601String(),
+            'books' => $loan->items->map(fn ($item) => [
+                'id' => $item->buku_id,
+                'title' => $item->buku->nama_buku,
+            ])->values()->all(),
+        ]);
 
         $this->qrSvg = QrCode::format('svg') 
             ->size(240) 

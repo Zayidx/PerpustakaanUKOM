@@ -5,7 +5,7 @@
     id="return-code-wrapper"
     data-loan-code="{{ $loan['kode'] ?? 'unknown' }}"
     data-loan-status="{{ $loan['status'] ?? '' }}"
-    @if ($loanStatus === 'accepted') wire:poll.5s="refreshLoan" @endif
+    @if ($loanStatus === 'accepted') wire:poll.2s.keep-alive="refreshLoan" @endif
 >
     @if ($loan)
         <div class="row g-4">
@@ -34,14 +34,20 @@
                             </span>
                         </div>
 
-                        <p class="text-muted small mb-1">
-                            Kode pengembalian Anda:
-                        </p>
-                        <div class="fs-3 fw-bold mb-3">
-                            {{ $loan['kode'] }}
-                        </div>
+                        @if ($loanStatus === 'accepted')
+                            <p class="text-muted small mb-1">
+                                Kode pengembalian Anda:
+                            </p>
+                            <div class="fs-3 fw-bold mb-3">
+                                {{ $loan['kode'] }}
+                            </div>
+                        @endif
 
-                        @if ($lateDays > 0)
+                        @if ($loanStatus === 'returned')
+                            <div class="alert alert-success">
+                                Pengembalian Anda telah selesai diproses. QR tidak lagi diperlukan.
+                            </div>
+                        @elseif ($lateDays > 0)
                             <div class="alert alert-warning text-start">
                                 Terlambat {{ $lateDays }} hari. Perkiraan denda: <strong>Rp{{ number_format($lateFee, 0, ',', '.') }}</strong>.
                                 Mohon siapkan pembayaran saat pengembalian.
@@ -63,11 +69,7 @@
                             <p class="text-muted mt-3 mb-0">
                                 Tunjukkan QR ini atau bacakan kode 6 angka tersebut kepada Admin Perpus untuk menyelesaikan pengembalian.
                             </p>
-                        @elseif ($loanStatus === 'returned')
-                            <div class="alert alert-success">
-                                Pengembalian Anda telah selesai diproses. QR tidak lagi diperlukan.
-                            </div>
-                        @else
+                        @elseif ($loanStatus === 'accepted')
                             <p class="text-danger mb-0">Gagal membuat QR code.</p>
                         @endif
                     </div>

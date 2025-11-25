@@ -1,12 +1,6 @@
 <div>
     @push('styles')
         <style>
-            /* Mirror preview so left/right match user movement */
-            #qr-reader video,
-            #qr-reader img {
-                transform: scaleX(-1);
-            }
-
             #qr-reader {
                 min-height: 360px;
             }
@@ -136,7 +130,6 @@
                             return;
                         }
 
-                        container.dataset.initialized = 'true';
                         dispatchLivewireEvent('qr-scanner-error');
 
                         if (this.instance) {
@@ -153,13 +146,14 @@
                             ? [Html5QrcodeSupportedFormats.QR_CODE]
                             : undefined;
 
-                        const buildConfig = () => ({
+                        const buildConfig = (constraints, isUserFacing = false) => ({
                             fps: 10,
                             qrbox: { width: 320, height: 320 },
-                            disableFlip: false, // allow mirrored preview
+                            disableFlip: isUserFacing ? false : true,
                             videoConstraints: {
                                 width: { ideal: 1280 },
                                 height: { ideal: 720 },
+                                ...(constraints ?? { facingMode: { ideal: 'environment' } }),
                             },
                         });
 
@@ -172,34 +166,72 @@
                         });
 
                         const startWithConstraints = async (constraints) => {
-                            const config = buildConfig();
+                            const isUserFacing =
+                                typeof constraints?.facingMode === 'string'
+                                    ? /user/i.test(constraints.facingMode)
+                                    : (typeof constraints?.facingMode === 'object' && /user/i.test(constraints.facingMode?.exact ?? ''));
+
+                            const config = buildConfig(constraints, isUserFacing);
                             await this.instance.start(
                                 constraints,
                                 config,
                                 (decodedText) => dispatchLivewireEvent('qr-scanned', decodedText),
                                 () => {}
                             );
+
+                            container.dataset.initialized = 'true';
                         };
 
-                        try {
-                            const cameras = await Html5Qrcode.getCameras();
-                            const preferred = cameras?.find((cam) => /back|rear|environment/i.test(cam.label ?? '')) ?? cameras?.[0];
+                        const tryStartRearFirst = async () => {
+                            const attempts = [];
+                            let cameras = [];
+
+                            try {
+                                cameras = await Html5Qrcode.getCameras();
+                            } catch (_) {
+                                cameras = [];
+                            }
+
+                            const preferred = cameras?.find((cam) => /back|rear|environment/i.test(cam.label ?? ''));
 
                             if (preferred?.id) {
-                                await startWithConstraints({ deviceId: { exact: preferred.id } });
-                                return;
+                                attempts.push({ deviceId: { exact: preferred.id } });
                             }
 
-                            await startWithConstraints({ facingMode: 'environment' });
-                        } catch (error) {
-                            try {
-                                await startWithConstraints({ facingMode: 'user' });
-                            } catch (fallbackError) {
-                                const message = (fallbackError?.message ?? error?.message) || 'Kamera tidak bisa diakses.';
-                                container.innerHTML = `<span class="text-danger small">Kamera tidak bisa diakses: ${message}</span>`;
-                                dispatchLivewireEvent('qr-scanner-error', message);
+                            attempts.push({ facingMode: { exact: 'environment' } });
+                            attempts.push({ facingMode: { ideal: 'environment' } });
+
+                            for (const cam of cameras ?? []) {
+                                if (!cam?.id || cam.id === preferred?.id) {
+                                    continue;
+                                }
+
+                                attempts.push({ deviceId: { exact: cam.id } });
                             }
-                        }
+
+                            attempts.push({ facingMode: 'environment' });
+                            attempts.push({ facingMode: 'user' });
+
+                            let lastError;
+
+                            for (const constraints of attempts) {
+                                try {
+                                    await startWithConstraints(constraints);
+                                    return;
+                                } catch (error) {
+                                    lastError = error;
+                                }
+                            }
+
+                            const message = (lastError?.message) || 'Kamera tidak bisa diakses.';
+                            container.innerHTML = `<span class="text-danger small">Kamera tidak bisa diakses: ${message}</span>`;
+                            dispatchLivewireEvent('qr-scanner-error', message);
+
+                            container.dataset.initialized = 'failed';
+                            container.addEventListener('click', attemptStart, { once: true });
+                        };
+
+                        await tryStartRearFirst();
                     };
 
                     if (document.readyState === 'loading') {

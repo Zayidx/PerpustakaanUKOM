@@ -229,7 +229,19 @@
                                         <span class="text-muted">Tidak ada</span>
                                     @endif
                                 </td>
-                                <td>{{ $item->deskripsi ?? '-' }}</td>
+                                <td>
+                                    @if ($item->deskripsi)
+                                        <span
+                                            class="d-inline-block text-truncate"
+                                            style="max-width: 320px;"
+                                            title="{{ $item->deskripsi }}"
+                                        >
+                                            {{ \Illuminate\Support\Str::limit($item->deskripsi, 120) }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <div class="d-flex gap-2">
                                         <button wire:click="edit({{ $item->id }})" data-bs-toggle="modal"

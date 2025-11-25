@@ -117,7 +117,15 @@
                                     {{ $loop->iteration + ($this->listKategoriBuku->currentPage() - 1) * $this->listKategoriBuku->perPage() }}
                                 </td>
                                 <td>{{ $item->nama_kategori_buku }}</td>
-                                <td>{{ $item->deskripsi_kategori_buku }}</td>
+                                <td>
+                                    <span
+                                        class="d-inline-block text-truncate"
+                                        style="max-width: 320px;"
+                                        title="{{ $item->deskripsi_kategori_buku }}"
+                                    >
+                                        {{ \Illuminate\Support\Str::limit($item->deskripsi_kategori_buku, 120) }}
+                                    </span>
+                                </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-2">
                                         <button wire:click="edit({{ $item->id }})" data-bs-toggle="modal"
