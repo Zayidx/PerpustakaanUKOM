@@ -101,6 +101,7 @@ class PenerbitBuku extends Component
 
     public function create(): void
     {
+        // Mulai flow tambah penerbit: reset form dan status validasi
         $this->resetForm(); 
         $this->editMode = false; 
         $this->resetValidation(); 
@@ -108,6 +109,7 @@ class PenerbitBuku extends Component
 
     public function store(): void
     {
+        // Simpan atau perbarui penerbit beserta upload logo (opsional)
         $uploadDirectory = 'admin/logo-penerbit'; 
         $this->validate(); 
 
@@ -146,6 +148,7 @@ class PenerbitBuku extends Component
 
     public function edit(int $id): void
     {
+        // Muat data penerbit terpilih ke form edit
         $this->resetValidation(); 
         $penerbit = Penerbit::findOrFail($id); 
 
@@ -160,6 +163,7 @@ class PenerbitBuku extends Component
 
     public function delete(int $id): void
     {
+        // Hapus penerbit dan logo jika tidak dipakai lagi
         $penerbit = Penerbit::findOrFail($id); 
 
         if ($penerbit->logo) { 
@@ -182,6 +186,7 @@ class PenerbitBuku extends Component
     #[Computed]
     public function listPenerbit()
     {
+        // Data tabel: pencarian, urutan, dan pagination
         [$sortField, $sortDirection] = $this->resolveSort();
 
         return Penerbit::query()

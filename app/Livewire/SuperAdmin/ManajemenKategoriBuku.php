@@ -84,6 +84,7 @@ class ManajemenKategoriBuku extends Component
 
     public function create()
     {
+        // Mulai flow tambah kategori buku: bersihkan form dan validasi
         $this->resetForm();
         $this->editMode = false;
         $this->resetValidation();
@@ -91,6 +92,7 @@ class ManajemenKategoriBuku extends Component
 
     public function store()
     {
+        // Simpan atau perbarui kategori buku sesuai mode edit/tambah
         $this->validate(); 
 
         if ($this->editMode && $this->kategori_id) {
@@ -117,6 +119,7 @@ class ManajemenKategoriBuku extends Component
 
     public function edit($id)
     {
+        // Muat data kategori yang dipilih ke form edit
         $this->resetValidation();
 
         $kategori = KategoriBuku::findOrFail((int) $id); 
@@ -129,6 +132,7 @@ class ManajemenKategoriBuku extends Component
 
     public function delete($id)
     {
+        // Hapus kategori buku dan reset form setelahnya
         $kategori = KategoriBuku::findOrFail((int) $id); 
         $kategori->delete(); 
 
@@ -139,6 +143,7 @@ class ManajemenKategoriBuku extends Component
     #[Computed]
     public function listKategoriBuku()
     {
+        // Data tabel: filter pencarian, urutan, dan pagination
         [$sortField, $sortDirection] = $this->resolveSort();
 
         return KategoriBuku::query()

@@ -1,5 +1,6 @@
 <div>
     
+    {{-- Flash sukses ditampilkan setelah simpan/hapus di komponen Livewire --}}
     @if (session()->has('message'))
         <div x-data="{ show: true }"
              x-show="show"
@@ -49,6 +50,7 @@
             </div>
 
             
+            {{-- Modal form tambah/edit buku --}}
             <div class="modal fade text-left" id="modal-form" tabindex="-1" role="dialog" aria-labelledby="modalLabel"
                  aria-hidden="true" wire:ignore.self>
                 <div class="modal-dialog modal-dialog-scrollable" role="document">
@@ -182,6 +184,7 @@
             </div>
 
             
+            {{-- Tabel daftar buku beserta relasi dan aksi --}}
             <div class="table-responsive mt-3">
                 <table class="table table-striped align-middle">
                     <thead>
@@ -264,6 +267,7 @@
             </div>
 
             
+            {{-- Kontrol pagination dan jumlah data per halaman --}}
             <div class="card-footer d-flex justify-content-between align-items-center gap-3">
                 <div>
                     <label class="form-label me-2 mb-0">Data per halaman</label>
@@ -281,6 +285,7 @@
     </div>
 
     
+    {{-- Tutup modal melalui event Livewire --}}
     <script>
         document.addEventListener('livewire:load', function () {
             window.addEventListener('close-modal', event => {

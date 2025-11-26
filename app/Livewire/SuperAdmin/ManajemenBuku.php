@@ -124,6 +124,7 @@ class ManajemenBuku extends Component
 
     public function create(): void
     {
+        // Mulai flow tambah buku: reset form dan status validasi
         $this->resetForm(); 
         $this->editMode = false; 
         $this->resetValidation(); 
@@ -131,6 +132,7 @@ class ManajemenBuku extends Component
 
     public function store(): void
     {
+        // Simpan atau perbarui buku berikut upload cover depan/belakang jika ada
         $this->validate(); 
 
         $coverDirectory = 'admin/cover-buku'; 
@@ -203,6 +205,7 @@ class ManajemenBuku extends Component
 
     public function edit(int $id): void
     {
+        // Muat data buku terpilih beserta cover untuk proses edit
         $this->resetValidation(); 
 
         $buku = BukuModel::findOrFail($id); 
@@ -232,6 +235,7 @@ class ManajemenBuku extends Component
 
     public function delete(int $id): void
     {
+        // Hapus buku dan cover yang tidak lagi digunakan
         $buku = BukuModel::findOrFail($id); 
 
         $coverDirectory = 'admin/cover-buku'; 
@@ -267,6 +271,7 @@ class ManajemenBuku extends Component
     #[Computed]
     public function listBuku()
     {
+        // Data tabel buku lengkap dengan filter pencarian, urutan, dan relasi
         [$sortField, $sortDirection] = $this->resolveSort();
 
         return BukuModel::with(['author', 'kategori', 'penerbit']) 
