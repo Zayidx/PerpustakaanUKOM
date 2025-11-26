@@ -16,12 +16,14 @@ class DetailPengumuman extends Component
 
     public function mount(string $slug): void
     {
+        // Ambil pengumuman terbit berdasarkan slug.
         $this->announcement = Pengumuman::query() 
             ->where('slug', $slug) 
             ->where('status', 'published') 
             ->with(['kategori', 'admin']) 
             ->firstOrFail(); 
 
+        // Ambil pengumuman lain (prioritaskan kategori yang sama).
         $this->otherAnnouncements = Pengumuman::query() 
             ->where('status', 'published') 
             ->where('id', '!=', $this->announcement->id) 

@@ -106,10 +106,12 @@
     @push('scripts')
         <script src="{{ asset('assets/js/html5-qrcode.min.js') }}"></script>
         <script>
+            // Helper untuk kirim event ke Livewire (dipakai oleh scanner)
             const dispatchLivewireEvent = (eventName, ...payload) => {
                 window.dispatchEvent(new CustomEvent(eventName, { detail: payload }));
             };
 
+            // Inisialisasi scanner sekali, mencoba kamera belakang lebih dulu
             const loanScanner = {
                 instance: null,
                 containerId: 'qr-reader',
@@ -242,6 +244,7 @@
                 },
             };
 
+            // Mulai fitur scan QR setelah Livewire siap
             const initLoanScanFeatures = () => {
                 loanScanner.initOnce();
             };

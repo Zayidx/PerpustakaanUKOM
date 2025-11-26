@@ -2,10 +2,12 @@
     use Illuminate\Support\Str;
 @endphp
 
+{{-- Halaman detail pengumuman --}}
 <div class="py-5">
     <div class="container">
         <div class="row g-4">
             <div class="col-lg-8">
+                {{-- Konten utama --}}
                 <article class="card border-0 shadow-sm">
                     @if ($announcement->thumbnail_url)
                         <img src="{{ $announcement->thumbnail_url }}"
@@ -48,6 +50,7 @@
                 </article>
             </div>
 
+            {{-- Sidebar daftar pengumuman lain + share --}}
             <aside class="col-lg-4">
                 <div class="sticky-top" style="top: 100px;">
                     <div class="card border-0 shadow-sm mb-4">

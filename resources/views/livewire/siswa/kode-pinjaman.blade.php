@@ -1,6 +1,7 @@
 @php
     $loanStatus = data_get($loan, 'status');
 @endphp
+{{-- Polling ringan untuk menyegarkan status peminjaman dan QR --}}
 <div wire:poll.2s.keep-alive="refreshLoan">
     @if ($loan)
         <div class="row g-4">
@@ -119,6 +120,7 @@
     @push('scripts')
         <script>
         document.addEventListener('livewire:load', () => {
+            // Tampilkan alert status sekali saat status berubah (real-time via event Livewire)
             const showAlert = ({ message, type = 'info' }) => {
                 if (!window.Swal) {
                     return;

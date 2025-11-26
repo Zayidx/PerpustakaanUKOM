@@ -97,6 +97,7 @@ class ManajemenAuthor extends Component
 
     public function create(): void
     {
+        // Mulai flow tambah baru: bersihkan form dan validasi
         $this->resetForm(); 
         $this->editMode = false; 
         $this->resetValidation(); 
@@ -104,6 +105,7 @@ class ManajemenAuthor extends Component
 
     public function store(): void
     {
+        // Simpan atau perbarui author dan tangani upload foto (opsional) dalam satu transaksi
         $uploadDirectory = 'img/author'; 
         $this->validate(); 
 
@@ -143,6 +145,7 @@ class ManajemenAuthor extends Component
 
     public function edit(int $id): void
     {
+        // Muat data author terpilih ke form untuk proses edit
         $this->resetValidation(); 
 
         $author = Author::findOrFail($id); 
@@ -159,6 +162,7 @@ class ManajemenAuthor extends Component
 
     public function delete(int $id): void
     {
+        // Hapus author beserta file foto (jika ada) di dalam transaksi
         $author = Author::findOrFail($id); 
 
         DB::transaction(function () use ($author) { 
@@ -183,6 +187,7 @@ class ManajemenAuthor extends Component
     #[Computed]
     public function getListAuthorProperty()
     {
+        // Data untuk tabel: terapkan pencarian, urutan, dan pagination
         [$sortField, $sortDirection] = $this->resolveSort();
 
         return Author::query()

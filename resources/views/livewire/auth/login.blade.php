@@ -3,12 +3,14 @@
         <img src="{{ asset('assets/logo.png') }}" width="50" alt=""> Ruang Belajar
     </a>
     
+    {{-- Headline & subheadline --}}
     <h1 class="mt-5 auth-title">Selamat datang di Ruang Belajar</h1>
     <p class="mb-5 auth-subtitle pe-5">
         Login menggunakan email & password yang benar 👋
     </p>
     
     
+    {{-- Form login --}}
     <form wire:submit.prevent='attemptLogin' novalidate>
         @if ($errors->has('credentials'))
             <div class="mb-3 alert alert-danger">{{ $errors->first('credentials') }}</div>

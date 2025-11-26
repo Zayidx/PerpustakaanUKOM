@@ -3,6 +3,7 @@
 @endphp
 
 <div>
+    {{-- Alert flash sukses --}}
     @if (session()->has('message'))
         <div x-data="{ show: true }"
              x-show="show"
@@ -14,6 +15,7 @@
 
     <div class="card">
         <div class="card-body d-flex flex-column">
+            {{-- Filter dan aksi utama --}}
             <div class="row align-items-center g-2 g-md-3 mb-3">
                 <div class="col-12 col-md">
                     <div class="d-flex flex-wrap align-items-stretch gap-2">
@@ -61,6 +63,7 @@
                 </div>
             </div>
 
+            {{-- Tabel daftar pengumuman --}}
             <div class="table-responsive flex-grow-1 overflow-auto"
                  style="max-height: calc(100vh - 360px);">
                 <table class="table table-striped align-middle">
@@ -149,6 +152,7 @@
         </div>
     </div>
 
+    {{-- Modal form tambah/edit pengumuman --}}
     <div class="modal fade text-left"
          id="modal-pengumuman"
          tabindex="-1"

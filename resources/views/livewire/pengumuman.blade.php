@@ -4,6 +4,7 @@
 
 <div class="py-5">
     <div class="container">
+        {{-- Header dan pencarian --}}
         <div class="row g-4 align-items-end mb-4">
             <div class="col-12 col-lg-8">
                 <h1 class="fw-bold mb-2">Pengumuman Perpustakaan</h1>
@@ -20,6 +21,7 @@
             </div>
         </div>
 
+        {{-- Filter kategori dan tombol kembali --}}
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
             <div class="d-flex flex-wrap gap-2">
                 <select class="form-select form-select-sm shadow-sm"
@@ -37,6 +39,7 @@
             </a>
         </div>
 
+        {{-- Daftar kartu pengumuman --}}
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             @forelse ($announcements as $announcement)
                 <div class="col" wire:key="announcement-{{ $announcement->id }}">
@@ -85,6 +88,7 @@
             @endforelse
         </div>
 
+        {{-- Navigasi pagination --}}
         <div class="mt-4 d-flex justify-content-center">
             {{ $announcements->onEachSide(1)->links('pagination::bootstrap-4') }}
         </div>

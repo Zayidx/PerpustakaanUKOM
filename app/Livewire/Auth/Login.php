@@ -20,6 +20,7 @@ class Login extends Component
 
     public function mount(): void
     {
+        // Jika sudah login, arahkan ke dashboard sesuai peran.
         if (! Auth::check()) { 
             return;
         }
@@ -44,6 +45,7 @@ class Login extends Component
     {
         $this->validate(); 
 
+        // Mapping ke kolom email_user yang digunakan tabel users.
         $credentials = [
             'email_user' => $this->email,
             'password' => $this->password,
@@ -68,6 +70,7 @@ class Login extends Component
 
     private function resolveDashboardRedirect(User $user): ?string
     {
+        // Cari nama role untuk menentukan tujuan dashboard.
         $roleName = optional($user->loadMissing('role')->role)->nama_role; 
 
         return match ($roleName) { 
@@ -80,9 +83,10 @@ class Login extends Component
 
     private function forceLogoutWithError(string $message): void
     {
-        Auth::logout(); 
-        request()->session()->invalidate(); 
-        request()->session()->regenerateToken(); 
+        // Paksa logout dan tampilkan pesan error umum.
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
 
         $this->addError('credentials', $message); 
     } 

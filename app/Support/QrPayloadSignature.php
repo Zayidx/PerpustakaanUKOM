@@ -61,12 +61,12 @@ class QrPayloadSignature
     private static function buildSignature(array $payload): string
     {
         $canonical = [
-            'code' => $payload['code'] ?? null, // PIN 6 digit atau kode unik lain.
-            'loan_id' => isset($payload['loan_id']) ? (int) $payload['loan_id'] : null, // ID peminjaman.
-            'student_id' => isset($payload['student_id']) ? (int) $payload['student_id'] : null, // ID siswa pemilik QR.
-            'admin_perpus_id' => isset($payload['admin_perpus_id']) ? (int) $payload['admin_perpus_id'] : null, // Admin perpus yang berwenang (opsional).
-            'action' => $payload['action'] ?? null, // borrow/return untuk membedakan fungsi QR.
-            'generated_at' => $payload['generated_at'] ?? null, // Timestamp pembuatan QR.
+            'code' => $payload['code'] ?? null, 
+            'loan_id' => isset($payload['loan_id']) ? (int) $payload['loan_id'] : null, 
+            'student_id' => isset($payload['student_id']) ? (int) $payload['student_id'] : null, 
+            'admin_perpus_id' => isset($payload['admin_perpus_id']) ? (int) $payload['admin_perpus_id'] : null, 
+            'action' => $payload['action'] ?? null, 
+            'generated_at' => $payload['generated_at'] ?? null, /
         ];
 
         $json = json_encode($canonical, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); // JSON stabil untuk HMAC.

@@ -25,7 +25,7 @@ class KodePinjaman extends Component
     {
         $this->kode = $kode; 
 
-        $this->loadLoan(); 
+        $this->loadLoan(); // Muat data peminjaman + QR saat halaman dibuka
     } 
 
     public function refreshLoan(): void
@@ -94,6 +94,7 @@ class KodePinjaman extends Component
 
         $this->lastKnownStatus = $this->loan['status'];
 
+        // Payload QR berisi metadata peminjaman yang ditandatangani
         $payload = QrPayloadSignature::sign([
             'code' => $loan->kode,
             'loan_id' => $loan->id,
@@ -107,6 +108,7 @@ class KodePinjaman extends Component
             ])->values()->all(),
         ]);
 
+        // QR disimpan sebagai SVG agar bisa langsung dirender di Blade
         $this->qrSvg = QrCode::format('svg') 
             ->size(240) 
             ->margin(2) 

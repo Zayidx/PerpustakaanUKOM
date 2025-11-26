@@ -1,5 +1,6 @@
 <div>
     
+    {{-- Flash sukses ditampilkan setelah simpan/hapus di komponen Livewire --}}
     @if (session()->has('message'))
         <div x-data="{ show: true }"
              x-show="show"

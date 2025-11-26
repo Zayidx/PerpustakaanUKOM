@@ -52,6 +52,7 @@ class ManajemenPengumuman extends Component
     public ?string $thumbnail_caption = null;
     public string $konten = '';
 
+    // Pesan validasi kustom untuk form pengumuman.
     protected $messages = [
         'judul.required' => 'Judul pengumuman wajib diisi.',
         'judul.min' => 'Judul pengumuman minimal 5 karakter.',
@@ -116,6 +117,7 @@ class ManajemenPengumuman extends Component
 
     public function render()
     {
+        // Hitung opsi sort terpilih dan apakah perlu join ke tabel users.
         [$sortField, $sortDirection, $requiresJoin] = $this->resolveSort(); 
 
         $query = PengumumanModel::query()
@@ -150,6 +152,7 @@ class ManajemenPengumuman extends Component
     {
         $this->resetForm(); 
         $this->assignCurrentAdmin(); 
+        // Inisialisasi editor konten saat modal dibuka.
         $this->dispatch('initialize-editor', content: $this->konten); 
     } 
 
@@ -168,6 +171,7 @@ class ManajemenPengumuman extends Component
         $this->konten = $pengumuman->konten; 
 
         $this->assignCurrentAdmin(); 
+        // Isi editor dengan konten lama.
         $this->dispatch('initialize-editor', content: $this->konten); 
     } 
 
@@ -177,6 +181,7 @@ class ManajemenPengumuman extends Component
         $data = $this->validate(); 
         $isUpdate = (bool) $this->pengumumanId; 
 
+        // Slug unik dan published_at hanya diset saat status published.
         $slug = $this->generateSlug($data['judul']); 
         $publishedAt = $this->status === 'published' 
             ? (PengumumanModel::find($this->pengumumanId)?->published_at ?? now()) 
@@ -251,6 +256,7 @@ class ManajemenPengumuman extends Component
         $slug = $baseSlug;
         $counter = 1;
 
+        // Tambahkan suffix angka sampai slug unik.
         while (
             PengumumanModel::where('slug', $slug) 
                 ->when($this->pengumumanId, fn ($query) => $query->where('id', '!=', $this->pengumumanId)) 

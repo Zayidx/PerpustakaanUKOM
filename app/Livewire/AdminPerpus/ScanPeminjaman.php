@@ -37,6 +37,7 @@ class ScanPeminjaman extends Component
     {
         $this->reset(['errorMessage', 'loan', 'lastPayload']);
 
+        // Event datang dari JS scanner: baca payload QR (string JSON) lalu parse
         $payload = is_string($event) ? $event : ($event['payload'] ?? null); 
         $data = $payload ? json_decode($payload, true) : null; 
 
@@ -97,6 +98,7 @@ class ScanPeminjaman extends Component
             return;
         }
 
+        // Pastikan QR peminjaman (bukan pengembalian) agar tidak salah proses
         if (isset($data['action']) && $data['action'] !== 'borrow') {
             $this->errorMessage = 'QR ini bukan untuk peminjaman.';
             $this->notifyScanResult('error', $this->errorMessage);
@@ -134,6 +136,7 @@ class ScanPeminjaman extends Component
 
         if ($loan->status === 'pending') { 
             try {
+                // Untuk status pending: lock stok buku dan set status accepted dalam transaksi
                 DB::transaction(function () use ($loan, $adminPerpus) { 
                     $items = $loan->items()->with('buku')->get(); 
                     $bookIds = $items->pluck('buku_id')->all(); 
