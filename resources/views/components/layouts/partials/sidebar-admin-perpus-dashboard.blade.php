@@ -70,14 +70,10 @@
                 </li>
                 <li class="sidebar-title mt-4">Akun</li>
                 <li class="sidebar-item">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit"
-                            class="sidebar-link w-100 border-0 bg-transparent text-start d-flex align-items-center gap-2">
-                            <i class="bi bi-box-arrow-right"></i>
-                            <span>Logout</span>
-                        </button>
-                    </form>
+                    <a href="{{ route('logout') }}" class="sidebar-link d-flex align-items-center gap-2">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Logout</span>
+                    </a>
                 </li>
                
             </ul>

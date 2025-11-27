@@ -28,7 +28,7 @@ class Login extends Component
         $redirectUrl = $this->resolveDashboardRedirect(Auth::user()); 
 
         if ($redirectUrl) {
-            $this->redirect($redirectUrl, navigate: true); 
+            $this->redirect($redirectUrl); 
             return;
         }
 
@@ -61,7 +61,7 @@ class Login extends Component
         $redirectUrl = $this->resolveDashboardRedirect(Auth::user()); 
 
         if ($redirectUrl) {
-            $this->redirect($redirectUrl, navigate: true); 
+            $this->redirect($redirectUrl); 
             return;
         }
 

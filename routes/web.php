@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Auth\Login;
+use App\Livewire\Auth\Logout;
 use App\Models\Pengumuman as PengumumanModel;
 use App\Models\Acara;
 use Illuminate\Http\Request;
@@ -77,10 +78,4 @@ Route::get('/cari-buku', function (Request $request) {
     return redirect()->to($target);
 })->name('landing.book-search');
 
-Route::post('/logout', function () {
-    Auth::logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-
-    return redirect()->route('login');
-})->middleware('auth')->name('logout');
+Route::get('/logout', Logout::class)->middleware('auth')->name('logout');
