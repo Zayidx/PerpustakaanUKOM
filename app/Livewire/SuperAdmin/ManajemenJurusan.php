@@ -20,6 +20,7 @@ class ManajemenJurusan extends Component
 
     protected $paginationTheme = 'bootstrap';
 
+    // properti halaman
     #[Title('Halaman Manajemen Jurusan')]
     #[Url(except: "")]
     #[Layout('components.layouts.dashboard-layouts')]
@@ -34,10 +35,12 @@ class ManajemenJurusan extends Component
         'created_at_asc' => 'Terlama',
     ];
 
+    // form data
     public $jurusan_id;
     public $nama_jurusan = '';
     public $deskripsi = '';
 
+    // pesan kustom
     protected $messages = [
         'nama_jurusan.required' => 'Nama jurusan wajib diisi.',
         'nama_jurusan.string' => 'Nama jurusan harus berupa teks.',
@@ -48,6 +51,7 @@ class ManajemenJurusan extends Component
         'deskripsi.max' => 'Deskripsi maksimal :max karakter.',
     ];
 
+    // membersihkan parameter-parameter
     public function updatedPerPage($value): void
     {
         $this->perPage = $this->normalizePerPage($value);
@@ -66,12 +70,14 @@ class ManajemenJurusan extends Component
         $this->resetPage();
     }
 
+    // menampilkan form baru
     public function create(): void
     {
         $this->resetForm();
         $this->resetValidation();
     }
 
+    // ambil data dan isi di properti dorm
     public function edit(int $id): void
     {
         $this->resetValidation();
@@ -83,19 +89,21 @@ class ManajemenJurusan extends Component
         $this->deskripsi = $jurusan->deskripsi;
     }
 
+    // simpan ke database
     public function store(): void
     {
         $this->validate();
 
+        // bersihkan untuk payload
         $payload = [
             'nama_jurusan' => trim($this->nama_jurusan),
             'deskripsi' => trim($this->deskripsi),
         ];
 
-        if ($this->jurusan_id) {
+        if ($this->jurusan_id) { //update
             $jurusan = Jurusan::findOrFail($this->jurusan_id);
             $jurusan->update($payload);
-        } else {
+        } else { // create
             $jurusan = Jurusan::create($payload);
             $this->jurusan_id = $jurusan->id;
         }
@@ -105,8 +113,10 @@ class ManajemenJurusan extends Component
         $this->dispatch('close-modal', id: 'modal-form-jurusan');
     }
 
+    // hapus data dengan syarat tak ada siswa yang masih terkait denganya
     public function delete(int $id): void
     {
+        // mengecek relasi
         $jurusan = Jurusan::withCount('siswa')->findOrFail($id);
 
         if ($jurusan->siswa_count > 0) {
@@ -121,6 +131,7 @@ class ManajemenJurusan extends Component
         $this->resetPage();
     }
 
+    // menampilkan daftar jurusan serta logika cari dan sortir
     #[Computed]
     public function listJurusan()
     {
@@ -139,11 +150,13 @@ class ManajemenJurusan extends Component
             ->paginate($this->perPage);
     }
 
+
     public function render()
     {
         return view('livewire.super-admin.manajemen-jurusan');
     }
 
+    // aturan-aturan form
     protected function rules(): array
     {
         return [
@@ -151,6 +164,7 @@ class ManajemenJurusan extends Component
                 'required',
                 'string',
                 'max:120',
+                // abaikan id jurusan saat edit
                 Rule::unique('jurusan', 'nama_jurusan')->ignore($this->jurusan_id),
             ],
             'deskripsi' => ['required', 'string', 'max:255'],

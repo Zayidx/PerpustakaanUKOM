@@ -30,6 +30,7 @@ class ManajemenSiswa extends Component
 
     protected $paginationTheme = 'bootstrap'; 
 
+    // properti halaman / buat sortir sama pencarian
     #[Title('Halaman Manajemen Siswa')]
     #[Url(except: "")]
     #[Layout('components.layouts.dashboard-layouts')]
@@ -50,6 +51,7 @@ class ManajemenSiswa extends Component
         'perempuan' => 'Perempuan',
     ];
 
+    // form data siswa
     public $siswa_id; 
     public $user_id; 
     public $nama = ''; 
@@ -63,9 +65,10 @@ class ManajemenSiswa extends Component
     public $nis = ''; 
     public $kelas_id; 
     public $jurusan_id; 
-    public $foto; 
+    public $foto;  // nampung foto sementara
     public $existingFoto = ''; 
 
+    // pesan-pesan validasi
     protected $messages = [ 
         'nama.required' => 'Nama siswa wajib diisi.',
         'nama.string' => 'Nama siswa harus berupa teks.',
@@ -109,6 +112,7 @@ class ManajemenSiswa extends Component
         'jurusan_id.exists' => 'Jurusan yang dipilih tidak valid.',
     ];
 
+    // membersihkan nilai dari url
     public function mount(): void
     {
         $this->perPage = $this->normalizePerPage($this->perPage); 
@@ -117,32 +121,35 @@ class ManajemenSiswa extends Component
         $this->search = trim((string) $this->search); 
     } 
 
-    
+    // perpage baru
     public function updatedPerPage($value): void
     {
         $this->perPage = $this->normalizePerPage($value); 
         $this->resetPage(); 
     }
 
+    // search baru
     public function updatedSearch(): void
     {
         $this->search = trim((string) $this->search); 
         $this->resetPage(); 
     }
 
+    // filter kelamin baru
     public function updatedGenderFilter($value): void
     {
         $this->genderFilter = $this->normalizeGender($value); 
         $this->resetPage(); 
     }
 
+    // sortitran baru
     public function updatedSort($value): void
     {
         $this->sort = $this->normalizeSort($value); 
         $this->resetPage(); 
     }
 
-        
+        // aturan validasi form
         protected function rules(): array
         {
             $passwordRules = $this->siswa_id ? ['nullable'] : ['required']; 
@@ -179,18 +186,20 @@ class ManajemenSiswa extends Component
             ];
         } 
 
-    
+
+    // form tambah baru
     public function create(): void
     {
         $this->resetForm(); 
         $this->resetValidation(); 
     }
 
-        
+    // simpan data siswa ke db
     public function store(): void
     {
-        $uploadDirectory = 'admin/foto-siswa'; 
+        $uploadDirectory = 'admin/foto-siswa';
 
+        //  biar kalo password kosong konfirmasi password juga kosong
         if ($this->password === '') {
             $this->password = null; 
         }
@@ -201,12 +210,14 @@ class ManajemenSiswa extends Component
 
             $this->validate(); 
 
+        // cek role user
         $roleId = RoleData::where('nama_role', 'Siswa')->value('id'); 
         if (!$roleId) {
             $this->flashError('Role Siswa belum dikonfigurasi. Silakan tambahkan role terlebih dahulu.');
             return;
         }
 
+        // logika foto
         $imagePath = $this->existingFoto;
         if ($this->foto instanceof TemporaryUploadedFile) { 
             $imagePath = $this->storeImageAndReturnName(
@@ -215,8 +226,10 @@ class ManajemenSiswa extends Component
                 $this->existingFoto
             ); 
         }
+        // hanya simpan nama file
         $imagePath = $this->onlyFilename($uploadDirectory, $imagePath); 
 
+        // membersihkan data
         $nama = trim($this->nama); 
         $email = strtolower(trim($this->email));
             $phone = trim($this->phone_number);
@@ -227,6 +240,7 @@ class ManajemenSiswa extends Component
             $jurusanId = (int) $this->jurusan_id;
 
             DB::transaction(function () use ($roleId, $imagePath, $nama, $email, $phone, $nisn, $nis, $alamat, $kelasId, $jurusanId) {
+                // lihat jika edit siswa atau bikin siswa
                 if ($this->siswa_id) {
                     $siswa = Siswa::with('user')->findOrFail($this->siswa_id); 
                     $user = $siswa->user; 
@@ -308,7 +322,7 @@ class ManajemenSiswa extends Component
         }
     }
 
-        
+    // hapus data siswa
     public function delete(int $id): void
     {
         $siswa = Siswa::with('user')->findOrFail($id); 
@@ -341,6 +355,7 @@ class ManajemenSiswa extends Component
         return Jurusan::orderBy('nama_jurusan')->get();
     }
 
+        // nampilin list siswa
         #[Computed]
         public function listSiswa() 
         {
@@ -379,6 +394,7 @@ class ManajemenSiswa extends Component
             return $query->paginate($this->perPage); 
         } 
 
+    // buat render
     public function render() 
     {
         return view('livewire.super-admin.manajemen-siswa'); 
@@ -411,7 +427,7 @@ class ManajemenSiswa extends Component
         return in_array($value, $this->perPageOptions, true) ? $value : $this->perPageOptions[0];
     }
 
-        
+        // reset form ke nilai awal
         private function resetForm(): void
         {
             $this->reset([

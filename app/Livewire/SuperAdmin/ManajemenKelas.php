@@ -19,6 +19,7 @@ class ManajemenKelas extends Component
 
     protected $paginationTheme = 'bootstrap';
 
+    // properti halaman
     #[Title('Halaman Manajemen Kelas')]
     #[Url(except: "")]
     #[Layout('components.layouts.dashboard-layouts')]
@@ -33,6 +34,7 @@ class ManajemenKelas extends Component
         'created_at_asc' => 'Terlama',
     ];
 
+    // properti form data
     public $kelas_id;
     public $nama_kelas = '';
     public $tingkat = '';
@@ -48,12 +50,14 @@ class ManajemenKelas extends Component
         'tingkat.max' => 'Tingkat kelas maksimal :max karakter.',
     ];
 
+    // setelah 
     public function updatedPerPage($value): void
     {
         $this->perPage = $this->normalizePerPage($value);
         $this->resetPage();
     }
 
+    // membersihkan string paramater etc
     public function updatedSearch(): void
     {
         $this->search = trim((string) $this->search);
@@ -72,6 +76,7 @@ class ManajemenKelas extends Component
         $this->resetValidation();
     }
 
+    // ambil data yang akan diedit lalu masukin ke form data
     public function edit(int $id): void
     {
         $this->resetValidation(); 
@@ -83,19 +88,21 @@ class ManajemenKelas extends Component
         $this->tingkat = $kelas->tingkat; 
     } 
 
+    // simpan data ke db
     public function store(): void
     {
         $this->validate(); 
 
+        // bersihkan payload
         $payload = [
             'nama_kelas' => trim($this->nama_kelas), 
             'tingkat' => trim($this->tingkat), 
         ];
 
-        if ($this->kelas_id) { 
+        if ($this->kelas_id) { // update
             $kelas = Kelas::findOrFail($this->kelas_id); 
             $kelas->update($payload); 
-        } else { 
+        } else { //create
             $kelas = Kelas::create($payload); 
             $this->kelas_id = $kelas->id; 
         }
@@ -105,8 +112,10 @@ class ManajemenKelas extends Component
         $this->dispatch('close-modal', id: 'modal-form-kelas'); 
     } 
 
+    // menghapus kelas (tidak bisa kalo masih ada siswa di kelas)
     public function delete(int $id): void
     {
+        // ngecek apakah masih ada relasi atau tidak
         $kelas = Kelas::withCount('siswa')->findOrFail($id); 
 
         if ($kelas->siswa_count > 0) { 
@@ -121,6 +130,7 @@ class ManajemenKelas extends Component
         $this->resetPage(); 
     } 
 
+    // menampilkan list kelas serta logika sortir/cari
     #[Computed]
     public function listKelas()
     {
@@ -178,6 +188,7 @@ class ManajemenKelas extends Component
         $this->resetValidation(); 
     } 
 
+    // aturan validasi untuk form
     protected function rules(): array
     {
         return [
@@ -185,6 +196,7 @@ class ManajemenKelas extends Component
                 'required', 
                 'string', 
                 'max:100', 
+                // ignores the unique when editing
                 Rule::unique('kelas', 'nama_kelas')->ignore($this->kelas_id), 
             ],
             'tingkat' => ['required', 'string', 'max:50'], 

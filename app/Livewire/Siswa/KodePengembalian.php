@@ -36,6 +36,7 @@ class KodePengembalian extends Component
         return view('livewire.siswa.kode-pengembalian');
     }
 
+    // memuat data pinjaman dan hasilkan qr
     protected function loadLoan(): void
     {
         $user = Auth::user();
@@ -60,6 +61,7 @@ class KodePengembalian extends Component
         $lateInfo = $this->calculateLateInfo($loan);
         $this->lateInfo = $lateInfo;
 
+        // persiapan payload qr
         $payload = QrPayloadSignature::sign([
             'code' => $loan->kode,
             'loan_id' => $loan->id,
@@ -74,6 +76,7 @@ class KodePengembalian extends Component
             'late_days' => $lateInfo['late_days'],
         ]);
 
+        // generate qr code
         $this->qrSvg = QrCode::format('svg')
             ->size(240)
             ->margin(2)
@@ -100,6 +103,7 @@ class KodePengembalian extends Component
         $this->lastKnownStatus = $this->loan['status'];
     }
 
+    // reload sampe status berubah
     public function refreshLoan(): void
     {
         $previousStatus = $this->lastKnownStatus;
@@ -115,6 +119,7 @@ class KodePengembalian extends Component
         }
     }
 
+    // hitung keterlambatan
     protected function calculateLateInfo(Peminjaman $loan): array
     {
         $lateDays = 0;

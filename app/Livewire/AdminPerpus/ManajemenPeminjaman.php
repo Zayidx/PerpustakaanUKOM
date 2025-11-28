@@ -33,7 +33,7 @@ class ManajemenPeminjaman extends Component
 
     public string $alertType = 'success';
 
-    
+    // statistiska di daashboard
     public array $stats = [
         'pending' => 0,
         'accepted' => 0,
@@ -42,6 +42,7 @@ class ManajemenPeminjaman extends Component
         'overdue' => 0,
     ];
 
+    // buat ketika search dan filter
     protected $queryString = [
         'search' => ['except' => ''],
         'statusFilter' => ['except' => 'all'],
@@ -52,10 +53,13 @@ class ManajemenPeminjaman extends Component
         abort_if(! Auth::user()?->adminPerpus, 403, 'Akun Admin Perpus belum memiliki data Admin Perpus.');
 
         $this->stats = $this->buildStats();
+
+        // peminjaman terbaru = tampilan default di panel detail
         $this->selectedLoanId = Peminjaman::latest('created_at')->value('id');
         $this->loadSelectedLoan();
     }
 
+    // reset paginasi ketika parameter url diganti
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -83,6 +87,7 @@ class ManajemenPeminjaman extends Component
         $this->loadSelectedLoan();
     }
 
+    // transaksi peminjaman
     public function markAsReturned(int $loanId): void
     {
         $this->clearAlert();
@@ -95,6 +100,7 @@ class ManajemenPeminjaman extends Component
                     ->with(['items'])
                     ->first();
 
+                // validasi
                 if (! $loan) {
                     throw ValidationException::withMessages([
                         'loan' => 'Data peminjaman tidak ditemukan.',
@@ -107,6 +113,7 @@ class ManajemenPeminjaman extends Component
                     ]);
                 }
 
+                // pengembalian stok
                 $bookIds = $loan->items->pluck('buku_id')->all();
 
                 if (! empty($bookIds)) {
@@ -125,6 +132,7 @@ class ManajemenPeminjaman extends Component
                     }
                 }
 
+                // ubat status pinjaman
                 $loan->update([
                     'status' => 'returned',
                     'returned_at' => now(),
@@ -138,6 +146,7 @@ class ManajemenPeminjaman extends Component
         }
     }
 
+    // batalkan pinjaman
     public function cancelLoan(int $loanId): void
     {
         $this->clearAlert();
@@ -173,6 +182,7 @@ class ManajemenPeminjaman extends Component
         }
     }
 
+    // tampilkan data ke view
     public function render()
     {
         $loans = Peminjaman::query()
@@ -206,6 +216,7 @@ class ManajemenPeminjaman extends Component
         ]);
     } 
 
+    // hitung statistik pinjaman berdasarkan status
     private function buildStats(): array
     {
         $counts = Peminjaman::select('status', DB::raw('count(*) as total'))
@@ -228,6 +239,7 @@ class ManajemenPeminjaman extends Component
         ];
     }
 
+    // muat detail pinjaman yang dipilih
     private function loadSelectedLoan(): void
     {
         if (! $this->selectedLoanId) {
@@ -255,6 +267,7 @@ class ManajemenPeminjaman extends Component
         $this->resetPage();
     }
 
+    // format jadi array
     private function formatLoan(Peminjaman $loan): array
     {
         $loan->loadMissing(['items.buku', 'siswa.user', 'siswa.kelas', 'adminPerpus.user']);
@@ -317,6 +330,7 @@ class ManajemenPeminjaman extends Component
         $this->notify($message, 'danger');
     }
 
+    // hitung jumlah hari keterlambatan
     private function calculateLateDays(Peminjaman $loan): int
     {
         if ($loan->status !== 'accepted' || ! $loan->due_at) {

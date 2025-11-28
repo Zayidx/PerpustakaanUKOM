@@ -28,6 +28,7 @@ class ManajemenSuperAdmin extends Component
 
     protected string $paginationTheme = 'bootstrap';
 
+    // properti halaman / pencarian / sortir
     #[Title('Halaman Manajemen Super Admin')]
     #[Url(except: "")]
     #[Layout('components.layouts.dashboard-layouts')]
@@ -55,6 +56,7 @@ class ManajemenSuperAdmin extends Component
         'perempuan' => 'Perempuan',
     ];
 
+    // properti form data
     public ?int $super_admin_id = null;
     public ?int $user_id = null;
     public string $nama = '';
@@ -67,6 +69,7 @@ class ManajemenSuperAdmin extends Component
     public $foto = null;
     public string $existingFoto = '';
 
+    // pesan kustom
     protected array $messages = [
         'nama.required' => 'Nama admin wajib diisi.',
         'nama.string' => 'Nama admin harus berupa teks.',
@@ -90,6 +93,7 @@ class ManajemenSuperAdmin extends Component
         'foto.max' => 'Ukuran foto maksimal :max kilobyte.',
     ];
 
+    // memebersihkan properti daru url
     public function mount(): void
     {
         $this->perPage = $this->normalizePerPage($this->perPage);
@@ -97,7 +101,7 @@ class ManajemenSuperAdmin extends Component
         $this->sort = $this->normalizeSort($this->sort);
         $this->search = trim((string) $this->search);
     }
-
+    // memebersihkan nilai parameter-parameter dari url
     public function updatedPerPage($value): void
     {
         $this->perPage = $this->normalizePerPage($value);
@@ -122,6 +126,7 @@ class ManajemenSuperAdmin extends Component
         $this->resetPage();
     }
 
+    // aturan validasi form
     protected function rules(): array
     {
         $passwordRules = $this->super_admin_id ? ['nullable'] : ['required'];
@@ -135,6 +140,7 @@ class ManajemenSuperAdmin extends Component
                 'required',
                 'email',
                 'max:255',
+                // abaikan email saat update
                 Rule::unique('users', 'email_user')->ignore($this->user_id),
             ],
             'phone_number' => ['required', 'string', 'max:20'],
@@ -146,12 +152,14 @@ class ManajemenSuperAdmin extends Component
         ];
     }
 
+    // buat form baru
     public function create(): void
     {
         $this->resetForm();
         $this->resetValidation();
     }
 
+    // simpan data ke db
     public function store(): void
     {
         $uploadDirectory = 'super-admin/foto-super-admins';
@@ -165,6 +173,7 @@ class ManajemenSuperAdmin extends Component
 
         $this->validate();
 
+
         $roleId = RoleData::firstOrCreate(
             ['nama_role' => 'SuperAdmin'],
             [
@@ -173,6 +182,7 @@ class ManajemenSuperAdmin extends Component
             ]
         )->id;
 
+        // logika upload foto
         $imagePath = $this->existingFoto;
 
         if ($this->foto instanceof TemporaryUploadedFile) {
@@ -184,13 +194,14 @@ class ManajemenSuperAdmin extends Component
         }
         $imagePath = $this->onlyFilename($uploadDirectory, $imagePath);
 
+        // membersihkan data input
         $nama = trim($this->nama);
         $email = strtolower(trim($this->email));
         $phone = trim($this->phone_number);
         $alamat = $this->alamat ? trim($this->alamat) : null;
 
         DB::transaction(function () use ($roleId, $imagePath, $nama, $email, $phone, $alamat) {
-            if ($this->super_admin_id) {
+            if ($this->super_admin_id) { // update
                 $super_admins = SuperAdmin::with('user')->findOrFail($this->super_admin_id);
                 $user = $super_admins->user;
 
@@ -214,6 +225,7 @@ class ManajemenSuperAdmin extends Component
                 return;
             }
 
+            // create
             $user = User::create([
                 'nama_user' => $nama,
                 'email_user' => $email,
@@ -238,6 +250,7 @@ class ManajemenSuperAdmin extends Component
         $this->dispatch('close-modal', id: 'modal-form');
     }
 
+    // ambil data admin yang akan diedit lalu masukan properti form
     public function edit(int $id): void
     {
         $this->resetValidation();
@@ -256,6 +269,7 @@ class ManajemenSuperAdmin extends Component
         $this->password_confirmation = null;
     }
 
+
     public function updatedFoto(): void
     {
         if ($this->foto) {
@@ -263,6 +277,7 @@ class ManajemenSuperAdmin extends Component
         }
     }
 
+    // hapus data
     public function delete(int $id): void
     {
         $super_admins = SuperAdmin::with('user')->findOrFail($id);

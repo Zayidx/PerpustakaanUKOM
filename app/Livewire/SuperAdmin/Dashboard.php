@@ -17,31 +17,40 @@ class Dashboard extends Component
 
     #[Layout('components.layouts.dashboard-layouts')]
     #[Title('Super Admin Dashboard')]
+
+    // ambil data dan render ke view
     public function render()
     {
+        // statistik total pengguna dan buku
         $totalStudents = Siswa::count();
         $totalAdminPerpus = AdminPerpus::count();
         $totalSuperAdmins = SuperAdmin::count();
         $totalBooks = Buku::count();
+
+        // anggota yang baru dari 7 hari terakhir
         $newMembersWeek = Siswa::where('created_at', '>=', now()->subDays(7))->count();
 
+        // statistik peminjaman-peminjaman
         $activeLoans = Peminjaman::where('status', 'accepted')->count();
         $pendingLoans = Peminjaman::where('status', 'pending')->count();
         $overdueLoans = Peminjaman::where('status', 'accepted')
             ->whereNotNull('due_at')
             ->where('due_at', '<', now())
             ->count();
-
+        
+        // 4 kategori buku dengan buku terbanyak
         $topCategories = KategoriBuku::withCount('buku')
             ->orderByDesc('buku_count')
             ->take(4)
             ->get();
 
+        // transaksi terbaru
         $recentLoans = Peminjaman::with(['siswa.user'])
             ->latest('created_at')
             ->take(5)
             ->get();
 
+        // peminjaman dengan waktu terlambat terdekat
         $upcomingDue = Peminjaman::with(['siswa.user'])
             ->where('status', 'accepted')
             ->whereNotNull('due_at')
@@ -50,6 +59,7 @@ class Dashboard extends Component
             ->take(5)
             ->get();
 
+        // render data ke view
         return view('livewire.super-admin.dashboard', [
             'stats' => [
                 'students' => $totalStudents,

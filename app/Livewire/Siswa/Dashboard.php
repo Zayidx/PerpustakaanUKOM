@@ -13,10 +13,13 @@ class Dashboard extends Component
 
     #[Layout('components.layouts.dashboard-layouts')]
     #[Title('Siswa Dashboard')]
+
+    // ambil data dan render view
     public function render()
     {
         $siswaId = Auth::user()?->siswa?->id;
 
+        // array statitiska
         $stats = [
             'active' => 0,
             'pending' => 0,
@@ -24,10 +27,13 @@ class Dashboard extends Component
             'total' => 0,
         ];
 
+        
         $currentLoans = collect();
         $recentHistory = collect();
 
+        // memastikan id siswa ada
         if ($siswaId) {
+            // perhitungan-perhitungan statistik
             $stats['active'] = Peminjaman::where('siswa_id', $siswaId)->where('status', 'accepted')->count();
             $stats['pending'] = Peminjaman::where('siswa_id', $siswaId)->where('status', 'pending')->count();
             $stats['overdue'] = Peminjaman::where('siswa_id', $siswaId)
@@ -51,6 +57,7 @@ class Dashboard extends Component
                 ->get();
         }
 
+        // render view dengan data tersebut
         return view('livewire.siswa.dashboard', [
             'stats' => $stats,
             'currentLoans' => $currentLoans,
